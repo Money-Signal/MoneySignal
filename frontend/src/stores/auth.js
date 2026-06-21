@@ -1,11 +1,41 @@
 import { defineStore } from 'pinia'
-import { signup as signupApi } from '@/api/auth'
+import { ref, computed } from 'vue'
+import { login as loginApi, logout as logoutApi, signup as signupApi } from '@/api/auth'
 
 export const useAuthStore = defineStore('auth', () => {
-  // 회원가입 요청, 실패 시 에러를 그대로 throw해서 컴포넌트에서 처리
+  // localStorage에서 초기값 복원 (새로고침 해도 로그인 유지)
+  const accessToken = ref(localStorage.getItem('access_token') || null)
+  const user = ref(JSON.parse(localStorage.getItem('user') || 'null'))
+
+  const isLoggedIn = computed(() => !!accessToken.value)
+
   async function signup(formData) {
     await signupApi(formData)
   }
 
-  return { signup }
+  async function login(credentials) {
+    const { data } = await loginApi(credentials)
+
+    // 토큰과 유저 정보를 state와 localStorage에 저장
+    accessToken.value = data.access
+    user.value = data.user
+    localStorage.setItem('access_token', data.access)
+    localStorage.setItem('refresh_token', data.refresh)
+    localStorage.setItem('user', JSON.stringify(data.user))
+  }
+
+  async function logout() {
+    try {
+      await logoutApi()
+    } finally {
+      // 서버 요청 실패해도 클라이언트 토큰은 무조건 삭제
+      accessToken.value = null
+      user.value = null
+      localStorage.removeItem('access_token')
+      localStorage.removeItem('refresh_token')
+      localStorage.removeItem('user')
+    }
+  }
+
+  return { accessToken, user, isLoggedIn, signup, login, logout }
 })

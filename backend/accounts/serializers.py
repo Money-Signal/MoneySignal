@@ -1,5 +1,6 @@
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from .models import User
 
@@ -40,3 +41,19 @@ class SignupSerializer(serializers.ModelSerializer):
         password = validated_data.pop('password')
         # create_user를 통해 비밀번호 해싱 처리
         return User.objects.create_user(password=password, **validated_data)
+
+
+class LoginSerializer(TokenObtainPairSerializer):
+    """
+    로그인 시리얼라이저.
+    simplejwt 기본 응답(access, refresh)에 유저 기본 정보를 추가로 포함.
+    """
+
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        data['user'] = {
+            'id':       self.user.id,
+            'email':    self.user.email,
+            'nickname': self.user.nickname,
+        }
+        return data
