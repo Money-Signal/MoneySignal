@@ -22,7 +22,7 @@ def signup(request):
 
 class LoginView(TokenObtainPairView):
     """POST /api/accounts/login/ - 로그인 (access + refresh 토큰 + 유저 정보 반환)"""
-    serializer_class = LoginSerializer
+    serializer_class = LoginSerializer # simplejwt의 TokenObtainPairView를 상속하고 커스텀 Serializer만 교체.
 
 
 @api_view(['POST'])
