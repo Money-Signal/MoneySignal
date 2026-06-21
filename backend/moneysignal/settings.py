@@ -27,20 +27,32 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+AUTH_USER_MODEL = 'accounts.User'
 
 # Application definition
 
 INSTALLED_APPS = [
+    'accounts',
+    'chatbot',
+    'community',
+    'exchange',
+    'map',
+    'products',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # 추가 패키지
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware', 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -115,3 +127,29 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# 업로드된 파일(프로필 사진 등) 저장 경로
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# DRF 기본 인증 방식을 JWT로 설정
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+# JWT 토큰 유효기간 설정
+from datetime import timedelta
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),    # Access Token: 1시간
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),    # Refresh Token: 7일
+    'ROTATE_REFRESH_TOKENS': True,                  # Refresh 시 새 Refresh Token 발급
+    'BLACKLIST_AFTER_ROTATION': False,
+}
+
+# Vue 개발 서버(5173)에서 오는 요청 허용
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+]
