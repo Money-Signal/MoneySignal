@@ -37,5 +37,12 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  return { accessToken, user, isLoggedIn, signup, login, logout }
+  // 카카오 로그인 콜백에서 받은 토큰을 저장 (API 호출 없이 URL 파라미터로 바로 처리)
+  function loginWithKakao(access, refresh) {
+    accessToken.value = access
+    localStorage.setItem('access_token', access)
+    localStorage.setItem('refresh_token', refresh)
+  }
+
+  return { accessToken, user, isLoggedIn, signup, login, logout, loginWithKakao }
 })
