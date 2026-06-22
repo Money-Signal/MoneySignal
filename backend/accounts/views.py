@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from .serializers import LoginSerializer, SignupSerializer
+from .serializers import LoginSerializer, ProfileSerializer, ProfileUpdateSerializer, SignupSerializer
 
 User = get_user_model()
 
@@ -38,6 +38,35 @@ def logout(request):
     """POST /api/accounts/logout/ - 로그아웃 (클라이언트 토큰 삭제 방식)"""
     # 실제 토큰 삭제는 프론트엔드(localStorage)에서 처리
     return Response({'message': '로그아웃되었습니다.'}, status=status.HTTP_200_OK)
+
+
+@api_view(['GET', 'PATCH', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def profile(request):
+    """
+    GET    /api/accounts/me/ - 내 정보 조회
+    PATCH  /api/accounts/me/ - 내 정보 수정
+    DELETE /api/accounts/me/ - 회원탈퇴
+    """
+    user = request.user
+
+    if request.method == 'GET':
+        serializer = ProfileSerializer(user)
+        return Response(serializer.data)
+
+    elif request.method == 'PATCH':
+        # partial=True: 일부 필드만 수정 가능
+        serializer = ProfileUpdateSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    elif request.method == 'DELETE':
+        # 계정 비활성화 (실제 DB 삭제 대신 is_active=False 처리)
+        user.is_active = False
+        user.save()
+        return Response({'message': '회원탈퇴가 완료되었습니다.'}, status=status.HTTP_204_NO_CONTENT)
 
 
 def kakao_callback(request):
