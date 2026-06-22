@@ -5,6 +5,7 @@ import SignupView from '@/views/accounts/SignupView.vue'
 import LoginView from '@/views/accounts/LoginView.vue'
 import KakaoCallbackView from '@/views/accounts/KakaoCallbackView.vue'
 import AssetView from '@/views/exchange/AssetView.vue'
+import VideoDetailView from '@/views/video/VideoDetailView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -15,7 +16,8 @@ const router = createRouter({
     { path: '/login',          name: 'login',          component: LoginView         },
     { path: '/oauth/callback', name: 'kakaoCallback',  component: KakaoCallbackView }, // 카카오 로그인 콜백
     { path: '/exchange', name: 'exchange', component: AssetView},
-    { path: '/video', name: 'VideoSearch', component: () => import('@/views/video/VideoSearchView.vue')}
+    { path: '/video', name: 'VideoSearch', component: () => import('@/views/video/VideoSearchView.vue')},
+    { path: '/video/:videoId', name: 'VideoDetail', component: VideoDetailView},
   ],
 })
 

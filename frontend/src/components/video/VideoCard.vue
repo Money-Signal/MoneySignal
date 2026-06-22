@@ -1,5 +1,5 @@
 <template>
-  <div class="video-card" @click="openVideo">
+  <div class="video-card" @click="goToDetail">
     <div class="thumbnail-wrapper">
       <img :src="video.thumbnail" :alt="video.title" class="thumbnail-img" />
     </div>
@@ -12,20 +12,15 @@
 </template>
 
 <script setup>
-const props = defineProps({
-  video: {
-    type: Object,
-    required: true
-  }
-})
+import { useRouter } from 'vue-router';
 
-// 카드를 누르면 실제 유튜브 영상 링크로 이동
-const openVideo = () => {
-  if (props.video.id) {
-    const videoUrl = `https://www.youtube.com/watch?v=${props.video.id}`
-    window.open(videoUrl, '_blank')
-  }
-}
+const props = defineProps(['video']);
+const router = useRouter();
+
+const goToDetail = () => {
+  // 클릭하면 /video/아이디 값으로 이동합니다
+  router.push(`/video/${props.video.id}`);
+};
 </script>
 
 <style scoped>
