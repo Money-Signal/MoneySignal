@@ -1,5 +1,8 @@
 <template>
-  <div id="map" style="width:100%; height:500px;"></div>
+  <div class="map-container">
+    <!-- 고정 픽셀 대신 클래스로 묶어 100% 꽉 채웁니다. -->
+    <div id="map" ref="mapContainer"></div>
+  </div>
 </template>
 
 <script setup>
@@ -120,3 +123,16 @@ watch(() => props.banks, (newBanks) => {
   renderBankMarkers(newBanks)
 })
 </script>
+
+<style scoped>
+.map-container {
+  width: 100%;
+  height: 100%; /* 부모인 .map-panel의 높이를 100% 다 쓰겠다는 선언 */
+  position: relative;
+}
+
+#map {
+  width: 100%;
+  height: 100%; /* 부모 컨테이너에 완벽하게 밀착 */
+}
+</style>
