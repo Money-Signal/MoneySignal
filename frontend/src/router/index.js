@@ -13,6 +13,7 @@ const router = createRouter({
     { path: '/signup', name: 'signup', component: SignupView },
     { path: '/login',  name: 'login',  component: LoginView  },
     { path: '/exchange', name: 'exchange', component: AssetView},
+    { path: '/video', name: 'VideoSearch', component: () => import('@/views/video/VideoSearchView.vue')}
   ],
 })
 
