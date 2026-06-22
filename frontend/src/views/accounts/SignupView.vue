@@ -24,7 +24,7 @@
         </div>
 
         <!-- STEP 1: 기본 정보 -->
-        <form v-if="step === 1" @submit.prevent="goToStep2">
+        <form v-if="step === 1" @submit.prevent="goToStep2" novalidate>
 
           <div class="mb-3">
             <label class="form-label fw-semibold">이메일 <span class="text-danger">*</span></label>
@@ -302,12 +302,22 @@ function goToStep2() {
   clearStep1Errors()
   let hasError = false
 
-  if (!form.email) { errors.email = '이메일을 입력해주세요.'; hasError = true }
-  if (!form.password) { errors.password = '비밀번호를 입력해주세요.'; hasError = true }
-  if (form.password !== form.password_confirm) {
-    errors.password_confirm = '비밀번호가 일치하지 않습니다.'
-    hasError = true
+  if (!form.email) {
+    errors.email = '이메일을 입력해주세요.'; hasError = true
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+    errors.email = '올바른 이메일 형식이 아닙니다.'; hasError = true
   }
+
+  if (!form.password) {
+    errors.password = '비밀번호를 입력해주세요.'; hasError = true
+  } else if (form.password.length < 8) {
+    errors.password = '비밀번호는 8자 이상이어야 합니다.'; hasError = true
+  }
+
+  if (form.password !== form.password_confirm) {
+    errors.password_confirm = '비밀번호가 일치하지 않습니다.'; hasError = true
+  }
+
   if (!form.nickname) { errors.nickname = '닉네임을 입력해주세요.'; hasError = true }
 
   if (!hasError) step.value = 2

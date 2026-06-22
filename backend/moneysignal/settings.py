@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 
-import os
+import os, environ
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'community',
     'exchange',
     'map',
+    'video',
     'products',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -166,3 +167,24 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
 ]
+
+# 유튜브 영상 불러오기 코드
+env = environ.Env(
+    DEBUG=(bool, False)
+)
+
+environ.Env.read_env(
+    env_file=os.path.join(os.path.dirname(BASE_DIR), '.env')
+)
+
+YOUTUBE_API_KEY = env('YOUTUBE_API_KEY')
+
+# 카카오 소셜 로그인
+KAKAO_REST_API_KEY = os.environ.get('KAKAO_REST_API_KEY')
+KAKAO_REDIRECT_URI = 'http://localhost:8000/api/accounts/kakao/callback/'
+FRONTEND_URL = 'http://localhost:5173'
+
+# 카카오 소셜 로그인
+KAKAO_REST_API_KEY = os.environ.get('KAKAO_REST_API_KEY')
+KAKAO_REDIRECT_URI = 'http://localhost:8000/api/accounts/kakao/callback/'
+FRONTEND_URL = 'http://localhost:5173'

@@ -43,6 +43,71 @@ class SignupSerializer(serializers.ModelSerializer):
         return User.objects.create_user(password=password, **validated_data)
 
 
+class ProfileSerializer(serializers.ModelSerializer):
+    """마이페이지 회원정보 조회 시리얼라이저 (읽기 전용)"""
+
+    class Meta:
+        model = User
+        fields = [
+            'id', 'email', 'nickname', 'profile_image', 'provider',
+            'age_group', 'monthly_saving', 'investment_type',
+            'preferred_product_type', 'financial_goal', 'target_amount', 'investment_period',
+            'created_at',
+        ]
+        read_only_fields = fields
+
+
+class ProfileUpdateSerializer(serializers.ModelSerializer):
+    """마이페이지 회원정보 수정 시리얼라이저"""
+
+    # 비밀번호 변경은 선택사항 (카카오 유저는 비밀번호 없음)
+    password         = serializers.CharField(write_only=True, required=False, validators=[validate_password])
+    password_confirm = serializers.CharField(write_only=True, required=False)
+
+    class Meta:
+        model = User
+        fields = [
+            'nickname', 'profile_image',
+            'age_group', 'monthly_saving', 'investment_type',
+            'preferred_product_type', 'financial_goal', 'target_amount', 'investment_period',
+            'password', 'password_confirm',
+        ]
+        extra_kwargs = {
+            'nickname':               {'required': False},
+            'profile_image':          {'required': False},
+            'age_group':              {'required': False},
+            'monthly_saving':         {'required': False},
+            'investment_type':        {'required': False},
+            'preferred_product_type': {'required': False},
+            'financial_goal':         {'required': False},
+            'target_amount':          {'required': False},
+            'investment_period':      {'required': False},
+        }
+
+    def validate(self, data):
+        # 비밀번호 변경 시 확인 값과 일치 여부 검증
+        password = data.get('password')
+        password_confirm = data.get('password_confirm')
+        if password or password_confirm:
+            if password != password_confirm:
+                raise serializers.ValidationError({'password_confirm': '비밀번호가 일치하지 않습니다.'})
+        return data
+
+    def update(self, instance, validated_data):
+        # 비밀번호는 별도로 꺼내서 해싱 처리
+        password = validated_data.pop('password', None)
+        validated_data.pop('password_confirm', None)
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        if password:
+            instance.set_password(password)
+
+        instance.save()
+        return instance
+
+
 class LoginSerializer(TokenObtainPairSerializer):
     """
     로그인 시리얼라이저.
@@ -50,7 +115,8 @@ class LoginSerializer(TokenObtainPairSerializer):
     """
 
     def validate(self, attrs):
-        data = super().validate(attrs)
+        # okenObtainPairSerializer 부모 클래스가 이메일/비밀번호 검증하고 JWT를 자동으로 만들어줌
+        data = super().validate(attrs) 
         data['user'] = {
             'id':       self.user.id,
             'email':    self.user.email,
