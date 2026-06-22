@@ -32,7 +32,6 @@ const loadKakaoMapScript = () => {
 const setCurrentLocationMarker = (lat, lng) => {
   const position = new window.kakao.maps.LatLng(lat, lng)
 
-  // 현재 위치 마커 (다른 마커와 구분되게 별도 이미지 써도 됨)
   currentMarker.value = new window.kakao.maps.Marker({
     position,
     map: map.value
@@ -46,10 +45,17 @@ const clearBankMarkers = () => {
   markers.value = []
 }
 
+// 🚀 지도를 자동으로 움직여 마커들을 한눈에 보여주는 로직 추가
 const renderBankMarkers = (banks) => {
   clearBankMarkers()
 
-  let openedInfowindow = null // 현재 열려있는 인포윈도우 추적
+  // 검색 결과가 없으면 지도를 움직이지 않고 종료합니다.
+  if (!banks || banks.length === 0) return
+
+  let openedInfowindow = null 
+  
+  // 1. 모든 마커를 포함할 '좌표 영역(Bounds)' 객체를 생성합니다.
+  const bounds = new window.kakao.maps.LatLngBounds()
 
   banks.forEach(bank => {
     const position = new window.kakao.maps.LatLng(bank.y, bank.x)
@@ -57,6 +63,9 @@ const renderBankMarkers = (banks) => {
       position,
       map: map.value
     })
+
+    // 2. 생성된 마커의 좌표를 Bounds 영역에 계속 추가(확장)합니다.
+    bounds.extend(position)
 
     const infowindow = new window.kakao.maps.InfoWindow({
       content: `
@@ -78,6 +87,9 @@ const renderBankMarkers = (banks) => {
 
     markers.value.push(marker)
   })
+
+  // 3. 계산된 마커들의 영역이 지도의 화면 안에 꽉 차게 들어오도록 시점을 부드럽게 이동시킵니다.
+  map.value.setBounds(bounds)
 }
 
 onMounted(async () => {
@@ -89,7 +101,6 @@ onMounted(async () => {
   }
   map.value = new window.kakao.maps.Map(container, options)
 
-  // 현재 위치 가져오기
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -98,7 +109,6 @@ onMounted(async () => {
       },
       (err) => {
         console.warn('위치 정보를 가져올 수 없습니다:', err)
-        // 위치 거부 시 기본 좌표(서울시청) 유지
       }
     )
   }
@@ -106,7 +116,6 @@ onMounted(async () => {
   emit('mapReady', map.value)
 })
 
-// 부모에서 검색 결과(banks)가 바뀌면 마커 다시 그림
 watch(() => props.banks, (newBanks) => {
   renderBankMarkers(newBanks)
 })

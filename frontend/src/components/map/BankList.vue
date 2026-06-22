@@ -10,7 +10,11 @@
       <option v-for="gugun in gugunList" :key="gugun" :value="gugun">{{ gugun }}</option>
     </select>
 
-    <input v-model="bankName" placeholder="은행명 (예: 국민은행)" />
+    <input 
+      v-model="bankName" 
+      placeholder="은행명 (예: 국민은행)" 
+      @keyup.enter="searchBanks"
+    />
 
     <button @click="searchBanks">검색</button>
   </div>
