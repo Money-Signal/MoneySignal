@@ -23,16 +23,16 @@ apiClient.interceptors.response.use(
 
     // 401이고 아직 재시도 안 한 요청인 경우에만 갱신 시도
     // _retry 플래그로 무한 루프 방지 (refresh 요청 자체가 401 나는 경우)
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url.includes('/login')) {
       originalRequest._retry = true
 
       const refreshToken = localStorage.getItem('refresh_token')
 
       if (!refreshToken) {
-        // refresh token도 없으면 로그인 페이지로
+        // refresh token도 없으면 로그인 페이지로 (이미 로그인 페이지면 무시)
         localStorage.removeItem('access_token')
         localStorage.removeItem('user')
-        window.location.href = '/login'
+        if (window.location.pathname !== '/login') window.location.href = '/login'
         return Promise.reject(error)
       }
 
@@ -49,11 +49,11 @@ apiClient.interceptors.response.use(
         return apiClient(originalRequest)
 
       } catch (refreshError) {
-        // refresh token도 만료된 경우 → 완전히 로그아웃
+        // refresh token도 만료된 경우 → 완전히 로그아웃 (이미 로그인 페이지면 무시)
         localStorage.removeItem('access_token')
         localStorage.removeItem('refresh_token')
         localStorage.removeItem('user')
-        window.location.href = '/login'
+        if (window.location.pathname !== '/login') window.location.href = '/login'
         return Promise.reject(refreshError)
       }
     }

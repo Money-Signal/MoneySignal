@@ -20,6 +20,8 @@ class SignupSerializer(serializers.ModelSerializer):
             'preferred_product_type', 'financial_goal', 'target_amount', 'investment_period',
         ]
         extra_kwargs = {
+            'email':    {'error_messages': {'unique': '이미 사용 중인 이메일입니다.'}},
+            'nickname': {'error_messages': {'unique': '이미 사용 중인 닉네임입니다.'}},
             'age_group':              {'required': False},
             'monthly_saving':         {'required': False},
             'investment_type':        {'required': False},
@@ -67,12 +69,17 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
+            'id', 'email', 'provider', 'created_at',
             'nickname', 'profile_image',
             'age_group', 'monthly_saving', 'investment_type',
             'preferred_product_type', 'financial_goal', 'target_amount', 'investment_period',
             'password', 'password_confirm',
         ]
         extra_kwargs = {
+            'id':                     {'read_only': True},
+            'email':                  {'read_only': True},
+            'provider':               {'read_only': True},
+            'created_at':             {'read_only': True},
             'nickname':               {'required': False},
             'profile_image':          {'required': False},
             'age_group':              {'required': False},

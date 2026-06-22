@@ -74,7 +74,9 @@
             <div class="invalid-feedback">{{ errors.nickname }}</div>
           </div>
 
-          <button type="submit" class="btn btn-primary-custom w-100 py-2">다음 →</button>
+          <button type="submit" class="btn btn-primary-custom w-100 py-2" :disabled="isLoading">
+            {{ isLoading ? '확인 중...' : '다음 →' }}
+          </button>
 
           <p class="text-center text-muted small mt-3 mb-0">
             이미 계정이 있으신가요?
@@ -232,6 +234,7 @@
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { validateSignup as validateSignupApi } from '@/api/auth'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -297,8 +300,8 @@ function clearStep1Errors() {
   Object.keys(errors).forEach((key) => (errors[key] = ''))
 }
 
-// 1단계 클라이언트 검증 후 2단계로 이동
-function goToStep2() {
+// 1단계 클라이언트 검증 후 서버 중복 확인까지 통과하면 2단계로 이동
+async function goToStep2() {
   clearStep1Errors()
   let hasError = false
 
@@ -320,7 +323,29 @@ function goToStep2() {
 
   if (!form.nickname) { errors.nickname = '닉네임을 입력해주세요.'; hasError = true }
 
-  if (!hasError) step.value = 2
+  if (hasError) return
+
+  // 서버에서 이메일/닉네임 중복 확인
+  isLoading.value = true
+  try {
+    await validateSignupApi({
+      email: form.email,
+      password: form.password,
+      password_confirm: form.password_confirm,
+      nickname: form.nickname,
+    })
+    step.value = 2
+  } catch (err) {
+    const data = err.response?.data
+    if (data) {
+      if (data.email)            errors.email = data.email[0]
+      if (data.password)         errors.password = data.password[0]
+      if (data.password_confirm) errors.password_confirm = data.password_confirm[0]
+      if (data.nickname)         errors.nickname = data.nickname[0]
+    }
+  } finally {
+    isLoading.value = false
+  }
 }
 
 function buildPayload(skip = false) {

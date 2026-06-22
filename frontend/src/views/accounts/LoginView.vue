@@ -11,7 +11,7 @@
       <div class="login-card">
         <h4 class="fw-bold mb-4">로그인</h4>
 
-        <form @submit.prevent="handleLogin">
+        <form @submit.prevent="handleLogin" novalidate>
 
           <div class="mb-3">
             <label class="form-label fw-semibold">이메일</label>
