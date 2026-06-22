@@ -7,6 +7,7 @@ import KakaoCallbackView from '@/views/accounts/KakaoCallbackView.vue'
 import MyPageView from '@/views/accounts/MyPageView.vue'
 import ProfileSetupView from '@/views/accounts/ProfileSetupView.vue'
 import AssetView from '@/views/exchange/AssetView.vue'
+import VideoDetailView from '@/views/video/VideoDetailView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -19,6 +20,8 @@ const router = createRouter({
     { path: '/mypage',         name: 'mypage',         component: MyPageView         },
     { path: '/profile/setup',  name: 'profileSetup',   component: ProfileSetupView   }, // 카카오 첫 로그인 프로필 설정
     { path: '/exchange', name: 'exchange', component: AssetView},
+    { path: '/video', name: 'VideoSearch', component: () => import('@/views/video/VideoSearchView.vue')},
+    { path: '/video/:videoId', name: 'VideoDetail', component: VideoDetailView},
   ],
 })
 
