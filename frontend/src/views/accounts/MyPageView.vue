@@ -4,6 +4,10 @@
 
       <h2 class="page-title">마이페이지</h2>
 
+      <div class="mypage-layout">
+        <!-- 왼쪽: 프로필 + 서비스 메뉴 -->
+        <div class="mypage-left">
+
       <!-- 프로필 카드 -->
       <div class="mypage-card profile-card mb-3">
         <div class="profile-image-wrapper">
@@ -16,30 +20,63 @@
 
         <template v-if="!isEditing">
           <h4 class="fw-bold mt-3 mb-1">{{ user.nickname }}</h4>
-          <p class="text-muted small mb-2">{{ user.email }}</p>
-          <span class="badge-provider">
+          <span class="badge-provider mb-1">
             <i :class="user.provider === 'KAKAO' ? 'bi bi-chat-fill' : 'bi bi-person-fill'"></i>
             {{ user.provider === 'KAKAO' ? '카카오 로그인' : '일반 로그인' }}
           </span>
+          <p class="text-muted small mb-2">{{ user.email }}</p>
           <p class="join-date">가입일 {{ formatDate(user.created_at) }}</p>
         </template>
         <template v-else>
           <input v-model="form.nickname" class="form-control mt-3 text-center nickname-input" placeholder="닉네임" />
         </template>
 
-        <div class="mt-3 d-flex gap-2 justify-content-center">
-          <button v-if="!isEditing" class="btn btn-primary-custom" @click="startEdit">
+        <div v-if="!isEditing" class="mt-3">
+          <button class="btn btn-primary-custom" @click="startEdit">
             <i class="bi bi-pencil-fill me-1"></i>정보 수정
           </button>
-          <template v-else>
-            <button class="btn btn-primary-custom" :disabled="isSaving" @click="saveProfile">
-              {{ isSaving ? '저장 중...' : '저장' }}
-            </button>
-            <button class="btn btn-outline-secondary" @click="cancelEdit">취소</button>
-          </template>
         </div>
-        <div v-if="saveError" class="alert alert-danger mt-2 py-2 small">{{ saveError }}</div>
       </div>
+
+      <!-- 메뉴 섹션 (왼쪽 하단) -->
+      <div class="mypage-card desktop-menu mb-3" :class="{ 'menu-dimmed': isEditing }">
+        <p class="section-title"><i class="bi bi-grid-fill me-2"></i>서비스</p>
+        <div class="menu-list">
+          <button class="menu-item" disabled>
+            <div class="menu-left">
+              <span class="menu-icon-wrap bg-blue"><i class="bi bi-bell-fill"></i></span>
+              <span class="menu-text">알림 설정</span>
+            </div>
+            <i class="bi bi-chevron-right menu-arrow"></i>
+          </button>
+          <button class="menu-item" disabled>
+            <div class="menu-left">
+              <span class="menu-icon-wrap bg-purple"><i class="bi bi-headset"></i></span>
+              <span class="menu-text">고객 지원</span>
+            </div>
+            <i class="bi bi-chevron-right menu-arrow"></i>
+          </button>
+          <button class="menu-item" @click="authStore.logout().then(() => router.push('/login'))">
+            <div class="menu-left">
+              <span class="menu-icon-wrap bg-gray"><i class="bi bi-box-arrow-right"></i></span>
+              <span class="menu-text">로그아웃</span>
+            </div>
+            <i class="bi bi-chevron-right menu-arrow"></i>
+          </button>
+          <button class="menu-item menu-item-danger" @click="confirmDelete">
+            <div class="menu-left">
+              <span class="menu-icon-wrap bg-red"><i class="bi bi-person-x-fill"></i></span>
+              <span class="menu-text">회원탈퇴</span>
+            </div>
+            <i class="bi bi-chevron-right menu-arrow"></i>
+          </button>
+        </div>
+      </div>
+
+        </div><!-- /.mypage-left -->
+
+        <!-- 오른쪽: 금융 정보 -->
+        <div class="mypage-right">
 
       <!-- 금융 정보 -->
       <div class="mypage-card mb-3">
@@ -185,8 +222,8 @@
         </div>
       </div>
 
-      <!-- 메뉴 섹션 -->
-      <div class="mypage-card mb-3">
+      <!-- 메뉴 섹션 (모바일에서만 표시) -->
+      <div class="mypage-card mobile-menu mb-3" :class="{ 'menu-dimmed': isEditing }">
         <p class="section-title"><i class="bi bi-grid-fill me-2"></i>서비스</p>
         <div class="menu-list">
           <button class="menu-item" disabled>
@@ -220,6 +257,20 @@
         </div>
       </div>
 
+      <!-- 저장/취소 버튼 (수정 모드) -->
+      <div v-if="isEditing" class="save-bar">
+        <div v-if="saveError" class="alert alert-danger py-2 small mb-2">{{ saveError }}</div>
+        <div class="d-flex gap-2 justify-content-end">
+          <button class="btn btn-outline-secondary" @click="cancelEdit">취소</button>
+          <button class="btn btn-primary-custom btn-save" :disabled="isSaving" @click="saveProfile">
+            <i class="bi bi-check-lg me-1"></i>{{ isSaving ? '저장 중...' : '저장하기' }}
+          </button>
+        </div>
+      </div>
+
+        </div><!-- /.mypage-right -->
+      </div><!-- /.mypage-layout -->
+
     </div>
   </div>
 </template>
@@ -229,6 +280,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css'
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import defaultProfileImg from '@/assets/default-profile.svg'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -280,7 +332,7 @@ const profileImageUrl = computed(() => {
     const img = user.value.profile_image
     return img.startsWith('http') ? img : `${BACKEND_URL}${img}`
   }
-  return `${BACKEND_URL}/media/profiles/default.png`
+  return defaultProfileImg
 })
 
 const investmentTypeLabel = computed(() => {
@@ -375,6 +427,43 @@ onMounted(async () => {
   font-weight: 800;
   color: #3a3a3a;
   margin-bottom: 1.2rem;
+}
+
+/* 데스크탑 2컬럼 레이아웃 */
+.mypage-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.desktop-menu { display: none; }
+.mobile-menu  { display: block; }
+
+@media (min-width: 900px) {
+  .mypage-container {
+    max-width: 1000px;
+  }
+
+  .mypage-layout {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+
+  .mypage-left {
+    width: 340px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 80px;
+  }
+
+  .mypage-right {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .desktop-menu { display: block; }
+  .mobile-menu  { display: none; }
 }
 
 /* 카드 공통 */
@@ -606,6 +695,28 @@ onMounted(async () => {
   border-radius: 10px;
   font-size: 0.9rem;
   padding: 0.45rem 1.4rem;
+}
+
+.menu-dimmed {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .desktop-menu.menu-dimmed {
+    display: block;
+    opacity: 0.4;
+    pointer-events: none;
+    user-select: none;
+  }
+}
+
+.save-bar {
+  margin-top: 0.5rem;
+}
+
+.btn-save {
+  padding: 0.55rem 2rem;
+  font-size: 0.95rem;
 }
 
 /* 회원가입과 동일한 금융정보 입력 스타일 */

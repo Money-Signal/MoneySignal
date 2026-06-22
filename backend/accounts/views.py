@@ -15,6 +15,18 @@ User = get_user_model()
 
 
 @api_view(['POST'])
+def validate_signup(request):
+    """POST /api/accounts/validate/ - 1단계 필드 유효성 검증 (저장 없음)"""
+    serializer = SignupSerializer(data=request.data)
+    if serializer.is_valid():
+        return Response({'valid': True})
+    # step 1 관련 에러만 반환
+    step1_fields = ['email', 'password', 'password_confirm', 'nickname', 'non_field_errors']
+    errors = {k: v for k, v in serializer.errors.items() if k in step1_fields}
+    return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
 def signup(request):
     """POST /api/accounts/signup/ - 회원가입"""
     serializer = SignupSerializer(data=request.data)
