@@ -61,3 +61,6 @@ dist/
 # Temporary Files
 *.tmp
 *.bak
+
+# Node
+node_modules/

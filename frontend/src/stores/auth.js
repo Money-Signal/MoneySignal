@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { login as loginApi, logout as logoutApi, signup as signupApi } from '@/api/auth'
+import { login as loginApi, logout as logoutApi, signup as signupApi, getProfile as getProfileApi, updateProfile as updateProfileApi, deleteAccount as deleteAccountApi } from '@/api/auth'
 
 export const useAuthStore = defineStore('auth', () => {
   // localStorage에서 초기값 복원 (새로고침 해도 로그인 유지)
@@ -44,5 +44,30 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.setItem('refresh_token', refresh)
   }
 
-  return { accessToken, user, isLoggedIn, signup, login, logout, loginWithKakao }
+  // 마이페이지 
+  // 내 프로필 정보 조회 후 store에 저장
+  async function fetchProfile() {
+    const { data } = await getProfileApi()
+    user.value = data
+    localStorage.setItem('user', JSON.stringify(data))
+  }
+
+  // 프로필 수정 후 store 업데이트
+  async function updateProfile(formData) {
+    const { data } = await updateProfileApi(formData)
+    user.value = data
+    localStorage.setItem('user', JSON.stringify(data))
+  }
+
+  // 회원탈퇴 후 로컬 상태 초기화
+  async function deleteAccount() {
+    await deleteAccountApi()
+    accessToken.value = null
+    user.value = null
+    localStorage.removeItem('access_token')
+    localStorage.removeItem('refresh_token')
+    localStorage.removeItem('user')
+  }
+
+  return { accessToken, user, isLoggedIn, signup, login, logout, loginWithKakao, fetchProfile, updateProfile, deleteAccount }
 })

@@ -17,11 +17,12 @@ onMounted(() => {
   // URL 쿼리 파라미터에서 JWT 토큰 및 신규 유저 여부 추출
   const access = route.query.access
   const refresh = route.query.refresh
+  const isNew = route.query.is_new === 'true'
 
   if (access && refresh) {
     authStore.loginWithKakao(access, refresh)
-    // 추가 정보 입력은 마이페이지 개발 시 처리 예정, 현재는 홈으로 이동
-    router.push('/')
+    // 처음 로그인한 유저는 프로필 설정 페이지로, 기존 유저는 홈으로 이동
+    router.push(isNew ? '/profile/setup' : '/')
   } else {
     // 토큰이 없으면 로그인 페이지로 이동
     router.push('/login')
