@@ -4,6 +4,7 @@ import MapView from '@/views/map/MapView.vue'
 import SignupView from '@/views/accounts/SignupView.vue'
 import LoginView from '@/views/accounts/LoginView.vue'
 import KakaoCallbackView from '@/views/accounts/KakaoCallbackView.vue'
+import AssetView from '@/views/exchange/AssetView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -13,6 +14,7 @@ const router = createRouter({
     { path: '/signup',         name: 'signup',         component: SignupView        },
     { path: '/login',          name: 'login',          component: LoginView         },
     { path: '/oauth/callback', name: 'kakaoCallback',  component: KakaoCallbackView }, // 카카오 로그인 콜백
+    { path: '/exchange', name: 'exchange', component: AssetView},
   ],
 })
 
