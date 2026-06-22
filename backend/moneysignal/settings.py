@@ -168,6 +168,7 @@ CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:5173',
 ]
 
+# 유튜브 영상 불러오기 코드
 env = environ.Env(
     DEBUG=(bool, False)
 )
@@ -177,3 +178,13 @@ environ.Env.read_env(
 )
 
 YOUTUBE_API_KEY = env('YOUTUBE_API_KEY')
+
+# 카카오 소셜 로그인
+KAKAO_REST_API_KEY = os.environ.get('KAKAO_REST_API_KEY')
+KAKAO_REDIRECT_URI = 'http://localhost:8000/api/accounts/kakao/callback/'
+FRONTEND_URL = 'http://localhost:5173'
+
+# 카카오 소셜 로그인
+KAKAO_REST_API_KEY = os.environ.get('KAKAO_REST_API_KEY')
+KAKAO_REDIRECT_URI = 'http://localhost:8000/api/accounts/kakao/callback/'
+FRONTEND_URL = 'http://localhost:5173'

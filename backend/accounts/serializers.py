@@ -50,7 +50,8 @@ class LoginSerializer(TokenObtainPairSerializer):
     """
 
     def validate(self, attrs):
-        data = super().validate(attrs)
+        # okenObtainPairSerializer 부모 클래스가 이메일/비밀번호 검증하고 JWT를 자동으로 만들어줌
+        data = super().validate(attrs) 
         data['user'] = {
             'id':       self.user.id,
             'email':    self.user.email,

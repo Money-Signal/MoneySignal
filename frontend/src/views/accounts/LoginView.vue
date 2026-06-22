@@ -46,6 +46,16 @@
             {{ isLoading ? '로그인 중...' : '로그인' }}
           </button>
 
+          <!-- 소셜 로그인 구분선 -->
+          <div class="divider my-3">
+            <span class="divider-text">또는</span>
+          </div>
+
+          <!-- 카카오 로그인 버튼 -->
+          <button type="button" class="btn btn-kakao w-100 py-2 mb-3" @click="loginWithKakao">
+            카카오로 로그인
+          </button>
+
           <p class="text-center text-muted small mb-0">
             아직 계정이 없으신가요?
             <RouterLink to="/signup" class="link-custom">회원가입</RouterLink>
@@ -71,6 +81,13 @@ const serverError = ref('')
 
 const form = reactive({ email: '', password: '' })
 const errors = reactive({ email: '', password: '' })
+
+// 카카오 인가 URL로 이동 → 카카오 로그인 → 백엔드 콜백 → /oauth/callback
+function loginWithKakao() {
+  const clientId = import.meta.env.VITE_KAKAO_REST_API_KEY
+  const redirectUri = import.meta.env.VITE_KAKAO_REDIRECT_URI
+  window.location.href = `https://kauth.kakao.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code`
+}
 
 async function handleLogin() {
   errors.email = ''
@@ -163,5 +180,35 @@ async function handleLogin() {
 .link-custom:hover {
   color: #749478;
   text-decoration: underline;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: #aaa;
+}
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #ddd;
+}
+.divider-text {
+  padding: 0 0.75rem;
+  font-size: 0.85rem;
+}
+
+.btn-kakao {
+  background-color: #FEE500;
+  border: none;
+  border-radius: 8px;
+  color: #3C1E1E;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+.btn-kakao:hover {
+  background-color: #f0d800;
+  color: #3C1E1E;
 }
 </style>
