@@ -59,7 +59,13 @@
         <div v-if="localBanks.length > 0" class="bank-items-list">
           <p class="result-count">검색 결과 총 <strong>{{ localBanks.length }}</strong>건</p>
           
-          <div v-for="(bank, index) in localBanks" :key="index" class="bank-item">
+          <div 
+            v-for="(bank, index) in localBanks" 
+            :key="index" 
+            class="bank-item"
+            @click="clickBankItem(bank)"
+            style="cursor: pointer;"
+          >
             <div class="bank-info">
               <span class="bank-badge">{{ index + 1 }}</span>
               <div class="bank-details">
@@ -90,7 +96,13 @@
         <div v-if="favoriteBanks.length > 0" class="bank-items-list">
           <p class="result-count">내가 저장한 은행 <strong>{{ favoriteBanks.length }}</strong>곳</p>
           
-          <div v-for="(bank, index) in favoriteBanks" :key="index" class="bank-item">
+          <div 
+            v-for="(bank, index) in favoriteBanks" 
+            :key="index" 
+            class="bank-item"
+            @click="clickBankItem(bank)"
+            style="cursor: pointer;"
+          >
             <div class="bank-info">
               <span class="bank-badge fav-badge">⭐</span>
               <div class="bank-details">
@@ -121,14 +133,15 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
+import axios from 'axios'
 import { regionData } from '@/utils/regionData'
 
 const props = defineProps({
   banks: { type: Array, default: () => [] }
 })
 
-const emit = defineEmits(['searchResult'])
+const emit = defineEmits(['searchResult', 'selectBank'])
 
 const activeTab = ref('list')
 const selectedSido = ref('')
@@ -137,22 +150,73 @@ const bankName = ref('')
 const gugunList = ref([])
 
 const localBanks = ref([...props.banks])
-const favoriteBanks = ref([])
+const favoriteBanks = ref([]) // DB에서 가져온 진짜 즐겨찾기 리스트
 
-// 🚀 현재 은행 아이템이 즐겨찾기 목록에 등록되어 있는지 검사하는 함수
-const isFavorite = (bank) => {
-  return favoriteBanks.value.some(b => b.id === bank.id)
+const clickBankItem = (bank) => {
+  emit('selectBank', bank)
 }
 
-// 🚀 별 아이콘 클릭 시 즐겨찾기 등록/해제를 처리하는 토글 함수
-const toggleFavorite = (bank) => {
-  const index = favoriteBanks.value.findIndex(b => b.id === bank.id)
-  if (index > -1) {
-    // 이미 담겨있다면 즐겨찾기 해제
-    favoriteBanks.value.splice(index, 1)
-  } else {
-    // 담겨있지 않다면 즐겨찾기 추가
-    favoriteBanks.value.push(bank)
+// 🚀 1. 백엔드에서 현재 유저의 즐겨찾기 목록 받아오기
+const fetchFavorites = async () => {
+  try {
+    // 🔍 확인된 로컬 스토리지의 키 'access_token'으로 토큰을 가져옵니다.
+    const token = localStorage.getItem('access_token') 
+    if (!token) return
+
+    const response = await axios.get('http://127.0.0.1:8000/api/v1/map/favorites/', {
+      // 🔍 JWT 방식에 맞추어 접두사를 'Bearer'로 변경합니다.
+      headers: { Authorization: `Bearer ${token}` } 
+    })
+    
+    // 카카오맵 템플릿 포맷에 맞춰 데이터 매핑
+    favoriteBanks.value = response.data.map(fav => ({
+      id: fav.kakao_id,
+      place_name: fav.place_name,
+      road_address_name: fav.road_address_name,
+      address_name: fav.address_name,
+      phone: fav.phone
+    }))
+  } catch (error) {
+    console.error('즐겨찾기 목록 로드 실패:', error)
+  }
+}
+
+// 화면이 켜지자마자 유저의 즐겨찾기를 불러옵니다.
+onMounted(() => {
+  fetchFavorites()
+})
+
+// 카카오 API의 id는 숫자형일 수 있으므로 안전하게 String으로 변환 후 매칭 검사
+const isFavorite = (bank) => {
+  return favoriteBanks.value.some(b => b.id === String(bank.id))
+}
+
+// 🚀 2. 별을 클릭했을 때 백엔드로 저장/삭제 요청을 보내는 함수
+const toggleFavorite = async (bank) => {
+  try {
+    // 🔍 똑같이 'access_token'에서 토큰을 땡겨옵니다.
+    const token = localStorage.getItem('access_token')
+    if (!token) {
+      alert('로그인이 필요한 서비스입니다.')
+      return
+    }
+
+    await axios.post('http://127.0.0.1:8000/api/v1/map/favorites/', {
+      id: String(bank.id),
+      place_name: bank.place_name,
+      road_address_name: bank.road_address_name,
+      address_name: bank.address_name,
+      phone: bank.phone
+    }, {
+      // 🔍 접두사를 'Bearer'로 세팅하여 전송합니다.
+      headers: { Authorization: `Bearer ${token}` }
+    })
+
+    // 변경이 끝나면 서버의 최신 상태를 받아와 화면을 동기화합니다.
+    await fetchFavorites()
+  } catch (error) {
+    console.error('즐겨찾기 토글 실패:', error)
+    alert('요청 처리 중 오류가 발생했습니다.')
   }
 }
 
