@@ -3,6 +3,7 @@ import HomeView from '@/views/home/HomeView.vue'
 import MapView from '@/views/map/MapView.vue'
 import SignupView from '@/views/accounts/SignupView.vue'
 import LoginView from '@/views/accounts/LoginView.vue'
+import AssetView from '@/views/exchange/AssetView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -11,6 +12,7 @@ const router = createRouter({
     { path: '/map',    name: 'map',    component: MapView    },
     { path: '/signup', name: 'signup', component: SignupView },
     { path: '/login',  name: 'login',  component: LoginView  },
+    { path: '/exchange', name: 'exchange', component: AssetView},
   ],
 })
 
