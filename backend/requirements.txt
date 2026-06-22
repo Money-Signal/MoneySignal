@@ -30,6 +30,8 @@ jsonschema==4.24.0
 jsonschema-specifications==2025.4.1
 matplotlib-inline==0.2.2
 mysqlclient==2.2.8
+python-dotenv
+requests
 numpy==2.5.0
 openai==2.24.0
 openpyxl==3.1.5
