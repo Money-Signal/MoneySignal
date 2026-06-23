@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'map',
     'video',
     'products',
+    'currency',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -178,6 +179,9 @@ environ.Env.read_env(
 )
 
 YOUTUBE_API_KEY = env('YOUTUBE_API_KEY')
+
+#환율 API key
+KOREA_EXIM_AUTH_KEY = env('EXCHANGE_API_KEY')
 
 # 네이버 뉴스 API key
 NAVER_CLIENT_ID = env('NAVER_CLIENT_ID')

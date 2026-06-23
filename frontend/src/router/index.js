@@ -8,6 +8,7 @@ import MyPageView from '@/views/accounts/MyPageView.vue'
 import ProfileSetupView from '@/views/accounts/ProfileSetupView.vue'
 import AssetView from '@/views/exchange/AssetView.vue'
 import VideoDetailView from '@/views/video/VideoDetailView.vue'
+import CurrencyView from '@/views/currency/CurrencyView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -24,6 +25,7 @@ const router = createRouter({
     { path: '/video/:videoId', name: 'VideoDetail', component: VideoDetailView},
     { path: '/products', name: 'productList', component: () => import('@/views/products/ProductListView.vue') },
     { path: '/products/:id', name: 'productDetail', component: () => import('@/views/products/ProductDetailView.vue') },
+    { path: '/currency', name: 'currency', component: CurrencyView}
   ],
 })
 
