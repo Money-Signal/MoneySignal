@@ -9,14 +9,31 @@
 
     <div class="rate-card mb-3">
       <p class="card-label">통화 선택</p>
-      <div class="select-wrap">
-        <select :value="selectedCode" @change="$emit('update:selectedCode', $event.target.value)" class="currency-select">
-          <option value="">통화를 선택하세요</option>
-          <option v-for="item in rates" :key="item.cur_unit" :value="item.cur_unit">
+
+      <div class="custom-select-wrapper" ref="dropdownRef">
+        <div
+          class="custom-select-box"
+          :class="{ open: isOpen }"
+          @click="isOpen = !isOpen"
+        >
+          <span :class="{ 'is-placeholder': !selectedCode }">
+            {{ selectedLabel }}
+          </span>
+          <svg class="arrow-icon" :class="{ rotated: isOpen }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </div>
+        <ul v-if="isOpen" class="custom-options">
+          <li class="is-placeholder" @click="selectOption('')">통화를 선택하세요</li>
+          <li
+            v-for="item in rates"
+            :key="item.cur_unit"
+            :class="{ selected: selectedCode === item.cur_unit }"
+            @click="selectOption(item.cur_unit)"
+          >
             {{ item.cur_unit }} - {{ item.cur_nm }}
-          </option>
-        </select>
-        <i class="bi bi-chevron-down select-icon"></i>
+          </li>
+        </ul>
       </div>
 
       <div v-if="selectedRate" class="rate-display mt-3">
@@ -51,6 +68,35 @@
       </div>
     </div>
 
+    <!-- 환율 계산기 -->
+    <div v-if="selectedRate" class="calc-card mb-3">
+      <p class="card-label">환율 계산기</p>
+      <div class="calc-row">
+        <div class="calc-input-wrap">
+          <input
+            v-model.number="calcAmount"
+            type="number"
+            class="calc-input"
+            placeholder="금액 입력"
+            min="0"
+          />
+          <span class="calc-unit">{{ isKrwToForeign ? 'KRW' : selectedRate.cur_unit }}</span>
+        </div>
+
+        <button class="swap-btn" @click="isKrwToForeign = !isKrwToForeign">
+          <i class="bi bi-arrow-left-right"></i>
+        </button>
+
+        <div class="calc-result-wrap">
+          <span class="calc-result">{{ calcResult }}</span>
+          <span class="calc-unit">{{ isKrwToForeign ? selectedRate.cur_unit : 'KRW' }}</span>
+        </div>
+      </div>
+      <p class="calc-desc">
+        1 {{ selectedRate.cur_unit }} = {{ Number(selectedRate.deal_bas_r).toLocaleString() }} KRW 기준
+      </p>
+    </div>
+
     <div v-if="error" class="alert-error">
       <i class="bi bi-exclamation-circle me-2"></i>{{ error }}
     </div>
@@ -58,25 +104,59 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { fetchLatestRates, fetchChartData } from '@/api/currency'
 
 const props = defineProps({
   selectedCode: { type: String, default: '' }
 })
 
-defineEmits(['update:selectedCode'])
+const emit = defineEmits(['update:selectedCode'])
 
 const rates = ref([])
 const error = ref('')
+const isOpen = ref(false)
+const dropdownRef = ref(null)
 const change = ref(0)
 const monthHigh = ref(0)
 const monthLow = ref(0)
+const calcAmount = ref(null)
+const isKrwToForeign = ref(true)
+
+const selectedLabel = computed(() => {
+  if (!props.selectedCode) return '통화를 선택하세요'
+  const found = rates.value.find(item => item.cur_unit === props.selectedCode)
+  return found ? `${found.cur_unit} - ${found.cur_nm}` : '통화를 선택하세요'
+})
 
 const selectedRate = computed(() => {
   if (!props.selectedCode) return null
   return rates.value.find(item => item.cur_unit === props.selectedCode) || null
 })
+
+const calcResult = computed(() => {
+  if (!calcAmount.value || !selectedRate.value) return '-'
+  const rate = Number(selectedRate.value.deal_bas_r)
+  if (!rate) return '-'
+  if (isKrwToForeign.value) {
+    return (calcAmount.value / rate).toFixed(4)
+  } else {
+    return (calcAmount.value * rate).toLocaleString()
+  }
+})
+
+const selectOption = (code) => {
+  emit('update:selectedCode', code)
+  isOpen.value = false
+  calcAmount.value = null
+  isKrwToForeign.value = true
+}
+
+const handleClickOutside = (e) => {
+  if (dropdownRef.value && !dropdownRef.value.contains(e.target)) {
+    isOpen.value = false
+  }
+}
 
 const loadStats = async (code) => {
   if (!code) return
@@ -98,12 +178,17 @@ watch(() => props.selectedCode, (code) => {
 })
 
 onMounted(async () => {
+  document.addEventListener('click', handleClickOutside)
   try {
     const res = await fetchLatestRates()
     rates.value = res.data.filter(item => item.deal_bas_r && item.deal_bas_r !== '-')
   } catch (e) {
     error.value = '환율 데이터를 불러올 수 없습니다.'
   }
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleClickOutside)
 })
 </script>
 
@@ -124,34 +209,95 @@ onMounted(async () => {
   border: 0.5px solid #c8c7b8;
   padding: 1.25rem 1.5rem;
 }
+.calc-card {
+  background: #fff;
+  border-radius: 14px;
+  border: 0.5px solid #c8c7b8;
+  padding: 1.25rem 1.5rem;
+}
 .card-label {
   font-size: 12px;
   color: #888876;
   margin-bottom: 0.5rem;
   letter-spacing: 0.04em;
 }
-.select-wrap {
+.custom-select-wrapper {
   position: relative;
 }
-.currency-select {
-  width: 100%;
-  padding: 10px 14px;
-  border-radius: 10px;
+.custom-select-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  font-size: 13px;
   border: 1.5px solid #A0BAA3;
-  background: #f7f7f0;
-  font-size: 15px;
-  color: #3a3a2e;
-  appearance: none;
+  border-radius: 6px;
+  background-color: #ffffff;
   cursor: pointer;
-  outline: none;
+  user-select: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
-.select-icon {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
+.custom-select-box.open {
+  border-color: #86A78A;
+  box-shadow: 0 0 0 2px rgba(134, 167, 138, 0.2);
+}
+.custom-select-box span {
+  color: #333;
+  font-size: 13px;
+}
+.custom-select-box span.is-placeholder {
+  color: #aaa;
+}
+.arrow-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  transition: transform 0.2s;
   color: #86A78A;
-  pointer-events: none;
+}
+.arrow-icon.rotated {
+  transform: rotate(180deg);
+}
+.custom-options {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1.5px solid #A0BAA3;
+  border-radius: 6px;
+  max-height: 200px;
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+.custom-options li {
+  padding: 8px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s;
+  color: #333;
+}
+.custom-options li.is-placeholder {
+  color: #aaa;
+}
+.custom-options li:hover {
+  background-color: #f0f4f0;
+}
+.custom-options li.selected {
+  color: #606c38;
+  font-weight: 600;
+  background-color: #edf2ed;
+}
+.custom-options::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-options::-webkit-scrollbar-thumb {
+  background: #c4c3b7;
+  border-radius: 4px;
 }
 .rate-display {
   display: flex;
@@ -209,6 +355,82 @@ onMounted(async () => {
 }
 .stat-val.up { color: #4a8a4e; }
 .stat-val.down { color: #a05050; }
+.calc-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.calc-input-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  border: 1.5px solid #A0BAA3;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #fff;
+}
+.calc-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: #333;
+  background: transparent;
+  width: 100%;
+}
+.calc-input::-webkit-inner-spin-button,
+.calc-input::-webkit-outer-spin-button {
+  appearance: none;
+}
+.calc-unit {
+  padding: 8px 10px;
+  font-size: 12px;
+  color: #86A78A;
+  font-weight: 600;
+  background: #f3f5f0;
+  white-space: nowrap;
+}
+.swap-btn {
+  background: #86A78A;
+  border: none;
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #fff;
+  font-size: 14px;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.swap-btn:hover {
+  background: #6f9473;
+}
+.calc-result-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  border: 1.5px solid #c8c7b8;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #f7f7f0;
+}
+.calc-result {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #2e4a31;
+}
+.calc-desc {
+  font-size: 11px;
+  color: #aaa;
+  margin-top: 8px;
+  text-align: right;
+}
 .alert-error {
   background: #fdecea;
   color: #a05050;
