@@ -1,16 +1,27 @@
+<template>
+  <AppHeader />
+  <div class="app-layout">
+    <SideNav />
+    <main class="app-main">
+      <RouterView />
+    </main>
+  </div>
+</template>
+
 <script setup>
-import { computed } from 'vue'
-import { useRoute, RouterView } from 'vue-router'
 import AppHeader from '@/components/common/AppHeader.vue'
-
-const route = useRoute()
-
-// 헤더를 숨길 페이지 목록
-const hideHeaderRoutes = ['login', 'signup']
-const showHeader = computed(() => !hideHeaderRoutes.includes(route.name))
+import SideNav from '@/components/common/SideNav.vue'
 </script>
 
-<template>
-  <AppHeader v-if="showHeader" />
-  <RouterView />
-</template>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #F5F1E8; font-family: -apple-system, sans-serif; }
+.app-layout {
+  display: flex;
+  min-height: calc(100vh - 56px);
+}
+.app-main {
+  flex: 1;
+  overflow-x: hidden;
+}
+</style>
