@@ -26,4 +26,5 @@ urlpatterns = [
     path('api/exchange/', include('exchange.urls')),
     path('api/video/', include('video.urls')),
     path('api/products/', include('products.urls')),
+    path('api/currency/', include('currency.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
