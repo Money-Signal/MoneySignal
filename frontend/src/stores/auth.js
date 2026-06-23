@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { login as loginApi, logout as logoutApi, signup as signupApi, getProfile as getProfileApi, updateProfile as updateProfileApi, deleteAccount as deleteAccountApi } from '@/api/auth'
+import { useProductStore } from '@/stores/product'
 
 export const useAuthStore = defineStore('auth', () => {
   // localStorage에서 초기값 복원 (새로고침 해도 로그인 유지)
@@ -22,6 +23,9 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.setItem('access_token', data.access)
     localStorage.setItem('refresh_token', data.refresh)
     localStorage.setItem('user', JSON.stringify(data.user))
+
+    // 로그인 후 추천 캐시 초기화 → 금융상품 페이지 재방문 시 맞춤 추천 재검색
+    useProductStore().clearRecommendations()
   }
 
   async function logout() {
@@ -34,6 +38,9 @@ export const useAuthStore = defineStore('auth', () => {
       localStorage.removeItem('access_token')
       localStorage.removeItem('refresh_token')
       localStorage.removeItem('user')
+
+      // 로그아웃 후 추천 캐시 초기화 → 비로그인 상태 배너로 전환
+      useProductStore().clearRecommendations()
     }
   }
 

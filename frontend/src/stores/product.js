@@ -1,12 +1,15 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import { getProducts, getProductDetail, toggleLike, getLikedProducts } from '@/api/product'
+import { getProducts, getProductDetail, toggleLike, getLikedProducts, getRecommendations } from '@/api/product'
 
 export const useProductStore = defineStore('product', () => {
   const products = ref([])       // 상품 목록
   const product = ref(null)      // 상품 상세
   const likedProducts = ref([])  // 찜한 상품 목록
+  const recommendations = ref([])        // 추천 상품 목록
+  const recommendationType = ref(null)   // 'personalized' | 'popular'
   const isLoading = ref(false)
+  const isRecommendLoading = ref(false)
   const error = ref(null)
 
   // 상품 목록 조회
@@ -53,10 +56,36 @@ export const useProductStore = defineStore('product', () => {
       const target = products.value.find((p) => p.id === productId)
       if (target) target.liked = liked
 
+      // 추천 섹션 상태 반영
+      const recommended = recommendations.value.find((p) => p.id === productId)
+      if (recommended) recommended.liked = liked
+
       return liked
     } catch (e) {
       error.value = '찜하기 처리 중 오류가 발생했습니다.'
     }
+  }
+
+  // 맞춤 추천 상품 조회
+  // recommendationType이 이미 세팅돼 있으면 세션 내 캐시 사용 (재호출 스킵)
+  async function fetchRecommendations({ force = false } = {}) {
+    if (!force && recommendationType.value !== null) return
+    isRecommendLoading.value = true
+    try {
+      const res = await getRecommendations()
+      recommendations.value = res.data.results
+      recommendationType.value = res.data.type
+    } catch {
+      recommendations.value = []
+    } finally {
+      isRecommendLoading.value = false
+    }
+  }
+
+  // 프로필 수정 후 추천 결과 초기화 (다음 조회 시 재검색)
+  function clearRecommendations() {
+    recommendations.value = []
+    recommendationType.value = null
   }
 
   // 찜한 상품 목록 조회
@@ -74,7 +103,9 @@ export const useProductStore = defineStore('product', () => {
   }
 
   return {
-    products, product, likedProducts, isLoading, error,
+    products, product, likedProducts, recommendations, recommendationType,
+    isLoading, isRecommendLoading, error,
     fetchProducts, fetchProductDetail, likeProduct, fetchLikedProducts,
+    fetchRecommendations, clearRecommendations,
   }
 })

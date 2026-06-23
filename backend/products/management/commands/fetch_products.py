@@ -8,6 +8,7 @@
 import os
 import requests
 from django.core.management.base import BaseCommand
+from django.core.management import call_command
 from products.models import FinancialProduct, ProductOption
 
 
@@ -51,6 +52,10 @@ class Command(BaseCommand):  # pylint: disable=no-member
                 f'\n✅ 완료! 신규 저장: {total_created}건 / 업데이트: {total_updated}건'
             )
         )
+
+        # 상품 데이터가 바뀌었으므로 ChromaDB 임베딩 자동 재구축
+        self.stdout.write('\n임베딩 재구축 시작...')
+        call_command('build_embeddings')
 
     def _fetch_and_save(self, top_fin_grp_no, product_type):
         """API 호출 후 상품 및 옵션을 DB에 저장. (신규, 업데이트) 건수 반환"""

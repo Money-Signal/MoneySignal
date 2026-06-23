@@ -286,11 +286,13 @@ import 'bootstrap-icons/font/bootstrap-icons.css'
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useProductStore } from '@/stores/product'
 import defaultProfileImg from '@/assets/default-profile.svg'
 import DropdownSelect from '@/components/common/DropdownSelect.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const productStore = useProductStore()
 const user = computed(() => authStore.user)
 
 const isEditing = ref(false)
@@ -420,6 +422,7 @@ async function saveProfile() {
     })
     if (imageFile.value) formData.append('profile_image', imageFile.value)
     await authStore.updateProfile(formData)
+    productStore.clearRecommendations()  // 프로필 바뀌었으니 다음 방문 시 추천 재검색
     isEditing.value = false
   } catch {
     saveError.value = '저장에 실패했습니다. 다시 시도해주세요.'

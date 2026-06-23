@@ -12,6 +12,9 @@ ENV/
 db.sqlite3
 db.sqlite3-journal
 
+# ChromaDB
+chroma_db/
+
 # Migrations (선택)
 # */migrations/*
 # !*/migrations/__init__.py

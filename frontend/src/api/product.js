@@ -11,3 +11,6 @@ export const toggleLike = (productId) => apiClient.post(`/products/${productId}/
 
 // 찜한 상품 목록 조회
 export const getLikedProducts = () => apiClient.get('/products/liked/')
+
+// 맞춤 추천 (비로그인 시 인기상품 반환)
+export const getRecommendations = () => apiClient.get('/products/recommend/')
