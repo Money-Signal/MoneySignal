@@ -108,7 +108,7 @@ class Command(BaseCommand):  # pylint: disable=no-member
         return None
 
     def _build_product_data(self, item, product_type):
-        """API 응답 item을 DB 저장용 dict로 변환"""
+        """API 응답 item을 DB 저장용 dict로 변환 (FSS API baseinfo 필드 기준)"""
         return {
             'fin_co_no': item.get('fin_co_no', ''),
             'kor_co_nm': item.get('kor_co_nm', ''),
@@ -121,8 +121,7 @@ class Command(BaseCommand):  # pylint: disable=no-member
             'etc_note': item.get('etc_note', ''),
             'mtrt_int': item.get('mtrt_int', ''),
             'max_limit': item.get('max_limit'),
-            'rsrv_type': item.get('rsrv_type', ''),
-            'rsrv_type_nm': item.get('rsrv_type_nm', ''),
+            'dcls_month': item.get('dcls_month', ''),
             'dcls_strt_day': item.get('dcls_strt_day', ''),
             'dcls_end_day': item.get('dcls_end_day'),
             'fin_co_subm_day': item.get('fin_co_subm_day', ''),

@@ -6,10 +6,10 @@ from django.conf import settings
 
 class FinancialProduct(models.Model):
     """
-    금융감독원 API 기반 예금/적금 상품 정보
+    금융감독원 API 기반 예금/적금 상품 정보 (FSS API baseinfo 기준)
     - fin_prdt_cd(금융상품코드)가 unique key → 중복 저장 방지
     - product_type 으로 예금(D) / 적금(S) 구분
-    - 적금 전용 필드(rsrv_type)는 예금일 경우 blank 처리
+    - rsrv_type(적립유형)은 API 스펙상 options에 있으므로 ProductOption에서 관리
     """
 
     PRODUCT_TYPE_CHOICES = [
@@ -37,12 +37,9 @@ class FinancialProduct(models.Model):
     mtrt_int = models.TextField(blank=True, verbose_name='만기 후 이자율')
     max_limit = models.BigIntegerField(null=True, blank=True, verbose_name='최고한도')
 
-    # 적금 전용 (예금은 blank)
-    rsrv_type = models.CharField(max_length=10, blank=True, verbose_name='적립유형코드')      # S: 정액적립식, F: 자유적립식
-    rsrv_type_nm = models.CharField(max_length=50, blank=True, verbose_name='적립유형명')
-
     # 공시 기간
-    dcls_strt_day = models.CharField(max_length=8, blank=True, verbose_name='공시 시작일')       # YYYYMMDD
+    dcls_month = models.CharField(max_length=6, blank=True, verbose_name='공시 제출월')       # YYYYMM
+    dcls_strt_day = models.CharField(max_length=8, blank=True, verbose_name='공시 시작일')    # YYYYMMDD
     dcls_end_day = models.CharField(max_length=8, blank=True, null=True, verbose_name='공시 종료일')
     fin_co_subm_day = models.CharField(max_length=12, blank=True, verbose_name='금융회사 제출일')
 

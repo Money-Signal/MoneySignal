@@ -17,7 +17,7 @@ class SignupSerializer(serializers.ModelSerializer):
             'email', 'password', 'password_confirm', 'nickname',
             # 금융 정보 (선택)
             'age_group', 'monthly_saving', 'investment_type',
-            'preferred_product_type', 'financial_goal', 'target_amount', 'investment_period',
+            'preferred_product_type', 'financial_goal', 'investment_period', 'occupation',
         ]
         extra_kwargs = {
             'email':    {'error_messages': {'unique': '이미 사용 중인 이메일입니다.'}},
@@ -27,8 +27,8 @@ class SignupSerializer(serializers.ModelSerializer):
             'investment_type':        {'required': False},
             'preferred_product_type': {'required': False},
             'financial_goal':         {'required': False},
-            'target_amount':          {'required': False},
             'investment_period':      {'required': False},
+            'occupation':             {'required': False},
         }
 
     # 비밀번호 일치 여부 확인
@@ -53,7 +53,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'email', 'nickname', 'profile_image', 'provider',
             'age_group', 'monthly_saving', 'investment_type',
-            'preferred_product_type', 'financial_goal', 'target_amount', 'investment_period',
+            'preferred_product_type', 'financial_goal', 'investment_period', 'occupation',
             'created_at',
         ]
         read_only_fields = fields
@@ -72,7 +72,7 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
             'id', 'email', 'provider', 'created_at',
             'nickname', 'profile_image',
             'age_group', 'monthly_saving', 'investment_type',
-            'preferred_product_type', 'financial_goal', 'target_amount', 'investment_period',
+            'preferred_product_type', 'financial_goal', 'investment_period', 'occupation',
             'password', 'password_confirm',
         ]
         extra_kwargs = {
@@ -87,8 +87,8 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
             'investment_type':        {'required': False},
             'preferred_product_type': {'required': False},
             'financial_goal':         {'required': False},
-            'target_amount':          {'required': False},
             'investment_period':      {'required': False},
+            'occupation':             {'required': False},
         }
 
     def validate(self, data):

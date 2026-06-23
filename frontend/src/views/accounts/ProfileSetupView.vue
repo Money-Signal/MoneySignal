@@ -80,17 +80,23 @@
 
           <!-- 금융 목표 -->
           <div class="mb-4">
-            <label class="form-label fw-semibold">금융 목표</label>
-            <input v-model="form.financial_goal" type="text" class="form-control custom-input" placeholder="예) 내 집 마련, 노후 준비, 여행 자금" />
+            <label class="form-label fw-semibold">금융 목표 <span class="text-muted small fw-normal">(복수 선택 가능)</span></label>
+            <DropdownSelect
+              v-model="form.financial_goal"
+              :options="financialGoalOptions"
+              :multiple="true"
+              placeholder="금융 목표를 선택하세요"
+            />
           </div>
 
-          <!-- 목표 금액 -->
+          <!-- 직업 -->
           <div class="mb-4">
-            <label class="form-label fw-semibold">목표 금액</label>
-            <div class="input-group">
-              <input v-model="targetAmountInput" type="text" inputmode="numeric" class="form-control custom-input" placeholder="예) 5,000" @input="onTargetAmountInput" />
-              <span class="input-group-text unit-text">만원</span>
-            </div>
+            <label class="form-label fw-semibold">직업</label>
+            <DropdownSelect
+              v-model="form.occupation"
+              :options="occupationOptions"
+              placeholder="직업을 선택하세요"
+            />
           </div>
 
           <!-- 투자 기간 슬라이더 -->
@@ -129,13 +135,13 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import DropdownSelect from '@/components/common/DropdownSelect.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
 
 const isLoading = ref(false)
 const serverError = ref('')
-const targetAmountInput = ref('')
 const errors = ref({ nickname: '' })
 
 const form = ref({
@@ -145,7 +151,7 @@ const form = ref({
   investment_type:        '',
   preferred_product_type: '',
   financial_goal:         '',
-  target_amount:          null,
+  occupation:             '',
   investment_period:      null,
 })
 
@@ -172,11 +178,24 @@ const investmentOptions = [
   { value: 'AGGRESSIVE',   label: '공격형', emoji: '🚀', desc: '수익 극대화'   },
 ]
 
-function onTargetAmountInput(e) {
-  const raw = e.target.value.replace(/[^0-9]/g, '')
-  form.value.target_amount = raw ? Number(raw) : null
-  targetAmountInput.value = raw ? Number(raw).toLocaleString() : ''
-}
+const financialGoalOptions = [
+  { value: 'HOME',       label: '내집마련',   emoji: '🏠' },
+  { value: 'WEDDING',    label: '결혼자금',   emoji: '💒' },
+  { value: 'RETIREMENT', label: '노후준비',   emoji: '👴' },
+  { value: 'TRAVEL',     label: '여행/여가',  emoji: '✈️' },
+  { value: 'EDUCATION',  label: '자녀교육',   emoji: '🎓' },
+  { value: 'EMERGENCY',  label: '비상금 마련', emoji: '🛡️' },
+  { value: 'ETC',        label: '기타',       emoji: '📌' },
+]
+
+const occupationOptions = [
+  { value: 'EMPLOYEE',    label: '직장인',  emoji: '💼' },
+  { value: 'SELF_EMPLOY', label: '자영업자', emoji: '🏪' },
+  { value: 'STUDENT',     label: '학생',    emoji: '📚' },
+  { value: 'HOUSEWIFE',   label: '주부',    emoji: '🏡' },
+  { value: 'FREELANCER',  label: '프리랜서', emoji: '💻' },
+  { value: 'ETC',         label: '기타',    emoji: '👤' },
+]
 
 async function handleSubmit() {
   errors.value.nickname = ''
@@ -190,7 +209,9 @@ async function handleSubmit() {
   try {
     const formData = new FormData()
     Object.entries(form.value).forEach(([key, value]) => {
-      if (value !== '' && value !== null) formData.append(key, value)
+      if (value === '' || value === null || value === undefined) return
+      if (Array.isArray(value)) formData.append(key, JSON.stringify(value))
+      else formData.append(key, value)
     })
     await authStore.updateProfile(formData)
     router.push('/')

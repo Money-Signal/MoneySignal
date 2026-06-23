@@ -64,8 +64,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):
         fields = ['id', 'fin_prdt_cd', 'fin_prdt_nm', 'kor_co_nm',
                   'product_type', 'join_way', 'join_member', 'join_deny',
                   'spcl_cnd', 'etc_note', 'mtrt_int', 'max_limit',
-                  'rsrv_type', 'rsrv_type_nm',
-                  'dcls_strt_day', 'dcls_end_day',
+                  'dcls_month', 'dcls_strt_day', 'dcls_end_day',
                   'options', 'liked', 'like_count']
 
     def get_liked(self, obj):

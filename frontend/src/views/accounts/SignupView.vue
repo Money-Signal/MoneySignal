@@ -161,29 +161,23 @@
 
           <!-- 금융 목표 -->
           <div class="mb-4">
-            <label class="form-label fw-semibold">금융 목표</label>
-            <input
+            <label class="form-label fw-semibold">금융 목표 <span class="text-muted small fw-normal">(복수 선택 가능)</span></label>
+            <DropdownSelect
               v-model="form.financial_goal"
-              type="text"
-              class="form-control custom-input"
-              placeholder="예) 내 집 마련, 노후 준비, 여행 자금"
+              :options="financialGoalOptions"
+              :multiple="true"
+              placeholder="금융 목표를 선택하세요"
             />
           </div>
 
-          <!-- 목표 금액 -->
+          <!-- 직업 -->
           <div class="mb-4">
-            <label class="form-label fw-semibold">목표 금액</label>
-            <div class="input-group">
-              <input
-                v-model="targetAmountInput"
-                type="text"
-                inputmode="numeric"
-                class="form-control custom-input"
-                placeholder="예) 5,000"
-                @input="onTargetAmountInput"
-              />
-              <span class="input-group-text unit-text">만원</span>
-            </div>
+            <label class="form-label fw-semibold">직업</label>
+            <DropdownSelect
+              v-model="form.occupation"
+              :options="occupationOptions"
+              placeholder="직업을 선택하세요"
+            />
           </div>
 
           <!-- 투자 기간 -->
@@ -235,6 +229,7 @@ import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { validateSignup as validateSignupApi } from '@/api/auth'
+import DropdownSelect from '@/components/common/DropdownSelect.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -242,9 +237,27 @@ const authStore = useAuthStore()
 const step = ref(1)
 const isLoading = ref(false)
 const serverError = ref('')
-const targetAmountInput = ref('')
 
 const ageOptions = ['10대', '20대', '30대', '40대', '50대 이상']
+
+const financialGoalOptions = [
+  { value: 'HOME',       label: '내집마련',   emoji: '🏠' },
+  { value: 'WEDDING',    label: '결혼자금',   emoji: '💒' },
+  { value: 'RETIREMENT', label: '노후준비',   emoji: '👴' },
+  { value: 'TRAVEL',     label: '여행/여가',  emoji: '✈️' },
+  { value: 'EDUCATION',  label: '자녀교육',   emoji: '🎓' },
+  { value: 'EMERGENCY',  label: '비상금 마련', emoji: '🛡️' },
+  { value: 'ETC',        label: '기타',       emoji: '📌' },
+]
+
+const occupationOptions = [
+  { value: 'EMPLOYEE',    label: '직장인',  emoji: '💼' },
+  { value: 'SELF_EMPLOY', label: '자영업자', emoji: '🏪' },
+  { value: 'STUDENT',     label: '학생',    emoji: '📚' },
+  { value: 'HOUSEWIFE',   label: '주부',    emoji: '🏡' },
+  { value: 'FREELANCER',  label: '프리랜서', emoji: '💻' },
+  { value: 'ETC',         label: '기타',    emoji: '👤' },
+]
 
 const savingOptions = [
   { label: '10만원 미만',  value: 5 },
@@ -277,9 +290,9 @@ const form = reactive({
   monthly_saving: null,
   investment_type: '',
   preferred_product_type: '',
-  financial_goal: '',
-  target_amount: null,
+  financial_goal: [],
   investment_period: null,
+  occupation: '',
 })
 
 const errors = reactive({
@@ -288,13 +301,6 @@ const errors = reactive({
   password_confirm: '',
   nickname: '',
 })
-
-// 목표 금액 입력 시 숫자만 허용
-function onTargetAmountInput(e) {
-  const raw = e.target.value.replace(/[^0-9]/g, '')
-  form.target_amount = raw ? Number(raw) : null
-  targetAmountInput.value = raw ? Number(raw).toLocaleString() : ''
-}
 
 function clearStep1Errors() {
   Object.keys(errors).forEach((key) => (errors[key] = ''))
@@ -360,9 +366,9 @@ function buildPayload(skip = false) {
     if (form.monthly_saving)         payload.monthly_saving = form.monthly_saving
     if (form.investment_type)        payload.investment_type = form.investment_type
     if (form.preferred_product_type) payload.preferred_product_type = form.preferred_product_type
-    if (form.financial_goal)         payload.financial_goal = form.financial_goal
-    if (form.target_amount)          payload.target_amount = form.target_amount
+    if (form.financial_goal?.length) payload.financial_goal = form.financial_goal
     if (form.investment_period)      payload.investment_period = form.investment_period
+    if (form.occupation)             payload.occupation = form.occupation
   }
   return payload
 }
