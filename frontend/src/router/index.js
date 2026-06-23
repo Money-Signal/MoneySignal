@@ -22,6 +22,8 @@ const router = createRouter({
     { path: '/exchange', name: 'exchange', component: AssetView},
     { path: '/video', name: 'VideoSearch', component: () => import('@/views/video/VideoSearchView.vue')},
     { path: '/video/:videoId', name: 'VideoDetail', component: VideoDetailView},
+    { path: '/products', name: 'productList', component: () => import('@/views/products/ProductListView.vue') },
+    { path: '/products/:id', name: 'productDetail', component: () => import('@/views/products/ProductDetailView.vue') },
   ],
 })
 

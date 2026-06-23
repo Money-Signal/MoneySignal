@@ -5,6 +5,13 @@
       <!-- 로고 -->
       <RouterLink to="/" class="brand">MoneySignal</RouterLink>
 
+      <!-- 가운데 메뉴 -->
+      <nav class="header-center">
+        <RouterLink to="/products" class="nav-link">금융상품</RouterLink>
+        <RouterLink to="/exchange" class="nav-link">환율</RouterLink>
+        <RouterLink to="/map" class="nav-link">주변 은행</RouterLink>
+      </nav>
+
       <!-- 우측 메뉴 -->
       <nav class="header-nav">
         <template v-if="authStore.isLoggedIn">
@@ -52,6 +59,12 @@ async function handleLogout() {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.header-center {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
 }
 
 .brand {

@@ -54,6 +54,25 @@ class User(AbstractUser):
         SAVING  = 'SAVING',  '적금'
         BOTH    = 'BOTH',    '상관없음'
 
+    class FinancialGoal(models.TextChoices):
+        """금융 목표 선택지 - RAG 임베딩 품질 일관성을 위해 자유 텍스트 대신 선택지로 관리"""
+        HOME       = 'HOME',       '내집마련'
+        WEDDING    = 'WEDDING',    '결혼자금'
+        RETIREMENT = 'RETIREMENT', '노후준비'
+        TRAVEL     = 'TRAVEL',     '여행/여가'
+        EDUCATION  = 'EDUCATION',  '자녀교육'
+        EMERGENCY  = 'EMERGENCY',  '비상금 마련'
+        ETC        = 'ETC',        '기타'
+
+    class Occupation(models.TextChoices):
+        """직업/소득유형 - 우대조건(급여이체, 직장인 전용 등) 매칭용"""
+        EMPLOYEE    = 'EMPLOYEE',    '직장인'
+        SELF_EMPLOY = 'SELF_EMPLOY', '자영업자'
+        STUDENT     = 'STUDENT',     '학생'
+        HOUSEWIFE   = 'HOUSEWIFE',   '주부'
+        FREELANCER  = 'FREELANCER',  '프리랜서'
+        ETC         = 'ETC',         '기타'
+
     class Provider(models.TextChoices):
         """로그인 제공자 - 카카오 소셜 로그인 추가 시 KAKAO 분기 처리"""
         LOCAL = 'LOCAL', '일반'
@@ -71,9 +90,9 @@ class User(AbstractUser):
     monthly_saving         = models.PositiveIntegerField(null=True, blank=True, help_text='월 저축 가능 금액, 단위: 만원')
     investment_type        = models.CharField(max_length=20, choices=InvestmentType.choices, null=True, blank=True)
     preferred_product_type = models.CharField(max_length=10, choices=PreferredProductType.choices, null=True, blank=True)
-    financial_goal         = models.CharField(max_length=100, null=True, blank=True)
-    target_amount          = models.PositiveIntegerField(null=True, blank=True, help_text='단위: 만원')
-    investment_period      = models.PositiveIntegerField(null=True, blank=True, help_text='단위: 개월')
+    financial_goal    = models.JSONField(default=list, null=True, blank=True)
+    investment_period = models.PositiveIntegerField(null=True, blank=True, help_text='단위: 개월')
+    occupation        = models.CharField(max_length=20, choices=Occupation.choices, null=True, blank=True)
 
     # 소셜 로그인 대비 필드
     provider    = models.CharField(max_length=10, choices=Provider.choices, default=Provider.LOCAL)

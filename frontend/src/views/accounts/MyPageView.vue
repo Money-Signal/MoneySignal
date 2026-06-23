@@ -107,12 +107,12 @@
             <div class="finance-item">
               <i class="bi bi-bullseye finance-icon"></i>
               <span class="finance-label">금융 목표</span>
-              <span class="finance-value" :class="{ unset: !user.financial_goal }">{{ user.financial_goal || '미설정' }}</span>
+              <span class="finance-value" :class="{ unset: !user.financial_goal }">{{ financialGoalLabel }}</span>
             </div>
             <div class="finance-item">
-              <i class="bi bi-cash-coin finance-icon"></i>
-              <span class="finance-label">목표 금액</span>
-              <span class="finance-value" :class="{ unset: !user.target_amount }">{{ user.target_amount ? user.target_amount + '만원' : '미설정' }}</span>
+              <i class="bi bi-briefcase finance-icon"></i>
+              <span class="finance-label">직업</span>
+              <span class="finance-value" :class="{ unset: !user.occupation }">{{ occupationLabel }}</span>
             </div>
             <div class="finance-item finance-item-full">
               <i class="bi bi-calendar-check finance-icon"></i>
@@ -177,17 +177,23 @@
 
           <!-- 금융 목표 -->
           <div class="mb-4">
-            <label class="form-label fw-semibold">금융 목표</label>
-            <input v-model="form.financial_goal" type="text" class="form-control custom-input" placeholder="예) 내 집 마련, 노후 준비, 여행 자금" />
+            <label class="form-label fw-semibold">금융 목표 <span class="text-muted small fw-normal">(복수 선택 가능)</span></label>
+            <DropdownSelect
+              v-model="form.financial_goal"
+              :options="financialGoalOptions"
+              :multiple="true"
+              placeholder="금융 목표를 선택하세요"
+            />
           </div>
 
-          <!-- 목표 금액 -->
+          <!-- 직업 -->
           <div class="mb-4">
-            <label class="form-label fw-semibold">목표 금액</label>
-            <div class="input-group">
-              <input v-model="targetAmountInput" type="text" inputmode="numeric" class="form-control custom-input" placeholder="예) 5,000" @input="onTargetAmountInput" />
-              <span class="input-group-text unit-text">만원</span>
-            </div>
+            <label class="form-label fw-semibold">직업</label>
+            <DropdownSelect
+              v-model="form.occupation"
+              :options="occupationOptions"
+              placeholder="직업을 선택하세요"
+            />
           </div>
 
           <!-- 투자 기간 슬라이더 -->
@@ -280,10 +286,13 @@ import 'bootstrap-icons/font/bootstrap-icons.css'
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useProductStore } from '@/stores/product'
 import defaultProfileImg from '@/assets/default-profile.svg'
+import DropdownSelect from '@/components/common/DropdownSelect.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const productStore = useProductStore()
 const user = computed(() => authStore.user)
 
 const isEditing = ref(false)
@@ -291,9 +300,27 @@ const isSaving = ref(false)
 const saveError = ref('')
 const imageFile = ref(null)
 const form = ref({})
-const targetAmountInput = ref('')
 
 const ageOptions = ['10대', '20대', '30대', '40대', '50대 이상']
+
+const financialGoalOptions = [
+  { value: 'HOME',       label: '내집마련',   emoji: '🏠' },
+  { value: 'WEDDING',    label: '결혼자금',   emoji: '💒' },
+  { value: 'RETIREMENT', label: '노후준비',   emoji: '👴' },
+  { value: 'TRAVEL',     label: '여행/여가',  emoji: '✈️' },
+  { value: 'EDUCATION',  label: '자녀교육',   emoji: '🎓' },
+  { value: 'EMERGENCY',  label: '비상금 마련', emoji: '🛡️' },
+  { value: 'ETC',        label: '기타',       emoji: '📌' },
+]
+
+const occupationOptions = [
+  { value: 'EMPLOYEE',    label: '직장인',  emoji: '💼' },
+  { value: 'SELF_EMPLOY', label: '자영업자', emoji: '🏪' },
+  { value: 'STUDENT',     label: '학생',    emoji: '📚' },
+  { value: 'HOUSEWIFE',   label: '주부',    emoji: '🏡' },
+  { value: 'FREELANCER',  label: '프리랜서', emoji: '💻' },
+  { value: 'ETC',         label: '기타',    emoji: '👤' },
+]
 
 const savingOptions = [
   { label: '10만원 미만',  value: 5   },
@@ -315,13 +342,6 @@ const investmentOptions = [
   { value: 'MODERATE',     label: '중립형', emoji: '⚖️', desc: '균형 추구'     },
   { value: 'AGGRESSIVE',   label: '공격형', emoji: '🚀', desc: '수익 극대화'   },
 ]
-
-// 목표 금액 입력 시 숫자만 허용 + 천 단위 콤마
-function onTargetAmountInput(e) {
-  const raw = e.target.value.replace(/[^0-9]/g, '')
-  form.value.target_amount = raw ? Number(raw) : null
-  targetAmountInput.value = raw ? Number(raw).toLocaleString() : ''
-}
 
 const BACKEND_URL = 'http://127.0.0.1:8000'
 
@@ -345,6 +365,20 @@ const preferredProductLabel = computed(() => {
   return map[user.value?.preferred_product_type] || '미설정'
 })
 
+const financialGoalLabel = computed(() => {
+  const goals = user.value?.financial_goal
+  if (!Array.isArray(goals) || !goals.length) return '미설정'
+  return goals
+    .map(v => financialGoalOptions.find(o => o.value === v)?.label)
+    .filter(Boolean)
+    .join(', ')
+})
+
+const occupationLabel = computed(() => {
+  const opt = occupationOptions.find(o => o.value === user.value?.occupation)
+  return opt?.label || '미설정'
+})
+
 function formatDate(dateStr) {
   if (!dateStr) return ''
   return dateStr.slice(0, 10)
@@ -357,14 +391,13 @@ function startEdit() {
     monthly_saving:         user.value.monthly_saving || '',
     investment_type:        user.value.investment_type || '',
     preferred_product_type: user.value.preferred_product_type || '',
-    financial_goal:         user.value.financial_goal || '',
-    target_amount:          user.value.target_amount || '',
+    financial_goal:         Array.isArray(user.value.financial_goal) ? [...user.value.financial_goal] : [],
+    occupation:             user.value.occupation || '',
     investment_period:      user.value.investment_period || '',
     password:               '',
     password_confirm:       '',
   }
   imageFile.value = null
-  targetAmountInput.value = form.value.target_amount ? Number(form.value.target_amount).toLocaleString() : ''
   isEditing.value = true
 }
 
@@ -383,10 +416,13 @@ async function saveProfile() {
   try {
     const formData = new FormData()
     Object.entries(form.value).forEach(([key, value]) => {
-      if (value !== '' && value !== null) formData.append(key, value)
+      if (value === '' || value === null || value === undefined) return
+      if (Array.isArray(value)) formData.append(key, JSON.stringify(value))
+      else formData.append(key, value)
     })
     if (imageFile.value) formData.append('profile_image', imageFile.value)
     await authStore.updateProfile(formData)
+    productStore.clearRecommendations()  // 프로필 바뀌었으니 다음 방문 시 추천 재검색
     isEditing.value = false
   } catch {
     saveError.value = '저장에 실패했습니다. 다시 시도해주세요.'
