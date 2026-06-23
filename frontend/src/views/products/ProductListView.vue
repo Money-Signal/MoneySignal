@@ -63,7 +63,7 @@
         </div>
       </div>
 
-      <!-- 탭 + 검색 -->
+      <!-- 툴바 -->
       <div class="toolbar mb-3">
         <div class="tab-group">
           <button :class="['tab-btn', activeTab === 'D' ? 'active' : '']" @click="changeTab('D')">
@@ -74,15 +74,21 @@
           </button>
         </div>
 
-        <div class="search-wrap">
-          <i class="bi bi-search search-icon" />
-          <input
-            v-model="bankFilter"
-            type="text"
-            class="search-input"
-            placeholder="은행명으로 검색"
-            @input="onBankFilter"
-          />
+        <div class="toolbar-right">
+          <div class="search-wrap">
+            <i class="bi bi-search search-icon" />
+            <input
+              v-model="searchQuery"
+              type="text"
+              class="search-input"
+              placeholder="은행명 또는 상품명"
+            />
+          </div>
+
+          <div class="sort-wrap">
+            <DropdownSelect v-model="sortBy" :options="sortOptions" />
+          </div>
+
         </div>
       </div>
 
@@ -97,19 +103,20 @@
       </div>
 
       <!-- 빈 결과 -->
-      <div v-else-if="store.products.length === 0" class="empty-state">
+      <div v-else-if="filteredSortedProducts.length === 0" class="empty-state">
         <i class="bi bi-inbox" />
-        <p>조건에 맞는 상품이 없습니다.</p>
+        <p v-if="store.products.length === 0">조건에 맞는 상품이 없습니다.</p>
+        <p v-else>검색 조건에 맞는 상품이 없어요.</p>
       </div>
 
       <!-- 상품 목록 -->
       <div v-else class="row g-3">
         <div
-          v-for="product in store.products"
+          v-for="product in filteredSortedProducts"
           :key="product.id"
           class="col-md-6 col-lg-4"
         >
-          <div class="product-card" @click="goDetail(product.id)">
+          <div :class="['product-card', store.isInCompare(product.id) ? 'comparing' : '']" @click="goDetail(product.id)">
 
             <div class="d-flex justify-content-between align-items-start mb-2">
               <span class="bank-chip">{{ product.kor_co_nm }}</span>
@@ -134,27 +141,48 @@
               <span class="rate-label">최고금리</span>
             </div>
 
+            <button
+              :class="['compare-btn', store.isInCompare(product.id) ? 'active' : '']"
+              :disabled="!store.isInCompare(product.id) && store.compareList.length >= 3"
+              @click.stop="onCompareToggle(product)"
+            >
+              <i :class="store.isInCompare(product.id) ? 'bi bi-check2' : 'bi bi-plus'" />
+              {{ store.isInCompare(product.id) ? '비교 중' : '비교 추가' }}
+            </button>
+
           </div>
         </div>
       </div>
 
     </div>
   </div>
+
+  <CompareBar @open="showCompareModal = true" />
+  <CompareModal v-if="showCompareModal" @close="showCompareModal = false" />
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter, RouterLink } from 'vue-router'
 import { useProductStore } from '@/stores/product'
 import { useAuthStore } from '@/stores/auth'
+import CompareBar from '@/components/products/CompareBar.vue'
+import CompareModal from '@/components/products/CompareModal.vue'
+import DropdownSelect from '@/components/common/DropdownSelect.vue'
 
 const router = useRouter()
 const store = useProductStore()
 const authStore = useAuthStore()
 
 const activeTab = ref('D')
-const bankFilter = ref('')
-let filterTimer = null
+const searchQuery = ref('')
+const sortBy = ref('popular')
+const sortOptions = [
+  { value: 'popular',        label: '인기순' },
+  { value: 'rate_desc',      label: '최고금리 높은순' },
+  { value: 'base_rate_desc', label: '기본금리 높은순' },
+]
+const showCompareModal = ref(false)
 
 onMounted(() => {
   store.fetchProducts({ type: activeTab.value })
@@ -163,16 +191,28 @@ onMounted(() => {
 
 function changeTab(type) {
   activeTab.value = type
-  bankFilter.value = ''
+  searchQuery.value = ''
   store.fetchProducts({ type })
 }
 
-function onBankFilter() {
-  clearTimeout(filterTimer)
-  filterTimer = setTimeout(() => {
-    store.fetchProducts({ type: activeTab.value, bank: bankFilter.value })
-  }, 300)
-}
+const filteredSortedProducts = computed(() => {
+  let list = [...store.products]
+
+  if (searchQuery.value.trim()) {
+    const q = searchQuery.value.trim().toLowerCase()
+    list = list.filter(p =>
+      p.kor_co_nm.toLowerCase().includes(q) || p.fin_prdt_nm.toLowerCase().includes(q)
+    )
+  }
+
+  if (sortBy.value === 'rate_desc')
+    list.sort((a, b) => (b.max_intr_rate2 ?? -Infinity) - (a.max_intr_rate2 ?? -Infinity))
+  else if (sortBy.value === 'base_rate_desc')
+    list.sort((a, b) => (b.max_intr_rate ?? -Infinity) - (a.max_intr_rate ?? -Infinity))
+
+  return list
+})
+
 
 function goDetail(id) {
   router.push({ name: 'productDetail', params: { id } })
@@ -184,6 +224,14 @@ async function onLike(productId) {
     return
   }
   await store.likeProduct(productId)
+}
+
+function onCompareToggle(product) {
+  if (store.isInCompare(product.id)) {
+    store.removeFromCompare(product.id)
+  } else {
+    store.addToCompare(product)
+  }
 }
 </script>
 
@@ -300,12 +348,33 @@ async function onLike(productId) {
   margin-top: 10px;
 }
 
-/* ── 툴바 (탭 + 검색) ── */
+/* ── 정렬 드롭다운 ── */
+.sort-wrap :deep(.ds-trigger) {
+  padding: 8px 10px;
+  font-size: 0.88rem;
+  border-radius: 10px;
+  border-color: #d4d3c4;
+  white-space: nowrap;
+  width: auto;
+}
+.sort-wrap :deep(.ds-panel) {
+  min-width: max-content;
+  right: auto;
+  white-space: nowrap;
+}
+
+/* ── 툴바 ── */
 .toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  flex-wrap: wrap;
+}
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
@@ -355,7 +424,7 @@ async function onLike(productId) {
   background: #fff;
   color: #2d2d25;
   outline: none;
-  width: 220px;
+  width: 280px;
   transition: border-color 0.15s;
 }
 .search-input:focus {
@@ -400,7 +469,7 @@ async function onLike(productId) {
 .product-card {
   background: #fff;
   border-radius: 14px;
-  padding: 18px 20px;
+  padding: 18px 20px 32px;
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   border: 1.5px solid transparent;
@@ -408,11 +477,17 @@ async function onLike(productId) {
   height: 100%;
   display: flex;
   flex-direction: column;
+  position: relative;
+  overflow: hidden;
 }
 .product-card:hover {
   transform: translateY(-3px);
   box-shadow: 0 8px 20px rgba(134,167,138,0.15);
   border-color: #A0BAA3;
+}
+.product-card.comparing {
+  border-color: #86A78A;
+  box-shadow: 0 4px 16px rgba(134,167,138,0.2);
 }
 
 .product-name {
@@ -445,6 +520,51 @@ async function onLike(productId) {
   justify-content: flex-end;
   margin-top: auto;
 }
+
+/* ── 비교 버튼 ── */
+.compare-btn {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 6px 0;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border: none;
+  border-top: 1.5px solid #e4e3d4;
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.96);
+  color: #8a8a7a;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  transform: translateY(100%);
+  transition: transform 0.2s ease, background 0.15s, color 0.15s;
+}
+.product-card:hover .compare-btn {
+  transform: translateY(0);
+}
+.compare-btn.active {
+  transform: translateY(0);
+  background: #eef4ef;
+  border-top-color: #A0BAA3;
+  color: #4a7a51;
+  font-weight: 600;
+}
+.compare-btn:disabled {
+  color: #c8c7b8;
+  cursor: not-allowed;
+  background: #f7f7f2;
+}
+
+/* 비교바 있을 때 하단 여백 */
+.page-wrap {
+  padding-bottom: 80px;
+}
+
+
 
 /* ── 빈 상태 ── */
 .empty-state {

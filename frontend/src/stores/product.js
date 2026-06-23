@@ -8,6 +8,7 @@ export const useProductStore = defineStore('product', () => {
   const likedProducts = ref([])  // 찜한 상품 목록
   const recommendations = ref([])        // 추천 상품 목록
   const recommendationType = ref(null)   // 'personalized' | 'popular'
+  const compareList = ref([])            // 비교할 상품 목록 (최대 3개)
   const isLoading = ref(false)
   const isRecommendLoading = ref(false)
   const error = ref(null)
@@ -88,6 +89,29 @@ export const useProductStore = defineStore('product', () => {
     recommendationType.value = null
   }
 
+  // 비교 목록 추가 (최대 3개, 중복 제외)
+  function addToCompare(product) {
+    if (compareList.value.length >= 3) return false
+    if (compareList.value.find(p => p.id === product.id)) return false
+    compareList.value.push(product)
+    return true
+  }
+
+  // 비교 목록에서 제거
+  function removeFromCompare(productId) {
+    compareList.value = compareList.value.filter(p => p.id !== productId)
+  }
+
+  // 비교 목록 전체 초기화
+  function clearCompare() {
+    compareList.value = []
+  }
+
+  // 비교 목록에 있는지 여부
+  function isInCompare(productId) {
+    return compareList.value.some(p => p.id === productId)
+  }
+
   // 찜한 상품 목록 조회
   async function fetchLikedProducts() {
     isLoading.value = true
@@ -104,8 +128,10 @@ export const useProductStore = defineStore('product', () => {
 
   return {
     products, product, likedProducts, recommendations, recommendationType,
+    compareList,
     isLoading, isRecommendLoading, error,
     fetchProducts, fetchProductDetail, likeProduct, fetchLikedProducts,
     fetchRecommendations, clearRecommendations,
+    addToCompare, removeFromCompare, clearCompare, isInCompare,
   }
 })

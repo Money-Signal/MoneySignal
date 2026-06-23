@@ -40,15 +40,7 @@
 
       <!-- 메뉴 섹션 (왼쪽 하단) -->
       <div class="mypage-card desktop-menu mb-3" :class="{ 'menu-dimmed': isEditing }">
-        <p class="section-title"><i class="bi bi-grid-fill me-2"></i>서비스</p>
         <div class="menu-list">
-          <button class="menu-item" disabled>
-            <div class="menu-left">
-              <span class="menu-icon-wrap bg-blue"><i class="bi bi-bell-fill"></i></span>
-              <span class="menu-text">알림 설정</span>
-            </div>
-            <i class="bi bi-chevron-right menu-arrow"></i>
-          </button>
           <button class="menu-item" disabled>
             <div class="menu-left">
               <span class="menu-icon-wrap bg-purple"><i class="bi bi-headset"></i></span>
@@ -215,6 +207,42 @@
         </template>
       </div>
 
+      <!-- 관심 상품 -->
+      <div v-if="!isEditing" class="mypage-card mb-3">
+        <p class="section-title"><i class="bi bi-heart-fill me-2" style="color:#c0756a" />관심 상품</p>
+
+        <div v-if="productStore.isLoading" class="text-center py-3">
+          <div class="spinner-border spinner-border-sm" style="color:#86A78A" role="status" />
+        </div>
+
+        <div v-else-if="productStore.likedProducts.length === 0" class="liked-empty">
+          <i class="bi bi-heart" />
+          <p>저장한 상품이 없어요</p>
+        </div>
+
+        <div v-else class="liked-scroll">
+          <div
+            v-for="p in productStore.likedProducts"
+            :key="p.id"
+            class="liked-card"
+            @click="router.push({ name: 'productDetail', params: { id: p.product.id } })"
+          >
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <span class="liked-bank-chip">{{ p.product.kor_co_nm }}</span>
+              <button class="liked-heart-btn" @click.stop="onUnlike(p.product.id)">
+                <i class="bi bi-heart-fill" />
+              </button>
+            </div>
+            <p class="liked-card-name">{{ p.product.fin_prdt_nm }}</p>
+            <p class="liked-card-member">{{ p.product.join_member || '-' }}</p>
+            <div class="liked-card-rate mt-auto">
+              <span class="liked-rate-value">{{ p.product.max_intr_rate2 != null ? p.product.max_intr_rate2 + '%' : '-' }}</span>
+              <span class="liked-rate-label">최고금리</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- 비밀번호 변경 (일반 로그인 유저, 수정 모드일 때만) -->
       <div v-if="user.provider === 'LOCAL' && isEditing" class="mypage-card mb-3">
         <p class="section-title"><i class="bi bi-lock-fill me-2"></i>비밀번호 변경</p>
@@ -230,15 +258,7 @@
 
       <!-- 메뉴 섹션 (모바일에서만 표시) -->
       <div class="mypage-card mobile-menu mb-3" :class="{ 'menu-dimmed': isEditing }">
-        <p class="section-title"><i class="bi bi-grid-fill me-2"></i>서비스</p>
         <div class="menu-list">
-          <button class="menu-item" disabled>
-            <div class="menu-left">
-              <span class="menu-icon-wrap bg-blue"><i class="bi bi-bell-fill"></i></span>
-              <span class="menu-text">알림 설정</span>
-            </div>
-            <i class="bi bi-chevron-right menu-arrow"></i>
-          </button>
           <button class="menu-item" disabled>
             <div class="menu-left">
               <span class="menu-icon-wrap bg-purple"><i class="bi bi-headset"></i></span>
@@ -441,8 +461,14 @@ async function confirmDelete() {
   }
 }
 
+async function onUnlike(productId) {
+  await productStore.likeProduct(productId)
+  await productStore.fetchLikedProducts()
+}
+
 onMounted(async () => {
   await authStore.fetchProfile()
+  await productStore.fetchLikedProducts()
 })
 </script>
 
@@ -487,8 +513,9 @@ onMounted(async () => {
   }
 
   .mypage-left {
-    width: 340px;
+    width: 300px;
     flex-shrink: 0;
+    align-self: flex-start;
     position: sticky;
     top: 80px;
   }
@@ -498,7 +525,10 @@ onMounted(async () => {
     min-width: 0;
   }
 
-  .desktop-menu { display: block; }
+  .desktop-menu {
+  display: block;
+  padding: 1.2rem 1.4rem;
+}
   .mobile-menu  { display: none; }
 }
 
@@ -576,11 +606,11 @@ onMounted(async () => {
 
 /* 섹션 타이틀 */
 .section-title {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: #555;
-  margin-bottom: 1rem;
-  padding-bottom: 0.6rem;
+  margin-bottom: 0.7rem;
+  padding-bottom: 0.5rem;
   border-bottom: 1.5px solid #f0f0f0;
   display: flex;
   align-items: center;
@@ -642,7 +672,7 @@ onMounted(async () => {
 .menu-list {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0;
 }
 
 .menu-item {
@@ -651,7 +681,7 @@ onMounted(async () => {
   justify-content: space-between;
   background: none;
   border: none;
-  padding: 0.75rem 0.4rem;
+  padding: 0.5rem 0.4rem;
   border-radius: 10px;
   cursor: pointer;
   transition: background-color 0.15s;
@@ -674,13 +704,13 @@ onMounted(async () => {
 }
 
 .menu-icon-wrap {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1rem;
+  font-size: 0.88rem;
   color: white;
 }
 
@@ -843,5 +873,102 @@ onMounted(async () => {
 .slider-tick {
   font-size: 0.72rem;
   color: #aaa;
+}
+
+/* ── 관심 상품 ── */
+.liked-empty {
+  text-align: center;
+  padding: 2rem 0;
+  color: #ccc;
+}
+.liked-empty i {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+.liked-empty p { font-size: 0.88rem; margin: 0; }
+
+.liked-scroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 4px 2px 8px;
+  scrollbar-width: thin;
+  scrollbar-color: #c8d9c9 transparent;
+}
+.liked-scroll::-webkit-scrollbar { height: 4px; }
+.liked-scroll::-webkit-scrollbar-thumb { background: #c8d9c9; border-radius: 2px; }
+
+.liked-card {
+  flex: 0 0 170px;
+  background: #fafaf6;
+  border: 1.5px solid #e4e3d4;
+  border-radius: 12px;
+  padding: 14px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+}
+.liked-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(134,167,138,0.15);
+  border-color: #A0BAA3;
+}
+
+.liked-bank-chip {
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: #ebebeb;
+  color: #4a4a4a;
+}
+
+.liked-heart-btn {
+  background: none;
+  border: none;
+  padding: 2px 4px;
+  font-size: 0.95rem;
+  color: #c0756a;
+  cursor: pointer;
+  line-height: 1;
+  transition: opacity 0.15s;
+}
+.liked-heart-btn:hover { opacity: 0.6; }
+
+.liked-card-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #2d2d25;
+  margin: 6px 0 4px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
+}
+
+.liked-card-member {
+  font-size: 0.75rem;
+  color: #a0a090;
+  margin: 0;
+}
+
+.liked-card-rate {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-top: 10px;
+}
+
+.liked-rate-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #5a8a5e;
+}
+
+.liked-rate-label {
+  font-size: 0.72rem;
+  color: #a0a090;
 }
 </style>

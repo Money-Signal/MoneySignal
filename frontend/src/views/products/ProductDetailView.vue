@@ -47,42 +47,42 @@
           </div>
         </div>
 
-        <!-- 2단 레이아웃 -->
-        <div class="row g-4">
+        <!-- 카드 목록 -->
+        <div class="row g-4 align-items-start">
 
-          <!-- 왼쪽 -->
-          <div class="col-lg-7">
+          <!-- 왼쪽: 기본 정보 + 우대조건 + 유의사항 -->
+          <div class="col-lg-5 d-flex flex-column gap-4">
 
             <!-- 기본 정보 -->
-            <div class="info-card mb-4">
+            <div class="info-card">
               <div class="card-section-title">
                 <i class="bi bi-info-circle" />기본 정보
               </div>
-              <div class="row g-3 pt-1">
+              <div class="d-flex flex-column gap-3 pt-1">
 
-                <div class="col-sm-6">
+                <div>
                   <p class="field-label">가입방법</p>
                   <div class="d-flex flex-wrap gap-1">
                     <span v-for="way in joinWays" :key="way" class="chip">{{ way }}</span>
                   </div>
                 </div>
 
-                <div class="col-sm-6">
+                <div>
                   <p class="field-label">가입대상</p>
                   <p class="field-value">{{ store.product.join_member || '-' }}</p>
                 </div>
 
-                <div v-if="store.product.max_limit" class="col-sm-6">
+                <div v-if="store.product.max_limit">
                   <p class="field-label">최고한도</p>
                   <p class="field-value accent-text">{{ store.product.max_limit.toLocaleString() }}원</p>
                 </div>
 
-                <div v-if="store.product.mtrt_int" class="col-12">
+                <div v-if="store.product.mtrt_int">
                   <p class="field-label">만기 후 이자율</p>
                   <p class="field-value">{{ store.product.mtrt_int }}</p>
                 </div>
 
-                <div class="col-12">
+                <div>
                   <p class="field-label">공시기간</p>
                   <p class="field-value">
                     {{ formatDay(store.product.dcls_strt_day) }} ~
@@ -97,11 +97,34 @@
               </div>
             </div>
 
-            <!-- 금리 옵션 -->
-            <div class="info-card mb-4">
+            <!-- 우대조건 -->
+            <div v-if="store.product.spcl_cnd" class="info-card">
+              <div class="card-section-title">
+                <i class="bi bi-star" />우대조건
+              </div>
+              <p class="condition-text">{{ store.product.spcl_cnd }}</p>
+            </div>
+
+            <!-- 유의사항 -->
+            <div v-if="store.product.etc_note" class="info-card">
+              <div class="card-section-title">
+                <i class="bi bi-exclamation-circle" />유의사항
+              </div>
+              <p class="condition-text">{{ store.product.etc_note }}</p>
+            </div>
+
+          </div>
+
+          <!-- 오른쪽: 금리 옵션 -->
+          <div class="col-lg-7">
+            <div class="info-card">
               <div class="card-section-title">
                 <i class="bi bi-graph-up-arrow" />금리 옵션
+                <button class="calc-btn ms-auto" @click="showCalcModal = true">
+                  <i class="bi bi-calculator me-1" />수익 계산기
+                </button>
               </div>
+              <RateChart :product="store.product" class="mt-3" />
               <div class="table-responsive mt-2">
                 <table class="rate-table w-100">
                   <thead>
@@ -132,47 +155,45 @@
                 </table>
               </div>
             </div>
-
-            <!-- 우대조건 -->
-            <div v-if="store.product.spcl_cnd" class="info-card mb-4">
-              <div class="card-section-title">
-                <i class="bi bi-star" />우대조건
-              </div>
-              <p class="condition-text">{{ store.product.spcl_cnd }}</p>
-            </div>
-
-            <!-- 기타 유의사항 -->
-            <div v-if="store.product.etc_note" class="info-card mb-4">
-              <div class="card-section-title">
-                <i class="bi bi-exclamation-circle" />유의사항
-              </div>
-              <p class="condition-text">{{ store.product.etc_note }}</p>
-            </div>
-
-          </div>
-
-          <!-- 오른쪽: 계산기 -->
-          <div class="col-lg-5">
-            <YieldCalculator :product="store.product" />
           </div>
 
         </div>
+
       </template>
     </div>
   </div>
+
+  <!-- 수익 계산기 모달 -->
+  <Teleport to="body">
+    <Transition name="fade">
+      <div v-if="showCalcModal" class="calc-modal-overlay" @click.self="showCalcModal = false">
+        <div class="calc-modal-box">
+          <div class="calc-modal-head">
+            <span class="calc-modal-title"><i class="bi bi-calculator me-2" />수익 계산기</span>
+            <button class="btn-close-calc" @click="showCalcModal = false"><i class="bi bi-x-lg" /></button>
+          </div>
+          <div class="calc-modal-body">
+            <YieldCalculator :product="store.product" />
+          </div>
+        </div>
+      </div>
+    </Transition>
+  </Teleport>
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useProductStore } from '@/stores/product'
 import { useAuthStore } from '@/stores/auth'
 import YieldCalculator from '@/components/products/YieldCalculator.vue'
+import RateChart from '@/components/products/RateChart.vue'
 
 const route = useRoute()
 const router = useRouter()
 const store = useProductStore()
 const authStore = useAuthStore()
+const showCalcModal = ref(false)
 
 onMounted(() => {
   store.fetchProductDetail(Number(route.params.id))
@@ -233,6 +254,92 @@ async function onLike() {
   min-height: 100vh;
   background-color: #EBEADD;
 }
+
+/* ── 수익 계산 버튼 ── */
+.calc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 20px;
+  background: #86A78A;
+  color: #fff;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  box-shadow: 0 2px 6px rgba(134,167,138,0.35);
+  transition: background 0.15s, box-shadow 0.15s;
+  white-space: nowrap;
+}
+.calc-btn:hover {
+  background: #6a9170;
+  box-shadow: 0 3px 10px rgba(134,167,138,0.45);
+}
+
+/* ── 계산기 모달 ── */
+.calc-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.calc-modal-box {
+  background: #fff;
+  border-radius: 18px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+  overflow: hidden;
+}
+
+.calc-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px 12px;
+  border-bottom: 1.5px solid #EBEADD;
+  flex-shrink: 0;
+}
+
+.calc-modal-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #2d2d25;
+}
+.calc-modal-title i { color: #86A78A; }
+
+.btn-close-calc {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: #a0a090;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: color 0.15s;
+}
+.btn-close-calc:hover { color: #2d2d25; }
+
+.calc-modal-body {
+  overflow-y: auto;
+  flex: 1;
+}
+.calc-modal-body :deep(.calc-header) {
+  display: none;
+}
+
+.fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
 
 /* ── 뒤로가기 ── */
 .btn-back {
@@ -340,9 +447,12 @@ async function onLike() {
   border-bottom: 1.5px solid #EBEADD;
   margin-bottom: 4px;
 }
-.card-section-title i {
+.card-section-title > i {
   color: #86A78A;
   font-size: 1rem;
+}
+.calc-btn i {
+  color: #fff;
 }
 
 /* 필드 */
