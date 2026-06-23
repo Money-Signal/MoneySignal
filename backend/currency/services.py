@@ -82,17 +82,14 @@ def _fetch_bok_data(bok_code, start_date, end_date):
 
 
 def get_exchange_data():
-    """
-    한 번 호출로 전체 통화 가져오기.
-    """
     auth_key = settings.KOREA_EXIM_AUTH_KEY
     today = datetime.now()
     end_date = today.strftime("%Y%m%d")
-    start_date = (today - timedelta(days=5)).strftime("%Y%m%d")
+    start_date = (today - timedelta(days=7)).strftime("%Y%m%d")  # 5 → 7일로 늘려서 전일 데이터 확보
 
     url = (
         f"https://ecos.bok.or.kr/api/StatisticSearch/{auth_key}"
-        f"/json/kr/1/100/731Y001/D/{start_date}/{end_date}"
+        f"/json/kr/1/500/731Y001/D/{start_date}/{end_date}"
     )
 
     try:
@@ -102,27 +99,37 @@ def get_exchange_data():
         if not rows:
             return []
 
-        # 가장 최근 날짜 데이터만 필터링
-        latest_date = max(row['TIME'] for row in rows)
-        latest_rows = [r for r in rows if r['TIME'] == latest_date]
+        # 날짜 목록 내림차순 정렬
+        dates = sorted(set(row['TIME'] for row in rows), reverse=True)
+        latest_date = dates[0]
+        prev_date = dates[1] if len(dates) > 1 else None
+
+        latest_rows = {r['ITEM_CODE1']: r for r in rows if r['TIME'] == latest_date}
+        prev_rows = {r['ITEM_CODE1']: r for r in rows if r['TIME'] == prev_date} if prev_date else {}
 
         result = []
-        for row in latest_rows:
-            code = row.get('ITEM_CODE1', '')
-            # BOK_CURRENCY_MAP 역방향 조회
-            cur_unit = next(
-                (k for k, v in BOK_CURRENCY_MAP.items() if v == code), None
-            )
-            if not cur_unit:
+        for cur_unit, bok_code in BOK_CURRENCY_MAP.items():
+            if bok_code not in latest_rows:
                 continue
             try:
-                rate = float(row.get('DATA_VALUE', '0').replace(',', ''))
+                rate = float(latest_rows[bok_code].get('DATA_VALUE', '0').replace(',', ''))
             except ValueError:
                 continue
+
+            # 전일 대비 계산
+            change = None
+            if bok_code in prev_rows:
+                try:
+                    prev_rate = float(prev_rows[bok_code].get('DATA_VALUE', '0').replace(',', ''))
+                    change = round(rate - prev_rate, 2)
+                except ValueError:
+                    pass
+
             result.append({
                 'cur_unit': cur_unit,
                 'cur_nm': BOK_CURRENCY_NAME.get(cur_unit, cur_unit),
                 'deal_bas_r': str(rate),
+                'change': change,  # 전일 대비 (없으면 None)
             })
 
         return result
