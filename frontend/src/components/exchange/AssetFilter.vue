@@ -2,38 +2,38 @@
   <div class="filter-wrapper">
     <div class="asset-toggle-group">
       <button 
-        :class="['toggle-btn', { active: filters.assetType === 'gold' }]"
+        :class="['toggle-btn', { 'active-gold': filters.assetType === 'gold' }]"
         @click="changeAsset('gold')"
       >
-        🪙 금 시세
+        금 시세
       </button>
       <button 
-        :class="['toggle-btn', { active: filters.assetType === 'silver' }]"
+        :class="['toggle-btn', { 'active-silver': filters.assetType === 'silver' }]"
         @click="changeAsset('silver')"
       >
-        🥈 은 시세
+        은 시세
       </button>
     </div>
 
     <div class="date-control-group">
       <div class="input-container">
-        <label>시작일</label>
+        <label><i class="bi bi-calendar-check me-1"></i> 시작일</label>
         <input type="date" v-model="filters.startDate" :min="minDate" :max="maxDate" />
       </div>
       
       <span class="date-separator">~</span>
       
       <div class="input-container">
-        <label>종료일</label>
+        <label><i class="bi bi-calendar-x me-1"></i> 종료일</label>
         <input type="date" v-model="filters.endDate" :min="minDate" :max="maxDate" />
       </div>
 
       <div class="button-action-group">
         <button class="action-btn submit-btn" @click="emitFilter">
-          🔍 조회
+          <i class="bi bi-search"></i> 조회
         </button>
         <button class="action-btn reset-btn" @click="resetPeriod">
-          🔄 전체기간
+          <i class="bi bi-arrow-counterclockwise"></i> 전체기간
         </button>
       </div>
     </div>
@@ -56,7 +56,6 @@ const filters = ref({
   endDate: ''
 })
 
-// 엑셀 원본 날짜 한계값이 넘어오면 필터 기본값으로 자동 연동
 watch(() => [props.minDate, props.maxDate], ([newMin, newMax]) => {
   if (!filters.value.startDate && newMin) filters.value.startDate = newMin
   if (!filters.value.endDate && newMax) filters.value.endDate = newMax
@@ -80,19 +79,19 @@ const resetPeriod = () => {
 
 <style scoped>
 .filter-wrapper {
-  background: #f7f9f6;
-  border: 1px solid #e1e6e2;
-  border-radius: 14px;
-  padding: 18px 24px;
-  margin-bottom: 24px;
+  background: #ffffff;
+  border: 1px solid #E1E6E2;
+  border-radius: 16px;
+  padding: 16px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
   gap: 16px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.02);
 }
 
-/* 자산 선택 버튼 스타일 */
+/* 자산 선택 버튼 공통 스타일 */
 .asset-toggle-group {
   display: flex;
   gap: 10px;
@@ -107,11 +106,24 @@ const resetPeriod = () => {
   cursor: pointer;
   transition: all 0.2s ease;
 }
-.toggle-btn.active {
-  background: #556256;
+.toggle-btn:hover {
+  background: #F4F7F2;
+}
+
+/* 🎯 [금 시세 활성화]: 고급스러운 톤다운 소프트 골드 테마 */
+.toggle-btn.active-gold {
+  background: #D4AF37; /* 클래식 골드 컬러 */
   color: #ffffff;
-  border-color: #556256;
-  box-shadow: 0 4px 10px rgba(85, 98, 86, 0.2);
+  border-color: #D4AF37;
+  box-shadow: 0 4px 10px rgba(212, 175, 55, 0.25);
+}
+
+/* 🎯 [은 시세 활성화]: 반장님 그래프 선 색상(#86A78A)과 완벽 동기화 */
+.toggle-btn.active-silver {
+  background: #8A9A86; /* 그래프 선 색상 */
+  color: #ffffff;
+  border-color: #8A9A86;
+  box-shadow: 0 4px 10px rgba(134, 167, 138, 0.25);
 }
 
 /* 날짜 입력 및 버튼 컨트롤 영역 */
@@ -124,68 +136,80 @@ const resetPeriod = () => {
 .input-container {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 .input-container label {
-  font-size: 11px;
+  font-size: 12px;
   color: #728273;
   font-weight: 600;
   padding-left: 2px;
+  display: flex;
+  align-items: center;
+}
+.input-container label i {
+  color: #86A78A;
 }
 input[type="date"] {
-  padding: 9px 12px;
-  border-radius: 8px;
-  border: 1px solid #cbd5cc;
-  color: #333;
+  padding: 9px 14px;
+  border-radius: 10px;
+  border: 1px solid #D1DBC5;
+  color: #2D3E2E;
   font-weight: 500;
+  font-size: 14px;
   outline: none;
   background: #ffffff;
+  transition: all 0.2s ease;
+}
+input[type="date"]:focus {
+  border-color: #86A78A;
+  box-shadow: 0 0 0 3px rgba(134, 167, 138, 0.15);
 }
 .date-separator {
-  color: #8a9a8d;
-  font-weight: bold;
-  margin-top: 16px;
+  color: #A0BAA3;
+  font-weight: 500;
+  margin-top: 20px;
 }
 
-/* 🚨 버튼 그룹 스타일 통일 디자인 적용 */
+/* 버튼 그룹 스타일 */
 .button-action-group {
   display: flex;
   gap: 8px;
-  margin-top: 16px; /* 라벨 높이 밸런스 정렬 */
+  margin-top: 20px;
 }
 .action-btn {
-  padding: 10px 16px;
-  border-radius: 8px;
+  padding: 10px 18px;
+  border-radius: 10px;
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
-  border: none;
+  border: 1px solid transparent;
   display: flex;
   align-items: center;
-  gap: 4px;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  gap: 6px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 조회 버튼 - 메인 액션 테마 컬러 */
+/* 조회 버튼 */
 .submit-btn {
-  background: #475569;
+  background: #2D3E2E;
   color: #ffffff;
 }
 .submit-btn:hover {
-  background: #334155;
+  background: #1E2B1F;
+  box-shadow: 0 4px 12px rgba(45, 62, 46, 0.3);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(51, 65, 85, 0.2);
 }
 
-/* 전체기간 버튼 - 서브 보조 테마 컬러 */
+/* 전체기간 버튼 */
 .reset-btn {
-  background: #64748b;
-  color: #ffffff;
+  background: #F4F7F2;
+  color: #556256;
+  border-color: #D1DBC5;
 }
 .reset-btn:hover {
-  background: #475569;
+  background: #E8EFE5;
+  color: #2D3E2E;
+  border-color: #86A78A;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(71, 85, 105, 0.2);
 }
 </style>

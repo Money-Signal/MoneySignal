@@ -179,6 +179,10 @@ environ.Env.read_env(
 
 YOUTUBE_API_KEY = env('YOUTUBE_API_KEY')
 
+# 네이버 뉴스 API key
+NAVER_CLIENT_ID = env('NAVER_CLIENT_ID')
+NAVER_CLIENT_SECRET = env('NAVER_CLIENT_SECRET')
+
 # 카카오 소셜 로그인
 KAKAO_REST_API_KEY = os.environ.get('KAKAO_REST_API_KEY')
 KAKAO_REDIRECT_URI = 'http://localhost:8000/api/accounts/kakao/callback/'
