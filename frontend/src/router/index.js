@@ -12,6 +12,7 @@ import CurrencyView from '@/views/currency/CurrencyView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
+  scrollBehavior: () => ({ top: 0 }),
   routes: [
     { path: '/',               name: 'home',          component: HomeView          },
     { path: '/map',            name: 'map',            component: MapView           },

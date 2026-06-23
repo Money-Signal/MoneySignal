@@ -7,6 +7,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+from django.db.models import Count
 
 from products.models import FinancialProduct, UserProduct
 from products.chroma_client import get_collection
@@ -33,7 +34,12 @@ def product_list(request):
       - type: 'D'(예금) | 'S'(적금) → 없으면 전체
       - bank: 은행명 (kor_co_nm 포함 검색)
     """
-    queryset = FinancialProduct.objects.prefetch_related('options', 'liked_users').all()
+    queryset = (
+        FinancialProduct.objects
+        .prefetch_related('options', 'liked_users')
+        .annotate(like_cnt=Count('liked_users'))
+        .order_by('-like_cnt')
+    )
 
     product_type = request.query_params.get('type')
     if product_type in ('D', 'S'):
