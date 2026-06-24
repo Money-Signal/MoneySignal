@@ -85,7 +85,7 @@ const menuItems = [
 .sidenav-panel {
   width: 200px;
   min-height: calc(100vh - 56px);
-  background: #ECEADD;
+  background: #FAF9F6;
   border-right: 0.5px solid #c4bfb0;
   display: flex;
   flex-direction: column;
@@ -128,9 +128,9 @@ const menuItems = [
   transition: background 0.15s;
 }
 .panel-item i { font-size: 16px; color: #A0BAA3; }
-.panel-item:hover { background: #DDD9CC; color: #3B2F26; }
+.panel-item:hover { background: #EAE6D8; color: #3B2F26; }
 .panel-item.active {
-  background: #DDD9CC;
+  background: EAE6D8;
   color: #6A7F5A;
   font-weight: 600;
 }
