@@ -1,9 +1,9 @@
 @import './base.css';
 
-/* 전체 배경색 통일 */
+/* ?꾩껜 諛곌꼍???듭씪 */
 html, body {
   min-height: 100vh;
-  background-color: #EBEADD;
+  background-color: #f9f8f5;
 }
 
 #app {
@@ -14,3 +14,4 @@ a {
   text-decoration: none;
   transition: color 0.2s;
 }
+

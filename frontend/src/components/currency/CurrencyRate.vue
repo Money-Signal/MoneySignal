@@ -1,12 +1,5 @@
 <template>
   <div class="currency-rate">
-    <div class="page-header mb-4">
-      <h2 class="page-title">
-        <i class="bi bi-currency-exchange me-2"></i>환율 조회
-      </h2>
-      <p class="page-sub">실시간 환율 및 과거 추이를 확인하세요</p>
-    </div>
-
     <div class="rate-card mb-3">
       <p class="card-label">통화 선택</p>
 

@@ -326,7 +326,7 @@ onBeforeUnmount(() => {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: #F5F1E8;
+  background: #f9f8f5;
   border-radius: 20px;
   padding: 6px 15px;
   font-size: 13px;
@@ -408,7 +408,7 @@ onBeforeUnmount(() => {
 .bc-icon {
   width: 32px; height: 32px;
   border-radius: 8px;
-  background: #F5F1E8;
+  background: #f9f8f5;
   display: flex; align-items: center; justify-content: center;
   margin-bottom: 8px;
 }
@@ -462,7 +462,7 @@ onBeforeUnmount(() => {
 .feat-icon {
   width: 44px; height: 44px;
   border-radius: 12px;
-  background: #F5F1E8;
+  background: #f9f8f5;
   display: flex; align-items: center; justify-content: center;
   margin-bottom: 12px;
 }

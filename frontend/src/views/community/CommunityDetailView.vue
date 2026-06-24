@@ -220,7 +220,7 @@ async function onCommentDelete(commentId) {
 <style scoped>
 .page-wrap {
   min-height: 100vh;
-  background: #F5F4EE;
+  background: #f9f8f5;
 }
 
 /* ── 로딩 ── */

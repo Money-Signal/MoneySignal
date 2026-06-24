@@ -239,7 +239,7 @@ const onSidoChange = () => {
 
 <style scoped>
 .bank-list-container { font-family: 'Pretendard', -apple-system, sans-serif; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; }
-.search-section { background-color: #EBEADD; padding: 16px 20px; flex-shrink: 0; }
+.search-section { background-color: #f9f8f5; padding: 16px 20px; flex-shrink: 0; }
 .search-title { font-size: 16px; font-weight: 700; color: #333d29; margin: 0 0 2px 0; display: flex; align-items: center; }
 .search-title i { color: #606c38; }
 .search-subtitle { font-size: 12px; color: #606c38; margin: 0 0 12px 0; }

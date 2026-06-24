@@ -2,7 +2,7 @@
   <div class="mypage-wrapper">
     <div class="mypage-container">
 
-      <h2 class="page-title">마이페이지</h2>
+      <PageHeader title="마이페이지" description="내 프로필과 관심 상품을 관리하고 금융 정보를 설정하세요." />
 
       <div class="mypage-layout">
         <!-- 왼쪽: 프로필 + 서비스 메뉴 -->
@@ -309,6 +309,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useProductStore } from '@/stores/product'
 import defaultProfileImg from '@/assets/default-profile.svg'
 import DropdownSelect from '@/components/common/DropdownSelect.vue'
+import PageHeader from '@/components/common/PageHeader.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -475,8 +476,8 @@ onMounted(async () => {
 <style scoped>
 .mypage-wrapper {
   min-height: 100vh;
-  background-color: #EBEADD;
-  padding: 2rem 1rem 4rem;
+  background-color: #f9f8f5;
+  padding: 2rem 2rem 4rem;
 }
 
 .mypage-container {
