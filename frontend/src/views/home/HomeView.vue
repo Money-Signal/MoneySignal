@@ -51,7 +51,7 @@
             </template>
           </div>
 
-          <div class="float-card badge-card">
+          <div class="float-card badge-card" v-if="depositProducts.length">
             <div class="bc-icon"><i class="bi bi-star"></i></div>
             <div class="bc-title">{{ depositProducts[0].name }}</div>
             <div class="bc-sub">{{ depositProducts[0].rate }}% · {{ depositProducts[0].badge }}</div>
@@ -147,20 +147,23 @@
               <RouterLink to="/products" class="col-more">더보기 →</RouterLink>
             </div>
             <div class="carousel-wrap">
-              <transition name="fade" mode="out-in">
-                <div :key="depositIdx" class="info-card">
-                  <div class="rank" :class="depositIdx === 0 ? 'gold' : 'green'">{{ depositIdx + 1 }}</div>
-                  <div class="cinfo">
-                    <p class="csub">{{ depositProducts[depositIdx].bank }}</p>
-                    <p class="cmain">{{ depositProducts[depositIdx].name }}</p>
-                    <p class="cdetail">{{ depositProducts[depositIdx].rate }}% · {{ depositProducts[depositIdx].period }}</p>
+              <div v-if="!depositProducts.length" class="loading-text">불러오는 중...</div>
+              <template v-else>
+                <transition name="fade" mode="out-in">
+                  <div :key="depositIdx" class="info-card" @click="$router.push('/products')">
+                    <div class="rank" :class="depositIdx === 0 ? 'gold' : 'green'">{{ depositIdx + 1 }}</div>
+                    <div class="cinfo">
+                      <p class="csub">{{ depositProducts[depositIdx].bank }}</p>
+                      <p class="cmain">{{ depositProducts[depositIdx].name }}</p>
+                      <p class="cdetail">{{ depositProducts[depositIdx].rate }}% · {{ depositProducts[depositIdx].period }}</p>
+                    </div>
+                    <span class="badge">{{ depositProducts[depositIdx].badge }}</span>
                   </div>
-                  <span class="badge">{{ depositProducts[depositIdx].badge }}</span>
+                </transition>
+                <div class="carousel-dots">
+                  <span v-for="(_, i) in depositProducts" :key="i" :class="['dot', { active: depositIdx === i }]" @click="depositIdx = i"></span>
                 </div>
-              </transition>
-              <div class="carousel-dots">
-                <span v-for="(_, i) in depositProducts" :key="i" :class="['dot', { active: depositIdx === i }]" @click="depositIdx = i"></span>
-              </div>
+              </template>
             </div>
           </div>
 
@@ -171,20 +174,23 @@
               <RouterLink to="/products" class="col-more">더보기 →</RouterLink>
             </div>
             <div class="carousel-wrap">
-              <transition name="fade" mode="out-in">
-                <div :key="savingIdx" class="info-card">
-                  <div class="rank" :class="savingIdx === 0 ? 'gold' : 'green'">{{ savingIdx + 1 }}</div>
-                  <div class="cinfo">
-                    <p class="csub">{{ savingProducts[savingIdx].bank }}</p>
-                    <p class="cmain">{{ savingProducts[savingIdx].name }}</p>
-                    <p class="cdetail">{{ savingProducts[savingIdx].rate }}% · {{ savingProducts[savingIdx].period }}</p>
+              <div v-if="!savingProducts.length" class="loading-text">불러오는 중...</div>
+              <template v-else>
+                <transition name="fade" mode="out-in">
+                  <div :key="savingIdx" class="info-card" @click="$router.push('/products')">
+                    <div class="rank" :class="savingIdx === 0 ? 'gold' : 'green'">{{ savingIdx + 1 }}</div>
+                    <div class="cinfo">
+                      <p class="csub">{{ savingProducts[savingIdx].bank }}</p>
+                      <p class="cmain">{{ savingProducts[savingIdx].name }}</p>
+                      <p class="cdetail">{{ savingProducts[savingIdx].rate }}% · {{ savingProducts[savingIdx].period }}</p>
+                    </div>
+                    <span class="badge">{{ savingProducts[savingIdx].badge }}</span>
                   </div>
-                  <span class="badge">{{ savingProducts[savingIdx].badge }}</span>
+                </transition>
+                <div class="carousel-dots">
+                  <span v-for="(_, i) in savingProducts" :key="i" :class="['dot', { active: savingIdx === i }]" @click="savingIdx = i"></span>
                 </div>
-              </transition>
-              <div class="carousel-dots">
-                <span v-for="(_, i) in savingProducts" :key="i" :class="['dot', { active: savingIdx === i }]" @click="savingIdx = i"></span>
-              </div>
+              </template>
             </div>
           </div>
         </div>
@@ -210,6 +216,7 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { fetchLatestRates } from '@/api/currency'
+import { getProducts } from '@/api/product'
 
 const rateLoading = ref(true)
 const mainRates = ref([])
@@ -223,17 +230,18 @@ let rateTimer = null
 let depositTimer = null
 let savingTimer = null
 
-const depositProducts = [
-  { bank: 'KB국민은행', name: 'KB Star 정기예금', rate: '3.85', period: '12개월 기준', badge: '최고금리' },
-  { bank: '신한은행', name: '쏠편한 정기예금', rate: '3.75', period: '12개월 기준', badge: '인기' },
-  { bank: '하나은행', name: '하나의 정기예금', rate: '3.70', period: '12개월 기준', badge: '온라인' },
-]
+const depositProducts = ref([])
+const savingProducts = ref([])
 
-const savingProducts = [
-  { bank: '우리은행', name: '우리 SUPER 주거래 적금', rate: '4.20', period: '12개월 기준', badge: '최고금리' },
-  { bank: '카카오뱅크', name: '카카오뱅크 자유적금', rate: '4.00', period: '12개월 기준', badge: '인기' },
-  { bank: '토스뱅크', name: '키워봐요 적금', rate: '3.90', period: '12개월 기준', badge: '온라인' },
-]
+const PRODUCT_BADGES = ['최고금리', '인기', '추천']
+const mapProduct = (product, index) => ({
+  id: product.id,
+  bank: product.kor_co_nm,
+  name: product.fin_prdt_nm,
+  rate: product.max_intr_rate2 != null ? product.max_intr_rate2 : '-',
+  period: product.join_way?.split(',')[0]?.trim() || '온라인',
+  badge: PRODUCT_BADGES[index] || '인기',
+})
 
 onMounted(async () => {
   try {
@@ -254,12 +262,27 @@ onMounted(async () => {
     rateLoading.value = false
   }
 
-  depositTimer = setInterval(() => {
-    depositIdx.value = (depositIdx.value + 1) % depositProducts.length
-  }, 3000)
-  savingTimer = setInterval(() => {
-    savingIdx.value = (savingIdx.value + 1) % savingProducts.length
-  }, 3000)
+  try {
+    const [depositRes, savingRes] = await Promise.all([
+      getProducts({ type: 'D' }),
+      getProducts({ type: 'S' }),
+    ])
+    depositProducts.value = depositRes.data.slice(0, 3).map(mapProduct)
+    savingProducts.value = savingRes.data.slice(0, 3).map(mapProduct)
+  } catch (e) {
+    console.error('상품 데이터 로드 실패:', e)
+  }
+
+  if (depositProducts.value.length) {
+    depositTimer = setInterval(() => {
+      depositIdx.value = (depositIdx.value + 1) % depositProducts.value.length
+    }, 3000)
+  }
+  if (savingProducts.value.length) {
+    savingTimer = setInterval(() => {
+      savingIdx.value = (savingIdx.value + 1) % savingProducts.value.length
+    }, 3000)
+  }
 })
 
 onBeforeUnmount(() => {

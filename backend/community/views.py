@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -15,10 +16,26 @@ def post_list(request):
 
     if request.method == 'GET':
         posts = Post.objects.select_related('author').prefetch_related('likes', 'comments')
+
         # category 쿼리 파라미터가 있으면 해당 카테고리만 필터링
         category = request.GET.get('category')
         if category:
             posts = posts.filter(category=category)
+
+        # search 파라미터: 제목 또는 본문에 키워드가 포함된 글 검색
+        # 상품 상세 페이지에서 은행명/상품명으로 관련 글을 찾을 때 사용
+        search = request.GET.get('search')
+        if search:
+            posts = posts.filter(Q(title__icontains=search) | Q(content__icontains=search))
+
+        # limit 파라미터: 상품 상세 등 일부만 필요할 때 결과 수 제한
+        limit = request.GET.get('limit')
+        if limit:
+            try:
+                posts = posts[:int(limit)]
+            except (ValueError, TypeError):
+                pass
+
         serializer = PostListSerializer(posts, many=True)
         return Response(serializer.data)
 

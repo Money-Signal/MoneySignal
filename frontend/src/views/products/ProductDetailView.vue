@@ -21,7 +21,7 @@
 
         <!-- 헤더 -->
         <div class="hero-card mb-4">
-          <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+          <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
             <div class="hero-left">
               <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
                 <span :class="['type-badge', store.product.product_type === 'D' ? 'type-deposit' : 'type-saving']">
@@ -168,6 +168,55 @@
 
         </div>
 
+        <!-- 관련 커뮤니티 글 -->
+        <div class="info-card mt-4">
+          <div class="card-section-title">
+            <i class="bi bi-chat-square-text" />관련 커뮤니티 글
+            <RouterLink
+              :to="{ name: 'communityList' }"
+              class="more-link ms-auto"
+            >
+              커뮤니티 바로가기 →
+            </RouterLink>
+          </div>
+
+          <!-- 로딩 -->
+          <div v-if="relatedLoading" class="text-center py-4">
+            <div class="spinner-border spinner-border-sm" style="color:#86A78A" role="status" />
+          </div>
+
+          <!-- 결과 없음 -->
+          <div v-else-if="relatedPosts.length === 0" class="related-empty">
+            <i class="bi bi-pencil-square" />
+            <p>{{ store.product.kor_co_nm }} 관련 글이 아직 없어요.</p>
+            <RouterLink :to="{ name: 'communityWrite' }" class="write-link">
+              첫 번째 글 작성하기 →
+            </RouterLink>
+          </div>
+
+          <!-- 글 목록 -->
+          <ul v-else class="related-list">
+            <li
+              v-for="post in relatedPosts"
+              :key="post.id"
+              class="related-item"
+              @click="router.push({ name: 'communityDetail', params: { id: post.id } })"
+            >
+              <div class="related-top">
+                <span class="related-category">{{ post.category === 'DEPOSIT' ? '예금·적금' : post.category }}</span>
+                <span class="related-date">{{ formatPostDate(post.created_at) }}</span>
+              </div>
+              <p class="related-title">{{ post.title }}</p>
+              <p class="related-preview">{{ post.content }}</p>
+              <div class="related-meta">
+                <span><i class="bi bi-person me-1" />{{ post.author_nickname }}</span>
+                <span><i class="bi bi-heart me-1" />{{ post.like_count }}</span>
+                <span><i class="bi bi-chat me-1" />{{ post.comment_count }}</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+
       </template>
     </div>
   </div>
@@ -195,6 +244,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useProductStore } from '@/stores/product'
 import { useAuthStore } from '@/stores/auth'
+import { searchPosts } from '@/api/community'
 import YieldCalculator from '@/components/products/YieldCalculator.vue'
 import RateChart from '@/components/products/RateChart.vue'
 
@@ -204,8 +254,48 @@ const store = useProductStore()
 const authStore = useAuthStore()
 const showCalcModal = ref(false)
 
-onMounted(() => {
-  store.fetchProductDetail(Number(route.params.id))
+// ── 관련 커뮤니티 글 ──────────────────────────────────────
+const relatedPosts = ref([])
+const relatedLoading = ref(false)
+
+// 날짜 포맷: "2024-05-01T..." → "2024.05.01"
+function formatPostDate(dateStr) {
+  if (!dateStr) return ''
+  return dateStr.slice(0, 10).replace(/-/g, '.')
+}
+
+// 은행명 + 상품명 두 키워드로 각각 검색 후 중복 제거해서 최대 5개 반환
+async function fetchRelatedPosts(bankName, productName) {
+  relatedLoading.value = true
+  try {
+    // 두 검색을 병렬로 요청
+    const [bankRes, productRes] = await Promise.all([
+      searchPosts(bankName, 5),
+      searchPosts(productName, 5),
+    ])
+
+    // id 기준으로 중복 제거 후 최대 5개만 사용
+    const seen = new Set()
+    const merged = []
+    for (const post of [...bankRes.data, ...productRes.data]) {
+      if (!seen.has(post.id)) {
+        seen.add(post.id)
+        merged.push(post)
+      }
+    }
+    relatedPosts.value = merged.slice(0, 5)
+  } catch (e) {
+    relatedPosts.value = []
+  } finally {
+    relatedLoading.value = false
+  }
+}
+
+onMounted(async () => {
+  await store.fetchProductDetail(Number(route.params.id))
+  if (store.product) {
+    fetchRelatedPosts(store.product.kor_co_nm, store.product.fin_prdt_nm)
+  }
 })
 
 const sortedOptions = computed(() => {
@@ -271,20 +361,24 @@ function goToMap(bankName) {
 /* ── 히어로 오른쪽 영역 ── */
 .hero-right {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 16px;
 }
 
 .bank-action-group {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: center;
   gap: 8px;
 }
 
 .bank-name {
-  font-size: 0.9rem;
-  color: #8a8a7a;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #2d2d25;
+  letter-spacing: -0.01em;
+  border-bottom: 2px solid #86A78A;
+  padding-bottom: 2px;
 }
 
 .map-link-btn {
@@ -543,6 +637,96 @@ function goToMap(bankName) {
 
 .muted-rate { color: #b0b0a0; font-size: 0.85rem; }
 .best-rate  { color: #5a8a5e; font-weight: 700; font-size: 0.95rem; }
+
+/* ── 관련 커뮤니티 글 ── */
+.more-link {
+  font-size: 0.78rem;
+  color: #86A78A;
+  font-weight: 600;
+  text-decoration: none;
+}
+.more-link:hover { text-decoration: underline; }
+
+.related-empty {
+  text-align: center;
+  padding: 28px 0 20px;
+  color: #c0bfb0;
+}
+.related-empty i {
+  font-size: 1.8rem;
+  display: block;
+  margin-bottom: 8px;
+}
+.related-empty p { font-size: 0.88rem; margin: 0 0 10px; }
+.write-link {
+  font-size: 0.82rem;
+  color: #86A78A;
+  font-weight: 600;
+  text-decoration: none;
+}
+.write-link:hover { text-decoration: underline; }
+
+.related-list {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.related-item {
+  padding: 14px 4px;
+  border-bottom: 1px solid #f2f1e8;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.12s;
+}
+.related-item:last-child { border-bottom: none; }
+.related-item:hover { background: #fafaf5; padding-left: 8px; }
+
+.related-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+.related-category {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #6A7F5A;
+  background: #eaf0eb;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+.related-date {
+  font-size: 0.75rem;
+  color: #b0b0a0;
+  margin-left: auto;
+}
+.related-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2d2d25;
+  margin: 0 0 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.related-preview {
+  font-size: 0.8rem;
+  color: #8a8a7a;
+  margin: 0 0 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.related-meta {
+  display: flex;
+  gap: 14px;
+  font-size: 0.75rem;
+  color: #b0b0a0;
+}
 
 /* 우대조건 / 유의사항 */
 .condition-text {

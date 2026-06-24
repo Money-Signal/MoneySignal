@@ -84,7 +84,6 @@
           <div class="sort-wrap">
             <DropdownSelect v-model="sortBy" :options="sortOptions" />
           </div>
-
         </div>
       </div>
 
@@ -105,10 +104,10 @@
         <p v-else>검색 조건에 맞는 상품이 없어요.</p>
       </div>
 
-      <!-- 상품 목록 -->
+      <!-- 상품 목록: 현재 페이지에 해당하는 상품만 렌더링 -->
       <div v-else class="row g-3">
         <div
-          v-for="product in filteredSortedProducts"
+          v-for="product in pagedProducts"
           :key="product.id"
           class="col-md-6 col-lg-4"
         >
@@ -150,6 +149,30 @@
         </div>
       </div>
 
+      <!-- 페이지네이션 -->
+      <div v-if="totalPages > 1" class="pagination-wrap">
+        <!-- 이전 버튼 -->
+        <button class="page-btn" :disabled="currentPage === 1" @click="goPage(currentPage - 1)">
+          <i class="bi bi-chevron-left" />
+        </button>
+
+        <!-- 페이지 번호 버튼들 -->
+        <button
+          v-for="p in pageNumbers"
+          :key="p"
+          :class="['page-btn', { active: p === currentPage, ellipsis: p === '...' }]"
+          :disabled="p === '...'"
+          @click="p !== '...' && goPage(p)"
+        >
+          {{ p }}
+        </button>
+
+        <!-- 다음 버튼 -->
+        <button class="page-btn" :disabled="currentPage === totalPages" @click="goPage(currentPage + 1)">
+          <i class="bi bi-chevron-right" />
+        </button>
+      </div>
+
     </div>
   </div>
 
@@ -158,7 +181,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, RouterLink } from 'vue-router'
 import { useProductStore } from '@/stores/product'
 import { useAuthStore } from '@/stores/auth'
@@ -189,12 +212,16 @@ onMounted(() => {
 function changeTab(type) {
   activeTab.value = type
   searchQuery.value = ''
+  currentPage.value = 1 // 탭 전환 시 1페이지로 리셋
   store.fetchProducts({ type })
 }
 
+// ── 필터·정렬 ─────────────────────────────────────────────
+// 검색어·정렬 기준을 클라이언트에서 처리. store.products는 전체 목록을 보유.
 const filteredSortedProducts = computed(() => {
   let list = [...store.products]
 
+  // 은행명 또는 상품명으로 부분 일치 검색
   if (searchQuery.value.trim()) {
     const q = searchQuery.value.trim().toLowerCase()
     list = list.filter(p =>
@@ -202,6 +229,7 @@ const filteredSortedProducts = computed(() => {
     )
   }
 
+  // 선택된 정렬 기준 적용 (기본값 'popular'은 서버에서 이미 like_cnt 내림차순 반환)
   if (sortBy.value === 'rate_desc')
     list.sort((a, b) => (b.max_intr_rate2 ?? -Infinity) - (a.max_intr_rate2 ?? -Infinity))
   else if (sortBy.value === 'base_rate_desc')
@@ -210,11 +238,60 @@ const filteredSortedProducts = computed(() => {
   return list
 })
 
+// ── 페이지네이션 ──────────────────────────────────────────
+const PAGE_SIZE = 12 // 한 페이지에 보여줄 상품 수
+const currentPage = ref(1)
+
+// 전체 페이지 수
+const totalPages = computed(() =>
+  Math.ceil(filteredSortedProducts.value.length / PAGE_SIZE)
+)
+
+// 현재 페이지에 해당하는 상품 슬라이스
+const pagedProducts = computed(() => {
+  const start = (currentPage.value - 1) * PAGE_SIZE
+  return filteredSortedProducts.value.slice(start, start + PAGE_SIZE)
+})
+
+// 검색어·정렬이 바뀌면 1페이지로 리셋
+watch([searchQuery, sortBy], () => { currentPage.value = 1 })
+
+// 페이지 이동 + 목록 상단으로 스크롤
+function goPage(page) {
+  currentPage.value = page
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+// 표시할 페이지 번호 목록 (최대 7개, 중간 생략 시 '...' 삽입)
+// 예: 1 2 3 ... 8 9 10  /  1 ... 4 5 6 ... 10
+const pageNumbers = computed(() => {
+  const total = totalPages.value
+  const cur = currentPage.value
+  if (total <= 7) {
+    // 페이지가 7개 이하면 전부 표시
+    return Array.from({ length: total }, (_, i) => i + 1)
+  }
+  const pages = []
+  if (cur <= 4) {
+    // 앞쪽에 있을 때: 1 2 3 4 5 ... last
+    pages.push(1, 2, 3, 4, 5, '...', total)
+  } else if (cur >= total - 3) {
+    // 뒤쪽에 있을 때: 1 ... last-4 last-3 last-2 last-1 last
+    pages.push(1, '...', total - 4, total - 3, total - 2, total - 1, total)
+  } else {
+    // 중간에 있을 때: 1 ... cur-1 cur cur+1 ... last
+    pages.push(1, '...', cur - 1, cur, cur + 1, '...', total)
+  }
+  return pages
+})
+
+// ── 라우팅·인터랙션 ───────────────────────────────────────
 function goDetail(id) {
   router.push({ name: 'productDetail', params: { id } })
 }
 
 async function onLike(productId) {
+  // 비로그인 시 로그인 페이지로 이동
   if (!authStore.isLoggedIn) {
     router.push({ name: 'login' })
     return
@@ -287,6 +364,7 @@ function onCompareToggle(product) {
 /* 추천 가로 스크롤 */
 .recommend-scroll {
   display: flex;
+  justify-content: center;
   gap: 12px;
   overflow-x: auto;
   padding: 4px 2px 8px;
@@ -301,7 +379,7 @@ function onCompareToggle(product) {
 
 /* 추천 카드 */
 .rec-card {
-  flex: 0 0 190px;
+  flex: 0 0 210px;
   background: #fafaf6;
   border: 1.5px solid #e4e3d4;
   border-radius: 12px;
@@ -548,6 +626,52 @@ function onCompareToggle(product) {
   color: #c8c7b8;
   cursor: not-allowed;
   background: #f7f7f2;
+}
+
+/* ── 페이지네이션 ── */
+.pagination-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  margin-top: 36px;
+}
+.page-btn {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1.5px solid #e4e3d4;
+  background: #fff;
+  color: #5a5a4a;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.page-btn:hover:not(:disabled):not(.active):not(.ellipsis) {
+  border-color: #A0BAA3;
+  color: #4a7a51;
+}
+.page-btn.active {
+  background: #86A78A;
+  border-color: #86A78A;
+  color: #fff;
+  font-weight: 700;
+  cursor: default;
+}
+.page-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.page-btn.ellipsis {
+  border-color: transparent;
+  background: none;
+  cursor: default;
+  color: #b0b0a0;
 }
 
 /* 비교바 있을 때 하단 여백 */
