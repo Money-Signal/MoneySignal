@@ -4,27 +4,35 @@ import { login as loginApi, logout as logoutApi, signup as signupApi, getProfile
 import { useProductStore } from '@/stores/product'
 
 export const useAuthStore = defineStore('auth', () => {
-  // localStorage에서 초기값 복원 (새로고침 해도 로그인 유지)
   const accessToken = ref(localStorage.getItem('access_token') || null)
   const user = ref(JSON.parse(localStorage.getItem('user') || 'null'))
 
   const isLoggedIn = computed(() => !!accessToken.value)
 
   async function signup(formData) {
-    await signupApi(formData)
+    try {
+      await signupApi(formData)
+      console.log('회원가입 API 성공')
+      await login({
+        email: formData.email,
+        password: formData.password,
+      })
+      console.log('자동 로그인 성공')
+    } catch (e) {
+      console.error('signup 에러:', e)
+      throw e
+    }
   }
 
   async function login(credentials) {
     const { data } = await loginApi(credentials)
 
-    // 토큰과 유저 정보를 state와 localStorage에 저장
     accessToken.value = data.access
     user.value = data.user
     localStorage.setItem('access_token', data.access)
     localStorage.setItem('refresh_token', data.refresh)
     localStorage.setItem('user', JSON.stringify(data.user))
 
-    // 로그인 후 추천 캐시 초기화 → 금융상품 페이지 재방문 시 맞춤 추천 재검색
     useProductStore().clearRecommendations()
   }
 
@@ -32,41 +40,34 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       await logoutApi()
     } finally {
-      // 서버 요청 실패해도 클라이언트 토큰은 무조건 삭제
       accessToken.value = null
       user.value = null
       localStorage.removeItem('access_token')
       localStorage.removeItem('refresh_token')
       localStorage.removeItem('user')
 
-      // 로그아웃 후 추천 캐시 초기화 → 비로그인 상태 배너로 전환
       useProductStore().clearRecommendations()
     }
   }
 
-  // 카카오 로그인 콜백에서 받은 토큰을 저장 (API 호출 없이 URL 파라미터로 바로 처리)
   function loginWithKakao(access, refresh) {
     accessToken.value = access
     localStorage.setItem('access_token', access)
     localStorage.setItem('refresh_token', refresh)
   }
 
-  // 마이페이지 
-  // 내 프로필 정보 조회 후 store에 저장
   async function fetchProfile() {
     const { data } = await getProfileApi()
     user.value = data
     localStorage.setItem('user', JSON.stringify(data))
   }
 
-  // 프로필 수정 후 store 업데이트
   async function updateProfile(formData) {
     const { data } = await updateProfileApi(formData)
     user.value = data
     localStorage.setItem('user', JSON.stringify(data))
   }
 
-  // 회원탈퇴 후 로컬 상태 초기화
   async function deleteAccount() {
     await deleteAccountApi()
     accessToken.value = null

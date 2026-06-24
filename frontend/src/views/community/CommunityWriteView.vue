@@ -101,6 +101,9 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useCommunityStore } from '@/stores/community'
+import { useAlert } from '@/composables/useAlert'
+
+const {success} = useAlert()
 
 const router = useRouter()
 const route  = useRoute()
@@ -172,9 +175,11 @@ async function onSubmit() {
 
   if (isEdit.value) {
     await store.editPost(route.query.id, formData)
+    await success('게시글이 수정되었습니다!', '수정 완료')  // 추가
     router.push({ name: 'communityDetail', params: { id: route.query.id } })
   } else {
     await store.submitPost(formData)
+    await success('게시글이 작성되었습니다!', '작성 완료')  // 추가
     router.push({ name: 'communityList' })
   }
 }
