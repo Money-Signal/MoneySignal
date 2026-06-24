@@ -16,6 +16,7 @@ const router = createRouter({
   routes: [
     { path: '/',               name: 'home',          component: HomeView          },
     { path: '/map',            name: 'map',            component: MapView           },
+    { path: '/map/directions', name: 'directions', component: () => import('@/views/map/DirectionsView.vue')},
     { path: '/signup',         name: 'signup',         component: SignupView        },
     { path: '/login',          name: 'login',          component: LoginView         },
     { path: '/oauth/callback', name: 'kakaoCallback',  component: KakaoCallbackView }, // 카카오 로그인 콜백
