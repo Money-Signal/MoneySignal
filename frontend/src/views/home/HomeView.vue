@@ -122,7 +122,7 @@
               <div v-if="rateLoading" class="loading-text">불러오는 중...</div>
               <transition v-else name="fade" mode="out-in">
                 <div :key="rateIdx" class="info-card" @click="$router.push('/currency')">
-                  <div class="rank gold">{{ rateIdx + 1 }}</div>
+                  <div class="rank" :class="rateIdx === 0 ? 'gold' : 'green'">{{ rateIdx + 1 }}</div>
                   <div class="cinfo">
                     <p class="csub">{{ mainRates[rateIdx]?.cur_nm }}</p>
                     <p class="cmain">{{ Number(mainRates[rateIdx]?.deal_bas_r).toLocaleString() }} ₩</p>
