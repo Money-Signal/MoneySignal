@@ -1,9 +1,10 @@
 <script setup>
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 
 const isVisible = ref(true)
@@ -14,9 +15,9 @@ const handleScroll = () => {
   if (currentScrollY < 10) {
     isVisible.value = true
   } else if (currentScrollY > lastScrollY) {
-    isVisible.value = false  // 아래로 스크롤 → 숨김
+    isVisible.value = false
   } else {
-    isVisible.value = true   // 위로 스크롤 → 표시
+    isVisible.value = true
   }
   lastScrollY = currentScrollY
 }
@@ -28,11 +29,18 @@ async function handleLogout() {
   await authStore.logout()
   router.push('/login')
 }
+
+const menuItems = [
+  { label: '예·적금 상품', path: '/products', icon: 'bi bi-piggy-bank' },
+  { label: '환율', path: '/currency', icon: 'bi bi-currency-exchange' },
+  { label: '영상 검색', path: '/video', icon: 'bi bi-play-circle' },
+  { label: '주변 은행', path: '/map', icon: 'bi bi-map' },
+  { label: '금·은 시세', path: '/exchange', icon: 'bi bi-bar-chart-line' },
+]
 </script>
 
 <template>
   <header class="app-header" :class="{ hidden: !isVisible }">
-    <!-- 기존 template 내용 그대로 -->
     <div class="header-inner">
       <RouterLink to="/" class="brand">
         <div class="logo-icon">
@@ -42,6 +50,21 @@ async function handleLogout() {
           <span class="money">money</span><span class="signal">signal</span>
         </div>
       </RouterLink>
+
+      <!-- 추가된 메뉴 -->
+      <nav class="main-nav">
+        <RouterLink
+          v-for="item in menuItems"
+          :key="item.path"
+          :to="item.path"
+          class="nav-item"
+          :class="{ active: route.path.startsWith(item.path) }"
+        >
+          <i :class="item.icon"></i>
+          <span>{{ item.label }}</span>
+        </RouterLink>
+      </nav>
+
       <nav class="header-nav">
         <template v-if="authStore.isLoggedIn">
           <span class="nickname">{{ authStore.user?.nickname }}</span>
@@ -59,8 +82,10 @@ async function handleLogout() {
 
 <style scoped>
 .app-header {
-  background: #DDD9CC;
-  border-bottom: 0.5px solid #c4bfb0;
+  /* 배경색을 요청하신 #C7D4CA로 변경 */
+  background: #C7D4CA; 
+  /* 경계선 색상도 배경과 어울리는 더 부드러운 톤으로 조정 */
+  border-bottom: 0.5px solid #b3c2b8;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -81,6 +106,7 @@ async function handleLogout() {
   align-items: center;
   gap: 8px;
   text-decoration: none;
+  flex-shrink: 0;
 }
 .logo-icon {
   display: flex;
@@ -104,10 +130,45 @@ async function handleLogout() {
 }
 .money { color: #3B2F26; }
 .signal { color: #6A7F5A; }
+
+/* 메뉴 */
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  justify-content: center;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  color: #555;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.nav-item i { font-size: 14px; color: #A0BAA3; }
+.nav-item:hover { 
+  /* 호버 시 색상을 배경색보다 조금 더 진한 톤으로 */
+  background: #b3c2b8; 
+  color: #2a352a; 
+}
+.nav-item.active {
+  background: #b3c2b8;
+  color: #3f4d3f;
+  font-weight: 600;
+}
+.nav-item.active i { color: #3f4d3f; }
+
 .header-nav {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-shrink: 0;
 }
 .nickname {
   font-size: 13px;
