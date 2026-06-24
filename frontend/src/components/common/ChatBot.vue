@@ -12,9 +12,9 @@
       <!-- 헤더 -->
       <div class="chat-header">
         <div class="chat-header-info">
-          <div class="chat-avatar">S</div>
+          <img :src="pinnyImg" class="chat-avatar-img" alt="한돈이" />
           <div>
-            <p class="chat-name">Signal</p>
+            <p class="chat-name">한돈이</p>
             <p class="chat-status">MoneySignal 금융 도우미</p>
           </div>
         </div>
@@ -31,13 +31,14 @@
           class="chat-msg"
           :class="msg.role"
         >
-          <div v-if="msg.role === 'assistant'" class="msg-avatar">S</div>
+          <img v-if="msg.role === 'assistant'" :src="pinnyImg" class="msg-avatar-img" alt="한돈이" />
           <div class="msg-bubble" v-html="formatMessage(msg.content)"></div>
         </div>
 
         <!-- 로딩 -->
+        <!-- 수정 -->
         <div v-if="loading" class="chat-msg assistant">
-          <div class="msg-avatar">S</div>
+          <img :src="pinnyImg" class="msg-avatar-img" alt="한돈이" />
           <div class="msg-bubble loading-bubble">
             <span></span><span></span><span></span>
           </div>
@@ -75,6 +76,7 @@
 <script setup>
 import { ref, nextTick } from 'vue'
 import axios from 'axios'
+import pinnyImg from '@/assets/pinny.png'
 
 const isOpen = ref(false)
 const inputText = ref('')
@@ -90,7 +92,7 @@ const quickQuestions = [
 const messages = ref([
   {
     role: 'assistant',
-    content: '안녕하세요! 저는 MoneySignal의 금융 도우미 Signal이에요 😊 예적금 상품 추천이나 서비스 안내가 필요하시면 말씀해 주세요!',
+    content: '안녕하세요! 저는 한국의 돈 흐름을 알려주는 금융 도우미 한돈이에요 🐷 예적금 상품 추천이나 MoneySignal 서비스 안내가 필요하시면 말씀해 주세요!',
   },
 ])
 
@@ -357,5 +359,20 @@ const sendMessage = async () => {
 @keyframes popIn {
   from { opacity: 0; transform: translateY(12px) scale(0.97); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.chat-avatar-img {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.msg-avatar-img {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
 }
 </style>
