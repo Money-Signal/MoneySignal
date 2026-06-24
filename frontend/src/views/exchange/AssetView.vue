@@ -72,7 +72,7 @@ onMounted(() => { fetchChartData(); fetchNewsData() })
 </script>
 
 <style scoped>
-.asset-view-container { padding: 2rem; max-width: 1600px; margin: 0 auto; }
+.asset-view-container { padding: 2.5rem 2rem; max-width: 1320px; margin: 0 auto; }
 .page-title { color: #2D3E2E; margin-bottom: 24px; font-weight: 700; display: flex; align-items: center; }
 .page-title i { color: #86A78A; }
 

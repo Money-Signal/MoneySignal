@@ -1,6 +1,6 @@
 <template>
-  <div class="page-wrap">
-    <div class="container py-4">
+  <div class="page-outer">
+    <div class="page-container">
 
       <PageHeader title="금융상품 비교" description="예금·적금 상품을 한눈에 비교하고 나에게 맞는 상품을 찾아보세요." class="mb-4" />
 
@@ -232,15 +232,6 @@ function onCompareToggle(product) {
 </script>
 
 <style scoped>
-/* ── 페이지 배경 ── */
-.page-wrap {
-  min-height: 100vh;
-  background-color: #f9f8f5;
-}
-.page-wrap .container {
-  padding-left: 2rem;
-  padding-right: 2rem;
-}
 
 /* ── 타이틀 ── */
 .page-title h2 {
@@ -560,7 +551,7 @@ function onCompareToggle(product) {
 }
 
 /* 비교바 있을 때 하단 여백 */
-.page-wrap {
+.page-outer {
   padding-bottom: 80px;
 }
 

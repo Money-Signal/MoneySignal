@@ -1,7 +1,10 @@
 <script setup>
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import defaultProfileImg from '@/assets/default-profile.svg'
+
+const BACKEND_URL = 'http://127.0.0.1:8000'
 
 const router = useRouter()
 const route = useRoute()
@@ -36,7 +39,14 @@ const menuItems = [
   { label: '영상 검색', path: '/video', icon: 'bi bi-play-circle' },
   { label: '주변 은행', path: '/map', icon: 'bi bi-map' },
   { label: '금·은 시세', path: '/exchange', icon: 'bi bi-bar-chart-line' },
+  { label: '커뮤니티', path: '/community', icon: 'bi bi-people' },
 ]
+
+const profileImageUrl = computed(() => {
+  const img = authStore.user?.profile_image
+  if (!img) return defaultProfileImg
+  return img.startsWith('http') ? img : `${BACKEND_URL}${img}`
+})
 </script>
 
 <template>
@@ -62,8 +72,10 @@ const menuItems = [
 
       <nav class="header-nav">
         <template v-if="authStore.isLoggedIn">
-          <span class="nickname">{{ authStore.user?.nickname }}</span>
-          <RouterLink to="/mypage" class="btn-mypage">마이페이지</RouterLink>
+          <RouterLink to="/mypage" class="user-profile">
+            <img :src="profileImageUrl" alt="프로필" class="profile-avatar" />
+            <span class="nickname">{{ authStore.user?.nickname }}</span>
+          </RouterLink>
           <button class="btn-logout" @click="handleLogout">로그아웃</button>
         </template>
         <template v-else>
@@ -165,10 +177,30 @@ const menuItems = [
   gap: 10px;
   flex-shrink: 0;
 }
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  text-decoration: none;
+  padding: 4px 10px 4px 4px;
+  border-radius: 20px;
+  transition: background 0.15s;
+}
+.user-profile:hover {
+  background: #b3c2b8;
+}
+.profile-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid #a0baa3;
+  flex-shrink: 0;
+}
 .nickname {
   font-size: 13px;
-  color: #555;
-  font-weight: 500;
+  color: #3B2F26;
+  font-weight: 600;
 }
 .btn-mypage {
   padding: 6px 14px;

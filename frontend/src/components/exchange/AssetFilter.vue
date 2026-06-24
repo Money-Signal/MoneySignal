@@ -81,8 +81,8 @@ const resetPeriod = () => {
 .filter-wrapper {
   background: #ffffff;
   border: 1px solid #E1E6E2;
-  border-radius: 16px;
-  padding: 16px 20px;
+  border-radius: 12px;
+  padding: 12px 18px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -95,13 +95,15 @@ const resetPeriod = () => {
 .asset-toggle-group {
   display: flex;
   gap: 10px;
+  margin-left: 1.5rem;
 }
 .toggle-btn {
-  padding: 10px 20px;
+  padding: 10px 24px;
   border-radius: 20px;
   border: 1px solid #cbd5cc;
   background: #ffffff;
   color: #4a554b;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -132,6 +134,7 @@ const resetPeriod = () => {
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
+  margin-right: 1.5rem;
 }
 .input-container {
   display: flex;
@@ -139,7 +142,7 @@ const resetPeriod = () => {
   gap: 6px;
 }
 .input-container label {
-  font-size: 12px;
+  font-size: 11px;
   color: #728273;
   font-weight: 600;
   padding-left: 2px;
@@ -150,12 +153,12 @@ const resetPeriod = () => {
   color: #86A78A;
 }
 input[type="date"] {
-  padding: 9px 14px;
-  border-radius: 10px;
+  padding: 6px 12px;
+  border-radius: 8px;
   border: 1px solid #D1DBC5;
   color: #2D3E2E;
   font-weight: 500;
-  font-size: 14px;
+  font-size: 13px;
   outline: none;
   background: #ffffff;
   transition: all 0.2s ease;
@@ -173,14 +176,14 @@ input[type="date"]:focus {
 /* 버튼 그룹 스타일 */
 .button-action-group {
   display: flex;
-  gap: 8px;
-  margin-top: 20px;
+  gap: 6px;
+  margin-top: 18px;
 }
 .action-btn {
-  padding: 10px 18px;
-  border-radius: 10px;
+  padding: 6px 14px;
+  border-radius: 8px;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13px;
   cursor: pointer;
   border: 1px solid transparent;
   display: flex;

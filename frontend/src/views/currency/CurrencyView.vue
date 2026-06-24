@@ -36,16 +36,18 @@ onMounted(() => {
   width: 100%;
 }
 .currency-page {
-  max-width: 1400px;
+  max-width: 1320px;
   margin: 0 auto;
   padding: 2.5rem 2rem;
   display: grid;
   grid-template-columns: 1fr 1.4fr;
-  gap: 1.5rem;
-  align-items: stretch;
+  column-gap: 1.5rem;
+  row-gap: 1rem;
+  align-items: start;
 }
 .currency-page-header {
   grid-column: 1 / -1;
+  margin-bottom: 0;
 }
 .left-col {
   display: flex;
@@ -55,6 +57,5 @@ onMounted(() => {
 .right-col {
   display: flex;
   flex-direction: column;
-  height: 100%;
 }
 </style>

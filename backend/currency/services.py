@@ -142,10 +142,12 @@ def get_exchange_data():
 def get_exchange_history(currency_code, days=30):
     qs = ExchangeRate.objects.filter(
         currency_code=currency_code
-    ).order_by('date')
+    ).order_by('-date')
 
     if qs.count() >= days // 2:
-        return [{'date': str(r.date), 'rate': r.deal_bas_r} for r in qs[:days]]
+        recent = list(qs[:days])
+        recent.reverse()
+        return [{'date': str(r.date), 'rate': r.deal_bas_r} for r in recent]
 
     bok_code = BOK_CURRENCY_MAP.get(currency_code)
     if not bok_code:

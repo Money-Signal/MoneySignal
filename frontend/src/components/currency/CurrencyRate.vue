@@ -214,11 +214,11 @@ onBeforeUnmount(() => {
   padding: 1.75rem 2rem;
 }
 .card-label {
-  font-size: 14px;
-  color: #888876;
+  font-size: 15px;
+  color: #3a3a2e;
   margin-bottom: 0.75rem;
-  letter-spacing: 0.04em;
-  font-weight: 600;
+  letter-spacing: 0.01em;
+  font-weight: 700;
 }
 .custom-select-wrapper {
   position: relative;

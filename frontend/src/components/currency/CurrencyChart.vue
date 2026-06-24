@@ -31,7 +31,9 @@
         <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
       </div>
 
-      <canvas v-if="!loading && !error" ref="chartCanvas"></canvas>
+      <div v-if="!loading && !error" class="canvas-wrap">
+        <canvas ref="chartCanvas"></canvas>
+      </div>
     </div>
   </div>
 </template>
@@ -40,11 +42,11 @@
 import { ref, watch, nextTick } from 'vue'
 import {
   Chart, LineElement, PointElement, LinearScale,
-  CategoryScale, LineController, Tooltip, Legend, Filler
+  CategoryScale, LineController, Tooltip, Legend, Filler, Title
 } from 'chart.js'
 import { fetchChartData } from '@/api/currency'
 
-Chart.register(LineElement, PointElement, LinearScale, CategoryScale, LineController, Tooltip, Legend, Filler)
+Chart.register(LineElement, PointElement, LinearScale, CategoryScale, LineController, Tooltip, Legend, Filler, Title)
 
 const props = defineProps({
   selectedCode: { type: String, default: '' }
@@ -67,6 +69,13 @@ const filters = [
 const renderChart = (labels, data) => {
   if (!chartCanvas.value) return
   if (chartInstance) chartInstance.destroy()
+
+  const ctx = chartCanvas.value.getContext('2d')
+  const gradient = ctx.createLinearGradient(0, 0, 0, chartCanvas.value.clientHeight || 400)
+  gradient.addColorStop(0, 'rgba(134, 167, 138, 0.45)')
+  gradient.addColorStop(0.6, 'rgba(134, 167, 138, 0.08)')
+  gradient.addColorStop(1, 'rgba(134, 167, 138, 0.0)')
+
   chartInstance = new Chart(chartCanvas.value, {
     type: 'line',
     data: {
@@ -74,47 +83,77 @@ const renderChart = (labels, data) => {
       datasets: [{
         label: `${props.selectedCode} → KRW`,
         data,
-        borderColor: '#86A78A',
-        backgroundColor: 'rgba(160, 186, 163, 0.15)',
+        borderColor: '#6a9e6e',
+        backgroundColor: gradient,
         fill: true,
-        tension: 0.4,
-        pointRadius: 3,
-        pointBackgroundColor: '#86A78A',
-        pointBorderColor: '#fff',
-        pointBorderWidth: 2,
+        tension: 0.35,
+        pointRadius: 0,
+        pointHoverRadius: 6,
+        pointHoverBackgroundColor: '#6a9e6e',
+        pointHoverBorderColor: '#fff',
+        pointHoverBorderWidth: 2.5,
+        borderWidth: 2,
       }]
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
       plugins: {
-        legend: {
-          display: true,
-          labels: { color: '#3a3a2e', font: { size: 12 } }
-        },
+        legend: { display: false },
         tooltip: {
-          mode: 'index',
-          intersect: false,
-          backgroundColor: '#2e4a31',
-          titleColor: '#A0BAA3',
-          bodyColor: '#fff',
-          padding: 10,
+          backgroundColor: 'rgba(26, 42, 28, 0.95)',
+          titleColor: '#a0c8a4',
+          titleFont: { size: 12, weight: '600' },
+          bodyColor: '#ffffff',
+          bodyFont: { size: 14, weight: '700' },
+          padding: { x: 16, y: 12 },
+          cornerRadius: 10,
+          displayColors: false,
           callbacks: {
-            label: (ctx) => ` ${ctx.parsed.y.toLocaleString()} ₩`
+            title: (items) => items[0].label,
+            label: (ctx) => `${ctx.parsed.y.toLocaleString()} ₩`
           }
         }
       },
       scales: {
         x: {
-          ticks: { maxTicksLimit: 8, color: '#888876', font: { size: 11 } },
-          grid: { color: 'rgba(0,0,0,0.04)' }
+          title: {
+            display: true,
+            text: '날짜',
+            color: '#b0af9f',
+            font: { size: 11, weight: '500' },
+            padding: { top: 8 },
+          },
+          ticks: {
+            maxTicksLimit: 7,
+            color: '#b0af9f',
+            font: { size: 11 },
+            maxRotation: 0,
+          },
+          grid: { display: false },
+          border: { display: false }
         },
         y: {
-          ticks: {
-            color: '#888876',
-            font: { size: 11 },
-            callback: (val) => val.toLocaleString() + ' ₩'
+          position: 'right',
+          title: {
+            display: true,
+            text: '환율 (KRW)',
+            color: '#b0af9f',
+            font: { size: 11, weight: '500' },
+            padding: { bottom: 8 },
           },
-          grid: { color: 'rgba(0,0,0,0.04)' }
+          ticks: {
+            color: '#b0af9f',
+            font: { size: 11 },
+            callback: (val) => val.toLocaleString(),
+            maxTicksLimit: 6,
+          },
+          grid: {
+            color: 'rgba(0,0,0,0.04)',
+            drawTicks: false,
+          },
+          border: { display: false, dash: [4, 4] }
         }
       }
     }
@@ -164,29 +203,13 @@ watch(() => props.selectedCode, (code) => {
   padding: 1.75rem 2rem;
   box-sizing: border-box;
   display: flex;
-  flex: 1;
   flex-direction: column;
 }
-.chart-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 1rem;
-}
-.chart-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #3a3a2e;
-}
-.chart-area {
-  flex: 1;
-  position: relative;
-  min-height: 0;
-}
 .card-label {
-  font-size: 12px;
-  color: #888876;
-  letter-spacing: 0.04em;
+  font-size: 15px;
+  color: #3a3a2e;
+  letter-spacing: 0.01em;
+  font-weight: 700;
 }
 .empty-state {
   color: #aaa;
@@ -238,10 +261,10 @@ watch(() => props.selectedCode, (code) => {
   padding: 0.75rem 1rem;
   font-size: 14px;
 }
+.canvas-wrap {
+  width: 100%;
+}
 canvas {
-  top: 0;
-  left: 0;
   width: 100% !important;
-  height: 100% !important;
 }
 </style>
