@@ -43,6 +43,7 @@ def search_videos(request):
             pageToken=page_token if page_token else None # 👈 토큰이 있을 때만 탑승
         )
         response = api_request.execute()
+        print(f"[DEBUG] 요청 페이지: {current_page}, 실제 받은 영상 수: {len(response.get('items', []))}")
         
         # 전체 결과 수 계산
         total_results = response.get('pageInfo', {}).get('totalResults', 0)
@@ -139,7 +140,7 @@ def get_related_videos(request, video_id):
             part='snippet',
             q=query,
             type='video',
-            maxResults=5,
+            maxResults=10,
             relevanceLanguage='ko'
         ).execute()
 
