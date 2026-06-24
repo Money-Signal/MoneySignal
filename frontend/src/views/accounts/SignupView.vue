@@ -91,12 +91,7 @@
           <div class="mb-4">
             <label class="form-label fw-semibold">연령대</label>
             <div class="d-flex flex-wrap gap-2">
-              <label
-                v-for="opt in ageOptions"
-                :key="opt"
-                class="chip-option"
-                :class="{ active: form.age_group === opt }"
-              >
+              <label v-for="opt in ageOptions" :key="opt" class="chip-option" :class="{ active: form.age_group === opt }">
                 <input type="radio" class="d-none" :value="opt" v-model="form.age_group" />
                 {{ opt }}
               </label>
@@ -107,12 +102,7 @@
           <div class="mb-4">
             <label class="form-label fw-semibold">월 저축 가능 금액</label>
             <div class="d-flex flex-wrap gap-2">
-              <label
-                v-for="opt in savingOptions"
-                :key="opt.label"
-                class="chip-option"
-                :class="{ active: form.monthly_saving === opt.value }"
-              >
+              <label v-for="opt in savingOptions" :key="opt.label" class="chip-option" :class="{ active: form.monthly_saving === opt.value }">
                 <input type="radio" class="d-none" :value="opt.value" v-model="form.monthly_saving" />
                 {{ opt.label }}
               </label>
@@ -123,12 +113,7 @@
           <div class="mb-4">
             <label class="form-label fw-semibold">관심 상품</label>
             <div class="d-flex gap-2">
-              <label
-                v-for="opt in productTypeOptions"
-                :key="opt.value"
-                class="invest-option flex-fill text-center"
-                :class="{ active: form.preferred_product_type === opt.value }"
-              >
+              <label v-for="opt in productTypeOptions" :key="opt.value" class="invest-option flex-fill text-center" :class="{ active: form.preferred_product_type === opt.value }">
                 <input type="radio" class="d-none" :value="opt.value" v-model="form.preferred_product_type" />
                 <div class="invest-label py-2 px-1">
                   <span class="d-block fs-4">{{ opt.emoji }}</span>
@@ -143,12 +128,7 @@
           <div class="mb-4">
             <label class="form-label fw-semibold">투자 성향</label>
             <div class="d-flex gap-2">
-              <label
-                v-for="opt in investmentOptions"
-                :key="opt.value"
-                class="invest-option flex-fill text-center"
-                :class="{ active: form.investment_type === opt.value }"
-              >
+              <label v-for="opt in investmentOptions" :key="opt.value" class="invest-option flex-fill text-center" :class="{ active: form.investment_type === opt.value }">
                 <input type="radio" class="d-none" :value="opt.value" v-model="form.investment_type" />
                 <div class="invest-label py-2 px-1">
                   <span class="d-block fs-4">{{ opt.emoji }}</span>
@@ -230,6 +210,9 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { validateSignup as validateSignupApi } from '@/api/auth'
 import DropdownSelect from '@/components/common/DropdownSelect.vue'
+import { useAlert } from '@/composables/useAlert'
+
+const { successConfetti } = useAlert()
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -280,7 +263,6 @@ const investmentOptions = [
   { value: 'AGGRESSIVE',   label: '공격형', emoji: '🚀', desc: '수익 극대화' },
 ]
 
-
 const form = reactive({
   email: '',
   password: '',
@@ -306,7 +288,6 @@ function clearStep1Errors() {
   Object.keys(errors).forEach((key) => (errors[key] = ''))
 }
 
-// 1단계 클라이언트 검증 후 서버 중복 확인까지 통과하면 2단계로 이동
 async function goToStep2() {
   clearStep1Errors()
   let hasError = false
@@ -331,7 +312,6 @@ async function goToStep2() {
 
   if (hasError) return
 
-  // 서버에서 이메일/닉네임 중복 확인
   isLoading.value = true
   try {
     await validateSignupApi({
@@ -374,16 +354,19 @@ function buildPayload(skip = false) {
 }
 
 async function handleSignup(skip = false) {
+  const payload = buildPayload(skip === true)
+  console.log('payload 타입:', payload instanceof FormData ? 'FormData' : '일반 객체')
+  console.log('payload:', payload)
   serverError.value = ''
   isLoading.value = true
   try {
     await authStore.signup(buildPayload(skip === true))
-    alert('회원가입이 완료되었습니다. 로그인 해주세요.')
-    router.push('/login')
+    // 자동 로그인 후 닉네임으로 환영 컨페티 모달
+    await successConfetti(`${form.nickname}님 환영합니다! 🎉`, '가입 완료')
+    router.push('/')
   } catch (err) {
     const data = err.response?.data
     if (data) {
-      // 서버에서 1단계 필드 에러가 오면 1단계로 되돌아감
       if (data.email || data.password || data.password_confirm || data.nickname) {
         if (data.email)            errors.email = data.email[0]
         if (data.password)         errors.password = data.password[0]
@@ -430,7 +413,6 @@ async function handleSignup(skip = false) {
   padding: 2rem;
 }
 
-/* 단계 인디케이터 */
 .step-indicator {
   display: flex;
   align-items: center;
@@ -454,26 +436,10 @@ async function handleSignup(skip = false) {
   color: #bbb;
   transition: all 0.3s;
 }
-.step.active .step-num {
-  border-color: #86A78A;
-  background-color: #86A78A;
-  color: white;
-}
-.step.done .step-num {
-  border-color: #86A78A;
-  background-color: #86A78A;
-  color: white;
-}
-.step-label {
-  font-size: 0.72rem;
-  color: #bbb;
-  font-weight: 500;
-  white-space: nowrap;
-}
-.step.active .step-label,
-.step.done .step-label {
-  color: #86A78A;
-}
+.step.active .step-num { border-color: #86A78A; background-color: #86A78A; color: white; }
+.step.done .step-num   { border-color: #86A78A; background-color: #86A78A; color: white; }
+.step-label { font-size: 0.72rem; color: #bbb; font-weight: 500; white-space: nowrap; }
+.step.active .step-label, .step.done .step-label { color: #86A78A; }
 .step-line {
   flex: 1;
   height: 2px;
@@ -482,11 +448,8 @@ async function handleSignup(skip = false) {
   margin-bottom: 18px;
   transition: background-color 0.3s;
 }
-.step-line.done {
-  background-color: #86A78A;
-}
+.step-line.done { background-color: #86A78A; }
 
-/* 인풋 */
 .custom-input {
   border: 1.5px solid #ddd;
   border-radius: 8px;
@@ -498,7 +461,6 @@ async function handleSignup(skip = false) {
   box-shadow: 0 0 0 3px rgba(160, 186, 163, 0.2);
 }
 
-/* 칩 선택 버튼 */
 .chip-option {
   cursor: pointer;
   border: 1.5px solid #ddd;
@@ -510,77 +472,20 @@ async function handleSignup(skip = false) {
   transition: all 0.2s;
   user-select: none;
 }
-.chip-option:hover {
-  border-color: #A0BAA3;
-  color: #86A78A;
-}
-.chip-option.active {
-  border-color: #86A78A;
-  background-color: #86A78A;
-  color: white;
-}
+.chip-option:hover { border-color: #A0BAA3; color: #86A78A; }
+.chip-option.active { border-color: #86A78A; background-color: #86A78A; color: white; }
 
-/* 투자 성향 카드 */
 .invest-option {
   cursor: pointer;
   border: 1.5px solid #ddd;
   border-radius: 10px;
   transition: all 0.2s;
 }
-.invest-option:hover {
-  border-color: #A0BAA3;
-  background-color: #f5faf5;
-}
-.invest-option.active {
-  border-color: #86A78A;
-  background-color: #eaf2ea;
-}
+.invest-option:hover { border-color: #A0BAA3; background-color: #f5faf5; }
+.invest-option.active { border-color: #86A78A; background-color: #eaf2ea; }
 .invest-label { pointer-events: none; }
 
-/* 단위 */
-.unit-text {
-  background-color: #f5f5f0;
-  border-color: #ddd;
-  color: #888;
-  font-size: 0.85rem;
-}
-
-/* 버튼 */
-.btn-primary-custom {
-  background-color: #86A78A;
-  border: none;
-  border-radius: 8px;
-  color: white;
-  font-weight: 600;
-  transition: background-color 0.2s;
-}
-.btn-primary-custom:hover:not(:disabled) {
-  background-color: #749478;
-  color: white;
-}
-.btn-primary-custom:disabled {
-  background-color: #A0BAA3;
-  color: white;
-}
-
-.btn-skip {
-  background-color: transparent;
-  border: 1.5px solid #A0BAA3;
-  border-radius: 8px;
-  color: #86A78A;
-  font-weight: 600;
-  transition: all 0.2s;
-}
-.btn-skip:hover {
-  background-color: #f0f5f0;
-}
-
-/* 투자 기간 슬라이더 */
-.period-badge {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #86A78A;
-}
+.period-badge { font-size: 0.85rem; font-weight: 700; color: #86A78A; }
 
 .period-slider {
   -webkit-appearance: none;
@@ -608,9 +513,7 @@ async function handleSignup(skip = false) {
   cursor: pointer;
   transition: transform 0.1s;
 }
-.period-slider::-webkit-slider-thumb:hover {
-  transform: scale(1.15);
-}
+.period-slider::-webkit-slider-thumb:hover { transform: scale(1.15); }
 .period-slider::-moz-range-thumb {
   width: 20px;
   height: 20px;
@@ -618,21 +521,31 @@ async function handleSignup(skip = false) {
   background: #86A78A;
   border: 3px solid white;
   box-shadow: 0 1px 6px rgba(0,0,0,0.2);
-  cursor: pointer;
 }
 
-.slider-tick {
-  font-size: 0.72rem;
-  color: #aaa;
-}
+.slider-tick { font-size: 0.72rem; color: #aaa; }
 
-.link-custom {
+.btn-primary-custom {
+  background-color: #86A78A;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+.btn-primary-custom:hover:not(:disabled) { background-color: #749478; color: white; }
+.btn-primary-custom:disabled { background-color: #A0BAA3; color: white; }
+
+.btn-skip {
+  background-color: transparent;
+  border: 1.5px solid #A0BAA3;
+  border-radius: 8px;
   color: #86A78A;
   font-weight: 600;
-  text-decoration: none;
+  transition: all 0.2s;
 }
-.link-custom:hover {
-  color: #749478;
-  text-decoration: underline;
-}
+.btn-skip:hover { background-color: #f0f5f0; }
+
+.link-custom { color: #86A78A; font-weight: 600; text-decoration: none; }
+.link-custom:hover { color: #749478; text-decoration: underline; }
 </style>

@@ -72,7 +72,9 @@
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useAlert } from '@/composables/useAlert'
 
+const {successConfetti} = useAlert()
 const router = useRouter()
 const authStore = useAuthStore()
 
@@ -97,6 +99,7 @@ async function handleLogin() {
 
   try {
     await authStore.login(form)
+    await successConfetti(`${authStore.user?.nickname}님 환영합니다! 🎉`, '로그인 성공')
     router.push('/')
   } catch (err) {
     const data = err.response?.data
