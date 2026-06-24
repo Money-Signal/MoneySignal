@@ -161,7 +161,27 @@ watch(() => props.selectedCode, (code) => {
   background: #fff;
   border-radius: 14px;
   border: 0.5px solid #c8c7b8;
-  padding: 1.25rem 1.5rem;
+  padding: 1.75rem 2rem;
+  box-sizing: border-box;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+.chart-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 1rem;
+}
+.chart-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #3a3a2e;
+}
+.chart-area {
+  flex: 1;
+  position: relative;
+  min-height: 0;
 }
 .card-label {
   font-size: 12px;
@@ -170,9 +190,15 @@ watch(() => props.selectedCode, (code) => {
 }
 .empty-state {
   color: #aaa;
-  font-size: 14px;
+  font-size: 15px;
   text-align: center;
-  padding: 2rem 0;
+  padding: 4rem 0;
+}
+.filter-wrap {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
 }
 .filter-row {
   display: flex;
@@ -180,12 +206,12 @@ watch(() => props.selectedCode, (code) => {
   flex-wrap: wrap;
 }
 .filter-btn {
-  padding: 5px 14px;
+  padding: 7px 18px;
   border-radius: 20px;
   border: 1.5px solid #A0BAA3;
   background: #fff;
   color: #86A78A;
-  font-size: 13px;
+  font-size: 14px;
   cursor: pointer;
   transition: all 0.15s;
 }
@@ -211,5 +237,11 @@ watch(() => props.selectedCode, (code) => {
   border-radius: 10px;
   padding: 0.75rem 1rem;
   font-size: 14px;
+}
+canvas {
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
 }
 </style>

@@ -193,13 +193,18 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+.currency-rate {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
 .page-title {
-  font-size: 22px;
-  font-weight: 500;
+  font-size: 26px;
+  font-weight: 600;
   color: #3a3a2e;
 }
 .page-sub {
-  font-size: 14px;
+  font-size: 15px;
   color: #6b6b5a;
   margin-top: 4px;
 }
@@ -207,19 +212,20 @@ onBeforeUnmount(() => {
   background: #fff;
   border-radius: 14px;
   border: 0.5px solid #c8c7b8;
-  padding: 1.25rem 1.5rem;
+  padding: 1.75rem 2rem;
 }
 .calc-card {
   background: #fff;
   border-radius: 14px;
   border: 0.5px solid #c8c7b8;
-  padding: 1.25rem 1.5rem;
+  padding: 1.75rem 2rem;
 }
 .card-label {
-  font-size: 12px;
+  font-size: 14px;
   color: #888876;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
   letter-spacing: 0.04em;
+  font-weight: 600;
 }
 .custom-select-wrapper {
   position: relative;
@@ -228,10 +234,10 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 12px;
-  font-size: 13px;
+  padding: 12px 16px;
+  font-size: 15px;
   border: 1.5px solid #A0BAA3;
-  border-radius: 6px;
+  border-radius: 8px;
   background-color: #ffffff;
   cursor: pointer;
   user-select: none;
@@ -243,14 +249,14 @@ onBeforeUnmount(() => {
 }
 .custom-select-box span {
   color: #333;
-  font-size: 13px;
+  font-size: 15px;
 }
 .custom-select-box span.is-placeholder {
   color: #aaa;
 }
 .arrow-icon {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
   transition: transform 0.2s;
   color: #86A78A;
@@ -265,8 +271,8 @@ onBeforeUnmount(() => {
   right: 0;
   background: #ffffff;
   border: 1.5px solid #A0BAA3;
-  border-radius: 6px;
-  max-height: 200px;
+  border-radius: 8px;
+  max-height: 220px;
   overflow-y: auto;
   list-style: none;
   margin: 0;
@@ -275,8 +281,8 @@ onBeforeUnmount(() => {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 .custom-options li {
-  padding: 8px 14px;
-  font-size: 13px;
+  padding: 10px 16px;
+  font-size: 14px;
   cursor: pointer;
   transition: background 0.15s;
   color: #333;
@@ -304,53 +310,53 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: space-between;
   background: #f3f5f0;
-  border-radius: 10px;
-  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
   gap: 12px;
 }
 .rate-main {
-  font-size: 18px;
-  font-weight: 500;
+  font-size: 24px;
+  font-weight: 600;
   color: #2e4a31;
 }
 .rate-arrow {
-  margin: 0 8px;
+  margin: 0 10px;
   color: #A0BAA3;
 }
 .rate-value {
   color: #86A78A;
 }
 .rate-sub {
-  font-size: 12px;
+  font-size: 13px;
   color: #7a9a7d;
-  margin-top: 4px;
+  margin-top: 6px;
 }
 .rate-badge {
   background: #A0BAA3;
   color: #fff;
-  font-size: 12px;
-  padding: 4px 12px;
+  font-size: 14px;
+  padding: 6px 16px;
   border-radius: 20px;
   white-space: nowrap;
 }
 .stat-row {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  gap: 10px;
+  gap: 12px;
 }
 .stat-card {
   background: #f3f5f0;
-  border-radius: 10px;
-  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
 }
 .stat-label {
-  font-size: 11px;
+  font-size: 13px;
   color: #888876;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 .stat-val {
-  font-size: 16px;
-  font-weight: 500;
+  font-size: 20px;
+  font-weight: 600;
   color: #2e4a31;
 }
 .stat-val.up { color: #4a8a4e; }
@@ -358,14 +364,14 @@ onBeforeUnmount(() => {
 .calc-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 .calc-input-wrap {
   flex: 1;
   display: flex;
   align-items: center;
   border: 1.5px solid #A0BAA3;
-  border-radius: 6px;
+  border-radius: 8px;
   overflow: hidden;
   background: #fff;
 }
@@ -373,8 +379,8 @@ onBeforeUnmount(() => {
   flex: 1;
   border: none;
   outline: none;
-  padding: 8px 12px;
-  font-size: 14px;
+  padding: 12px 14px;
+  font-size: 16px;
   color: #333;
   background: transparent;
   width: 100%;
@@ -384,8 +390,8 @@ onBeforeUnmount(() => {
   appearance: none;
 }
 .calc-unit {
-  padding: 8px 10px;
-  font-size: 12px;
+  padding: 12px 12px;
+  font-size: 14px;
   color: #86A78A;
   font-weight: 600;
   background: #f3f5f0;
@@ -395,14 +401,14 @@ onBeforeUnmount(() => {
   background: #86A78A;
   border: none;
   border-radius: 50%;
-  width: 34px;
-  height: 34px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   color: #fff;
-  font-size: 14px;
+  font-size: 16px;
   flex-shrink: 0;
   transition: background 0.15s;
 }
@@ -414,21 +420,21 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   border: 1.5px solid #c8c7b8;
-  border-radius: 6px;
+  border-radius: 8px;
   overflow: hidden;
   background: #f7f7f0;
 }
 .calc-result {
   flex: 1;
-  padding: 8px 12px;
-  font-size: 14px;
+  padding: 12px 14px;
+  font-size: 16px;
   font-weight: 500;
   color: #2e4a31;
 }
 .calc-desc {
-  font-size: 11px;
+  font-size: 13px;
   color: #aaa;
-  margin-top: 8px;
+  margin-top: 10px;
   text-align: right;
 }
 .alert-error {
