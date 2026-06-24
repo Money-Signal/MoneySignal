@@ -9,12 +9,14 @@
     <AppFooter />
     <ChatBot />
   </div>
+  <AlertModal/>
 </template>
 
 <script setup>
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
 import ChatBot from '@/components/common/ChatBot.vue'
+import AlertModal from './components/common/AlertModal.vue';
 </script>
 
 <style>

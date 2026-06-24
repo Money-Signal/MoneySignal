@@ -123,6 +123,9 @@
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import axios from 'axios'
 import { regionData } from '@/utils/regionData'
+import { useAlert } from '@/composables/useAlert'
+
+const {alert, confirm} = useAlert()
 
 const props = defineProps({
   banks: { type: Array, default: () => [] },
@@ -202,7 +205,7 @@ const toggleFavorite = async (bank) => {
   
   if (!token) {
     console.error("토큰 없음! 로그인 필요");
-    alert('로그인이 필요한 서비스입니다.');
+    await alert('로그인이 필요한 서비스입니다.', '로그인 필요')
     return;
   }
 
@@ -221,7 +224,7 @@ const toggleFavorite = async (bank) => {
     await fetchFavorites();
   } catch (error) {
     console.error("에러 상세 내용:", error);
-    alert('요청 처리 중 오류가 발생했습니다. (콘솔 확인 요망)');
+    await alert('요청 처리 중 오류가 발생했습니다.', '오류')
   }
 }
 

@@ -310,6 +310,9 @@ import { useProductStore } from '@/stores/product'
 import defaultProfileImg from '@/assets/default-profile.svg'
 import DropdownSelect from '@/components/common/DropdownSelect.vue'
 import PageHeader from '@/components/common/PageHeader.vue'
+import { useAlert } from '@/composables/useAlert'
+
+const {alert, confirm} = useAlert()
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -453,12 +456,16 @@ async function saveProfile() {
 }
 
 async function confirmDelete() {
-  if (!confirm('정말 탈퇴하시겠습니까?')) return
+  const result = await confirm('정말 탈퇴하시겠습니까?', '회원탈퇴', {
+    confirmText: '탈퇴',
+    cancelText: '취소'
+  })
+  if (!result) return
   try {
     await authStore.deleteAccount()
     router.push('/login')
   } catch {
-    alert('회원탈퇴에 실패했습니다.')
+    await alert('회원탈퇴에 실패했습니다.', '오류')
   }
 }
 

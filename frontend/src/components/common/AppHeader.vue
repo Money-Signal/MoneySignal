@@ -43,12 +43,7 @@ const menuItems = [
   <header class="app-header" :class="{ hidden: !isVisible }">
     <div class="header-inner">
       <RouterLink to="/" class="brand">
-        <div class="logo-icon">
-          <span></span><span></span><span></span>
-        </div>
-        <div class="logo-text">
-          <span class="money">money</span><span class="signal">signal</span>
-        </div>
+        <img src="@/assets/logo.png" alt="MoneySignal" class="logo-img" />
       </RouterLink>
 
       <!-- 추가된 메뉴 -->
@@ -202,5 +197,9 @@ const menuItems = [
   font-size: 13px;
   text-decoration: none;
   font-weight: 600;
+}
+.logo-img {
+  height: 70px;
+  object-fit: contain;
 }
 </style>

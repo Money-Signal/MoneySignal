@@ -139,6 +139,9 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute, RouterLink } from 'vue-router'
 import { useCommunityStore } from '@/stores/community'
 import { useAuthStore } from '@/stores/auth'
+import { useAlert } from '@/composables/useAlert'
+
+const {confirm} = useAlert()
 
 const router    = useRouter()
 const route     = useRoute()
@@ -200,7 +203,11 @@ async function onLike() {
 }
 
 async function onDelete() {
-  if (!confirm('게시글을 삭제할까요?')) return
+  const result = await confirm('게시글을 삭제할까요?', '게시글 삭제', {
+    confirmText: '삭제',
+    cancelText: '취소'
+  })
+  if (!result) return
   await store.removePost(store.post.id)
   router.push({ name: 'communityList' })
 }
@@ -212,7 +219,11 @@ async function onCommentSubmit() {
 }
 
 async function onCommentDelete(commentId) {
-  if (!confirm('댓글을 삭제할까요?')) return
+  const result = await confirm('댓글을 삭제할까요?', '댓글 삭제', {
+    confirmText: '삭제',
+    cancelText: '취소'
+  })
+  if (!result) return
   await store.removeComment(store.post.id, commentId)
 }
 </script>
