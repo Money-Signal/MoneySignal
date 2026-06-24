@@ -125,7 +125,8 @@ import axios from 'axios'
 import { regionData } from '@/utils/regionData'
 
 const props = defineProps({
-  banks: { type: Array, default: () => [] }
+  banks: { type: Array, default: () => [] },
+  initialQuery: { type: String, default: '' }  // 추가
 })
 
 const emit = defineEmits(['searchResult', 'selectBank'])
@@ -160,10 +161,32 @@ const fetchFavorites = async () => {
   } catch (error) { console.error('즐겨찾기 목록 로드 실패:', error) }
 }
 
+const searchBanks = () => {
+  if (!window.kakao || !window.kakao.maps) return
+  const ps = new window.kakao.maps.services.Places()
+  const query = [selectedSido.value, selectedGugun.value, bankName.value || '은행'].filter(Boolean).join(' ')
+  ps.keywordSearch(query, (data, status) => {
+    if (status === window.kakao.maps.services.Status.OK) { localBanks.value = data; emit('searchResult', data) }
+    else { localBanks.value = []; emit('searchResult', []) }
+  }, { category_group_code: 'BK9' })
+}
+
 onMounted(() => {
   fetchFavorites()
   document.addEventListener('click', handleOutsideClick)
 })
+
+watch(() => props.initialQuery, (query) => {
+  if (query) {
+    bankName.value = query
+    const trySearch = setInterval(() => {
+      if (window.kakao && window.kakao.maps) {
+        clearInterval(trySearch)
+        searchBanks()
+      }
+    }, 200)
+  }
+}, { immediate: true })
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleOutsideClick)
@@ -172,7 +195,7 @@ onBeforeUnmount(() => {
 const isFavorite = (bank) => { return favoriteBanks.value.some(b => b.id === String(bank.id)) }
 
 const toggleFavorite = async (bank) => {
-  console.log("함수 진입 확인"); // 이거부터 찍히는지 확인
+  console.log("함수 진입 확인");
   
   const token = localStorage.getItem('access_token');
   console.log("저장된 토큰 값:", token); 
@@ -197,7 +220,7 @@ const toggleFavorite = async (bank) => {
     console.log("요청 성공!");
     await fetchFavorites();
   } catch (error) {
-    console.error("에러 상세 내용:", error); // 서버 응답 에러를 여기서 확인
+    console.error("에러 상세 내용:", error);
     alert('요청 처리 중 오류가 발생했습니다. (콘솔 확인 요망)');
   }
 }
@@ -212,16 +235,6 @@ const onSidoChange = () => {
   selectedGugun.value = ''
   gugunList.value = regionData[selectedSido.value] || []
 }
-
-const searchBanks = () => {
-  if (!window.kakao || !window.kakao.maps) return
-  const ps = new window.kakao.maps.services.Places()
-  const query = [selectedSido.value, selectedGugun.value, bankName.value || '은행'].filter(Boolean).join(' ')
-  ps.keywordSearch(query, (data, status) => {
-    if (status === window.kakao.maps.services.Status.OK) { localBanks.value = data; emit('searchResult', data) }
-    else { localBanks.value = []; emit('searchResult', []) }
-  }, { category_group_code: 'BK9' })
-}
 </script>
 
 <style scoped>
@@ -235,75 +248,18 @@ const searchBanks = () => {
 
 input { width: 100%; padding: 8px 12px; font-size: 13px; border: 1.5px solid #A0BAA3; border-radius: 6px; background-color: #ffffff; outline: none; box-sizing: border-box; }
 
-/* 커스텀 드롭다운 */
 .custom-select-wrapper { position: relative; flex: 1; }
-
-.custom-select-box {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 12px;
-  font-size: 13px;
-  border: 1.5px solid #A0BAA3;
-  border-radius: 6px;
-  background-color: #ffffff;
-  cursor: pointer;
-  user-select: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  white-space: nowrap;
-  overflow: hidden;
-}
-.custom-select-box.open {
-  border-color: #86A78A;
-  box-shadow: 0 0 0 2px rgba(134, 167, 138, 0.2);
-}
-.custom-select-box.disabled {
-  background-color: #f5f5f0;
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-/* Bootstrap .placeholder 충돌 방지: is-placeholder 사용 */
-.custom-select-box span {
-  color: #333;
-  font-size: 13px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  background-color: transparent !important;
-  opacity: 1 !important;
-}
+.custom-select-box { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; font-size: 13px; border: 1.5px solid #A0BAA3; border-radius: 6px; background-color: #ffffff; cursor: pointer; user-select: none; transition: border-color 0.2s, box-shadow 0.2s; white-space: nowrap; overflow: hidden; }
+.custom-select-box.open { border-color: #86A78A; box-shadow: 0 0 0 2px rgba(134, 167, 138, 0.2); }
+.custom-select-box.disabled { background-color: #f5f5f0; cursor: not-allowed; opacity: 0.6; }
+.custom-select-box span { color: #333; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background-color: transparent !important; opacity: 1 !important; }
 .custom-select-box span.is-placeholder { color: #aaa; }
-
 .arrow-icon { width: 16px; height: 16px; flex-shrink: 0; transition: transform 0.2s; }
 .arrow-icon.rotated { transform: rotate(180deg); }
-
-.custom-options {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
-  background: #ffffff;
-  border: 1.5px solid #A0BAA3;
-  border-radius: 6px;
-  max-height: 200px;
-  overflow-y: auto;
-  list-style: none;
-  margin: 0;
-  padding: 4px 0;
-  z-index: 1000;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-.custom-options li {
-  padding: 8px 14px;
-  font-size: 13px;
-  cursor: pointer;
-  transition: background 0.15s;
-  color: #333;
-}
+.custom-options { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #ffffff; border: 1.5px solid #A0BAA3; border-radius: 6px; max-height: 200px; overflow-y: auto; list-style: none; margin: 0; padding: 4px 0; z-index: 1000; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
+.custom-options li { padding: 8px 14px; font-size: 13px; cursor: pointer; transition: background 0.15s; color: #333; }
 .custom-options li:hover { background-color: #f0f4f0; }
 .custom-options li.selected { color: #606c38; font-weight: 600; background-color: #edf2ed; }
-
 .custom-options::-webkit-scrollbar { width: 4px; }
 .custom-options::-webkit-scrollbar-thumb { background: #c4c3b7; border-radius: 4px; }
 
@@ -322,7 +278,6 @@ input { width: 100%; padding: 8px 12px; font-size: 13px; border: 1.5px solid #A0
 
 .bank-item { background-color: #ffffff; border: 1px solid #e6e5da; border-radius: 8px; padding: 12px; margin-bottom: 8px; transition: border-color 0.15s ease; }
 .bank-item:hover { border-color: #86A78A; }
-
 .bank-info { display: flex; gap: 10px; }
 .bank-badge { background-color: #A0BAA3; color: white; font-size: 10px; font-weight: 700; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .bank-badge.fav-badge { background-color: #ffcc00; font-size: 10px; }

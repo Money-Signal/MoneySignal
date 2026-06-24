@@ -1,7 +1,12 @@
 <template>
   <div class="map-page-wrapper">
     <div class="side-panel">
-      <BankList :banks="searchedBanks" @search-result="onSearchResult" @select-bank="onSelectBank" />
+      <BankList
+        :banks="searchedBanks"
+        :initial-query="initialQuery"
+        @search-result="onSearchResult"
+        @select-bank="onSelectBank"
+      />
     </div>
     
     <div class="map-panel">
@@ -11,12 +16,23 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import BankMap from '@/components/map/BankMap.vue'
 import BankList from '@/components/map/BankList.vue'
 
+const route = useRoute()
 const searchedBanks = ref([])
 const bankMapRef = ref(null)
+const initialQuery = ref('')
+
+onMounted(() => {
+  console.log('route.query.bank:', route.query.bank)
+  if (route.query.bank) {
+    initialQuery.value = route.query.bank
+    console.log('initialQuery 설정됨:', initialQuery.value)
+  }
+})
 
 const onSearchResult = (banks) => {
   searchedBanks.value = banks

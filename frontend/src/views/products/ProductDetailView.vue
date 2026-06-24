@@ -22,12 +22,11 @@
         <!-- 헤더 -->
         <div class="hero-card mb-4">
           <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
-            <div>
+            <div class="hero-left">
               <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
                 <span :class="['type-badge', store.product.product_type === 'D' ? 'type-deposit' : 'type-saving']">
                   {{ store.product.product_type === 'D' ? '정기예금' : '정기적금' }}
                 </span>
-                <span class="bank-name">{{ store.product.kor_co_nm }}</span>
               </div>
               <h2 class="product-title">{{ store.product.fin_prdt_nm }}</h2>
               <div class="d-flex align-items-center gap-3 flex-wrap mt-2">
@@ -40,10 +39,20 @@
               </div>
             </div>
 
-            <button :class="['like-btn', store.product.liked ? 'liked' : '']" @click="onLike">
-              <i :class="store.product.liked ? 'bi bi-heart-fill' : 'bi bi-heart'" />
-              <span>{{ store.product.like_count }}</span>
-            </button>
+            <!-- 오른쪽: 은행명 + 지도 버튼 + 하트 -->
+            <div class="hero-right">
+              <div class="bank-action-group">
+                <span class="bank-name">{{ store.product.kor_co_nm }}</span>
+                <button class="map-link-btn" @click="goToMap(store.product.kor_co_nm)">
+                  <i class="bi bi-geo-alt-fill me-1" />지도에서 찾기
+                </button>
+              </div>
+              <button :class="['like-btn', store.product.liked ? 'liked' : '']" @click="onLike">
+                <i :class="store.product.liked ? 'bi bi-heart-fill' : 'bi bi-heart'" />
+                <span>{{ store.product.like_count }}</span>
+              </button>
+            </div>
+
           </div>
         </div>
 
@@ -246,6 +255,10 @@ async function onLike() {
   }
   await store.likeProduct(Number(route.params.id))
 }
+
+function goToMap(bankName) {
+  router.push({ name: 'map', query: { bank: bankName } })
+}
 </script>
 
 <style scoped>
@@ -253,6 +266,45 @@ async function onLike() {
 .page-wrap {
   min-height: 100vh;
   background-color: #EBEADD;
+}
+
+/* ── 히어로 오른쪽 영역 ── */
+.hero-right {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.bank-action-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.bank-name {
+  font-size: 0.9rem;
+  color: #8a8a7a;
+}
+
+.map-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 14px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border: 1.5px solid #A0BAA3;
+  border-radius: 20px;
+  background: #fff;
+  color: #6A7F5A;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.map-link-btn:hover {
+  background: #f0f4f0;
+  border-color: #6A7F5A;
 }
 
 /* ── 수익 계산 버튼 ── */
@@ -289,7 +341,6 @@ async function onLike() {
   justify-content: center;
   padding: 20px;
 }
-
 .calc-modal-box {
   background: #fff;
   border-radius: 18px;
@@ -301,7 +352,6 @@ async function onLike() {
   box-shadow: 0 20px 60px rgba(0,0,0,0.18);
   overflow: hidden;
 }
-
 .calc-modal-head {
   display: flex;
   align-items: center;
@@ -310,14 +360,12 @@ async function onLike() {
   border-bottom: 1.5px solid #EBEADD;
   flex-shrink: 0;
 }
-
 .calc-modal-title {
   font-size: 0.95rem;
   font-weight: 700;
   color: #2d2d25;
 }
 .calc-modal-title i { color: #86A78A; }
-
 .btn-close-calc {
   background: none;
   border: none;
@@ -329,7 +377,6 @@ async function onLike() {
   transition: color 0.15s;
 }
 .btn-close-calc:hover { color: #2d2d25; }
-
 .calc-modal-body {
   overflow-y: auto;
   flex: 1;
@@ -373,19 +420,9 @@ async function onLike() {
   border-radius: 20px;
   letter-spacing: 0.02em;
 }
-.type-deposit {
-  background: #dde8de;
-  color: #4a7a51;
-}
-.type-saving {
-  background: #e8e4d4;
-  color: #7a6e3a;
-}
+.type-deposit { background: #dde8de; color: #4a7a51; }
+.type-saving  { background: #e8e4d4; color: #7a6e3a; }
 
-.bank-name {
-  font-size: 0.9rem;
-  color: #8a8a7a;
-}
 .product-title {
   font-size: 1.4rem;
   font-weight: 700;
@@ -435,7 +472,6 @@ async function onLike() {
   padding: 20px 24px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
-
 .card-section-title {
   font-size: 0.9rem;
   font-weight: 700;
@@ -447,13 +483,8 @@ async function onLike() {
   border-bottom: 1.5px solid #EBEADD;
   margin-bottom: 4px;
 }
-.card-section-title > i {
-  color: #86A78A;
-  font-size: 1rem;
-}
-.calc-btn i {
-  color: #fff;
-}
+.card-section-title > i { color: #86A78A; font-size: 1rem; }
+.calc-btn i { color: #fff; }
 
 /* 필드 */
 .field-label {
@@ -469,7 +500,7 @@ async function onLike() {
 .accent-text { color: #5a8a5e; font-weight: 600; }
 .end-valid   { color: #5a8a5e; }
 
-/* 칩(가입방법) */
+/* 칩 */
 .chip {
   font-size: 0.78rem;
   padding: 3px 10px;
@@ -521,5 +552,4 @@ async function onLike() {
   line-height: 1.8;
   margin: 12px 0 0;
 }
-
 </style>
