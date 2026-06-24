@@ -9,13 +9,27 @@
         <div class="d-flex align-items-center gap-2 mb-3">
           <h6 class="fw-bold mb-0 rec-title">맞춤 추천</h6>
           <span v-if="store.recommendationType === 'personalized'" class="ai-badge">
-            <i class="bi bi-stars me-1" />AI 추천
+            <i class="bi bi-robot me-1" />AI 추천
           </span>
         </div>
 
-        <!-- 추천 로딩 -->
-        <div v-if="store.isRecommendLoading" class="text-center py-3">
-          <div class="spinner-border spinner-border-sm" style="color:#86A78A" role="status" />
+        <!-- 추천 로딩: 스켈레톤 -->
+        <div v-if="store.isRecommendLoading">
+          <div class="insight-banner mb-3 skel-banner">
+            <i class="bi bi-robot me-2" />AI가 맞춤 상품을 분석하고 있어요
+            <span class="dot-flicker">...</span>
+          </div>
+          <div class="recommend-scroll">
+            <div v-for="i in 5" :key="i" class="rec-card skel-card">
+              <div class="skel-line skel-chip mb-2" />
+              <div class="skel-line skel-name mt-1" />
+              <div class="skel-line skel-name-short mt-1" />
+              <div class="skel-line skel-member mt-2" />
+              <div class="skel-line skel-reason mt-2" />
+              <div class="skel-line skel-reason-short mt-1" />
+              <div class="skel-line skel-rate mt-auto" />
+            </div>
+          </div>
         </div>
 
         <!-- 비로그인 유도 -->
@@ -33,27 +47,42 @@
         </div>
 
         <!-- 추천 카드 가로 스크롤 -->
-        <div v-else-if="store.recommendations.length" class="recommend-scroll">
-          <div
-            v-for="product in store.recommendations"
-            :key="product.id"
-            class="rec-card"
-            @click="goDetail(product.id)"
-          >
-            <div class="d-flex justify-content-between align-items-start mb-2">
-              <span class="bank-chip">{{ product.kor_co_nm }}</span>
-              <button
-                :class="['heart-btn', product.liked ? 'liked' : '']"
-                @click.stop="onLike(product.id)"
-              >
-                <i :class="product.liked ? 'bi bi-heart-fill' : 'bi bi-heart'" />
-              </button>
-            </div>
-            <p class="rec-name">{{ product.fin_prdt_nm }}</p>
-            <p class="rec-member">{{ product.join_member || '-' }}</p>
-            <div class="rec-rate mt-auto">
-              <span class="rate-value">{{ product.max_intr_rate2 != null ? product.max_intr_rate2 + '%' : '-' }}</span>
-              <span class="rate-label">최고금리</span>
+        <div v-else-if="store.recommendations.length">
+          <!-- AI 전체 인사이트 배너 -->
+          <div v-if="store.overallInsight" class="insight-banner mb-3">
+            <i class="bi bi-stars me-2" />{{ store.overallInsight }}
+          </div>
+
+          <div class="recommend-scroll">
+            <div
+              v-for="product in store.recommendations"
+              :key="product.id"
+              class="rec-card"
+              @click="goDetail(product.id)"
+            >
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <span class="bank-chip">{{ product.kor_co_nm }}</span>
+                <button
+                  :class="['heart-btn', product.liked ? 'liked' : '']"
+                  @click.stop="onLike(product.id)"
+                >
+                  <i :class="product.liked ? 'bi bi-heart-fill' : 'bi bi-heart'" />
+                </button>
+              </div>
+              <p class="rec-name">{{ product.fin_prdt_nm }}</p>
+              <p class="rec-member">{{ product.join_member || '-' }}</p>
+              <div class="rec-rate mt-auto">
+                <span class="rate-value">{{ product.max_intr_rate2 != null ? product.max_intr_rate2 + '%' : '-' }}</span>
+                <span class="rate-label">최고금리</span>
+              </div>
+
+              <!-- 호버 시 추천 이유 오버레이 -->
+              <div v-if="product.ai_reason" class="rec-reason-overlay">
+                <div>
+                  <p class="reason-label"><i class="bi bi-robot me-1" />추천 이유</p>
+                  <p class="reason-text">{{ product.ai_reason }}</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -332,12 +361,14 @@ function onCompareToggle(product) {
 }
 .rec-title { color: #2d2d25; font-size: 0.95rem; }
 .ai-badge {
-  font-size: 0.7rem;
+  font-size: 0.78rem;
   font-weight: 700;
   color: #fff;
   background: #86A78A;
-  padding: 3px 10px;
+  padding: 4px 12px;
   border-radius: 20px;
+  box-shadow: 0 2px 6px rgba(134,167,138,0.35);
+  letter-spacing: 0.3px;
 }
 
 /* 유도 박스 */
@@ -361,6 +392,52 @@ function onCompareToggle(product) {
 }
 .nudge-link:hover { text-decoration: underline; }
 
+/* ── 스켈레톤 ── */
+@keyframes shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position: 600px 0; }
+}
+@keyframes dot-blink {
+  0%, 100% { opacity: 0.2; }
+  50%       { opacity: 1; }
+}
+
+.skel-banner {
+  opacity: 0.75;
+}
+.dot-flicker {
+  display: inline-block;
+  animation: dot-blink 1.2s ease-in-out infinite;
+  letter-spacing: 2px;
+}
+.skel-card {
+  pointer-events: none;
+}
+.skel-line {
+  background: linear-gradient(90deg, #e8e8e0 25%, #f4f4ec 50%, #e8e8e0 75%);
+  background-size: 1200px 100%;
+  animation: shimmer 1.5s infinite linear;
+  border-radius: 6px;
+}
+.skel-chip        { width: 64px;  height: 20px; border-radius: 20px; }
+.skel-name        { width: 90%;   height: 13px; }
+.skel-name-short  { width: 65%;   height: 13px; }
+.skel-member      { width: 50%;   height: 11px; }
+.skel-reason      { width: 95%;   height: 11px; }
+.skel-reason-short{ width: 75%;   height: 11px; }
+.skel-rate        { width: 55px;  height: 22px; border-radius: 6px; margin-top: 14px; }
+
+/* AI 인사이트 배너 */
+.insight-banner {
+  font-size: 0.83rem;
+  color: #4a7a51;
+  background: #f0f5f1;
+  border-left: 3px solid #86A78A;
+  border-radius: 6px;
+  padding: 9px 14px;
+  line-height: 1.55;
+}
+
 /* 추천 가로 스크롤 */
 .recommend-scroll {
   display: flex;
@@ -379,14 +456,16 @@ function onCompareToggle(product) {
 
 /* 추천 카드 */
 .rec-card {
-  flex: 0 0 210px;
+  flex: 0 0 230px;
   background: #fafaf6;
   border: 1.5px solid #e4e3d4;
   border-radius: 12px;
-  padding: 14px;
+  padding: 18px 18px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
+  position: relative;
+  overflow: hidden;
   transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
 }
 .rec-card:hover {
@@ -408,6 +487,33 @@ function onCompareToggle(product) {
 .rec-member {
   font-size: 0.75rem;
   color: #a0a090;
+  margin: 0;
+}
+.rec-reason-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(34, 44, 36, 0.87);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.22s ease;
+  pointer-events: none;
+}
+.rec-card:hover .rec-reason-overlay {
+  opacity: 1;
+}
+.reason-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #a8d4ac;
+  margin: 0 0 6px;
+}
+.reason-text {
+  font-size: 0.78rem;
+  color: #f0f5f0;
+  line-height: 1.55;
   margin: 0;
 }
 .rec-rate {

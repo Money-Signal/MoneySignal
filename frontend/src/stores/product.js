@@ -8,6 +8,7 @@ export const useProductStore = defineStore('product', () => {
   const likedProducts = ref([])  // 찜한 상품 목록
   const recommendations = ref([])        // 추천 상품 목록
   const recommendationType = ref(null)   // 'personalized' | 'popular'
+  const overallInsight = ref('')         // AI 전체 추천 이유
   const compareList = ref([])            // 비교할 상품 목록 (최대 3개)
   const isLoading = ref(false)
   const isRecommendLoading = ref(false)
@@ -76,8 +77,10 @@ export const useProductStore = defineStore('product', () => {
       const res = await getRecommendations()
       recommendations.value = res.data.results
       recommendationType.value = res.data.type
+      overallInsight.value = res.data.overall_insight || ''
     } catch {
       recommendations.value = []
+      overallInsight.value = ''
     } finally {
       isRecommendLoading.value = false
     }
@@ -87,6 +90,7 @@ export const useProductStore = defineStore('product', () => {
   function clearRecommendations() {
     recommendations.value = []
     recommendationType.value = null
+    overallInsight.value = ''
   }
 
   // 비교 목록 추가 (최대 3개, 중복 제외)
@@ -127,7 +131,7 @@ export const useProductStore = defineStore('product', () => {
   }
 
   return {
-    products, product, likedProducts, recommendations, recommendationType,
+    products, product, likedProducts, recommendations, recommendationType, overallInsight,
     compareList,
     isLoading, isRecommendLoading, error,
     fetchProducts, fetchProductDetail, likeProduct, fetchLikedProducts,
