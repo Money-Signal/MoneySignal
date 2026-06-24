@@ -15,13 +15,13 @@ import SideNav from '@/components/common/SideNav.vue'
 
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: #F5F1E8; font-family: -apple-system, sans-serif; }
+body { background: #F8F7F2; font-family: -apple-system, sans-serif; }
 .app-layout {
   display: flex;
   min-height: calc(100vh - 56px);
 }
 .app-main {
   flex: 1;
-  overflow-x: hidden;
+  overflow-x: hidden;  
 }
 </style>
