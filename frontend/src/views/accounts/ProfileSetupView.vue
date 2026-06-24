@@ -247,7 +247,7 @@ async function skip() {
 <style scoped>
 .setup-wrapper {
   min-height: 100vh;
-  background-color: #EBEADD;
+  background-color: #f9f8f5;
   display: flex;
   align-items: center;
   justify-content: center;

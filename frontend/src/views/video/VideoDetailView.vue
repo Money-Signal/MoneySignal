@@ -103,7 +103,7 @@ const goToVideo = (id) => {
 </script>
 
 <style scoped>
-.detail-container { background-color: #EBEADD; min-height: 100vh; padding: 40px 20px; }
+.detail-container { background-color: #f9f8f5; min-height: 100vh; padding: 2.5rem 2rem; }
 .video-wrapper { position: relative; width: 100%; padding-bottom: 56.25%; border-radius: 12px; border: 3px solid #A0BAA3; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
 .video-player { position: absolute; width: 100%; height: 100%; }
 

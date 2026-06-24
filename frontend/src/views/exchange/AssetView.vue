@@ -1,8 +1,6 @@
 <template>
   <div class="asset-view-container">
-    <h2 class="page-title">
-      <i class="bi bi-graph-up-arrow me-2"></i> 원자재 실시간 자산 시세 조회
-    </h2>
+    <PageHeader title="원자재 시세 조회" description="원자재 실시간 시세를 확인하고 과거 추이를 분석하세요." />
     
     <div class="layout-content-wrapper">
       
@@ -34,6 +32,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
+import PageHeader from '@/components/common/PageHeader.vue'
 import AssetFilter from '@/components/exchange/AssetFilter.vue'
 import AssetChart from '@/components/exchange/AssetChart.vue'
 import CommodityNews from '@/components/exchange/CommodityNews.vue'
@@ -73,7 +72,7 @@ onMounted(() => { fetchChartData(); fetchNewsData() })
 </script>
 
 <style scoped>
-.asset-view-container { padding: 24px; max-width: 1600px; margin: 0 auto; }
+.asset-view-container { padding: 2rem; max-width: 1600px; margin: 0 auto; }
 .page-title { color: #2D3E2E; margin-bottom: 24px; font-weight: 700; display: flex; align-items: center; }
 .page-title i { color: #86A78A; }
 

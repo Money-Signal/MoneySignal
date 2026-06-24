@@ -1,7 +1,8 @@
 <template>
   <div class="video-search-container">
-    <h2><i class="bi bi-search me-2"></i>영상 검색</h2>
-    
+    <div class="inner-container">
+    <PageHeader title="영상 검색" description="금융 관련 유튜브 영상을 검색하고 시청하세요." />
+
     <div class="search-box">
       <input 
         v-model="searchQuery" 
@@ -75,13 +76,15 @@
       </nav>
     </div>
 
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import axios from 'axios' // 필요시 기존 세팅에 맞게 복원
+import axios from 'axios'
 import VideoList from '@/components/video/VideoList.vue'
+import PageHeader from '@/components/common/PageHeader.vue'
 
 const searchQuery = ref('') 
 const videos = ref([])
@@ -139,12 +142,14 @@ onMounted(() => {
 
 <style scoped>
 .video-search-container {
-  background-color: #EBEADD;
+  background-color: #f9f8f5;
   min-height: 100vh;
-  padding: 40px 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  padding: 2.5rem 0;
+}
+.inner-container {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 2rem;
 }
 
 h2 {

@@ -3,16 +3,11 @@
 
     <div class="container main-content">
 
-      <!-- 페이지 타이틀 -->
-      <div class="page-header">
-        <div class="page-title">
-          <h2>커뮤니티</h2>
-          <p>금융 정보와 생각을 자유롭게 나눠보세요</p>
-        </div>
+      <PageHeader title="커뮤니티" description="금융 정보와 생각을 자유롭게 나눠보세요.">
         <RouterLink v-if="authStore.isLoggedIn" to="/community/write" class="write-btn">
           <i class="bi bi-pencil-square me-1" />글쓰기
         </RouterLink>
-      </div>
+      </PageHeader>
 
       <!-- 인기글 섹션 -->
       <div v-if="popularPosts.length" class="section mb-5">
@@ -127,6 +122,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter, RouterLink } from 'vue-router'
 import { useCommunityStore } from '@/stores/community'
 import { useAuthStore } from '@/stores/auth'
+import PageHeader from '@/components/common/PageHeader.vue'
 
 const router    = useRouter()
 const store     = useCommunityStore()
@@ -211,7 +207,7 @@ function formatDate(dateStr) {
 <style scoped>
 .page-wrap {
   min-height: 100vh;
-  background: #F5F4EE;
+  background: #f9f8f5;
 }
 
 /* ── 페이지 헤더 ── */
@@ -242,7 +238,7 @@ function formatDate(dateStr) {
 }
 
 /* ── 메인 컨텐츠 ── */
-.main-content { padding-top: 28px; padding-bottom: 48px; }
+.main-content { padding-top: 28px; padding-bottom: 48px; padding-left: 2rem; padding-right: 2rem; }
 
 /* ── 섹션 제목 ── */
 .section-title {

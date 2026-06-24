@@ -1,5 +1,11 @@
 <template>
-  <div class="map-page-wrapper">
+  <div class="map-page-outer">
+    <div class="map-header-area">
+      <div class="map-header-inner">
+        <PageHeader title="주변 은행 검색" description="내 주변 은행을 찾고 영업시간과 위치를 확인하세요." />
+      </div>
+    </div>
+    <div class="map-page-wrapper">
     <div class="side-panel">
       <BankList
         :banks="searchedBanks"
@@ -13,6 +19,7 @@
       <BankMap ref="bankMapRef" :banks="searchedBanks" />
     </div>
   </div>
+  </div>
 </template>
 
 <script setup>
@@ -20,6 +27,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import BankMap from '@/components/map/BankMap.vue'
 import BankList from '@/components/map/BankList.vue'
+import PageHeader from '@/components/common/PageHeader.vue'
 
 const route = useRoute()
 const searchedBanks = ref([])
@@ -46,10 +54,28 @@ const onSelectBank = (bank) => {
 </script>
 
 <style scoped>
+.map-page-outer {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.map-header-area {
+  padding: 1.5rem 0 0;
+  background: #f9f8f5;
+  flex-shrink: 0;
+}
+.map-header-inner {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
 .map-page-wrapper {
   display: flex;
   width: 100%;
-  height: calc(100vh - 64px); 
+  flex: 1;
+  height: 0;
   overflow: hidden;
   background-color: #ffffff;
 }

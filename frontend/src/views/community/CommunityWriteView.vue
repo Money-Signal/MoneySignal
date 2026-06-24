@@ -2,10 +2,10 @@
   <div class="page-wrap">
 
     <div class="container main-content" style="max-width: 780px;">
-      <div class="page-header">
-        <h2 class="page-title">{{ isEdit ? '게시글 수정' : '게시글 작성' }}</h2>
-        <p class="page-sub">{{ isEdit ? '내용을 수정하고 완료 버튼을 눌러주세요.' : '커뮤니티에 글을 남겨보세요.' }}</p>
-      </div>
+      <PageHeader
+        :title="isEdit ? '게시글 수정' : '게시글 작성'"
+        :description="isEdit ? '내용을 수정하고 완료 버튼을 눌러주세요.' : '커뮤니티에 글을 남겨보세요.'"
+      />
       <div class="write-box">
 
         <!-- 카테고리 선택 -->
@@ -101,6 +101,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useCommunityStore } from '@/stores/community'
+import PageHeader from '@/components/common/PageHeader.vue'
 import { useAlert } from '@/composables/useAlert'
 
 const {success} = useAlert()
@@ -188,7 +189,7 @@ async function onSubmit() {
 <style scoped>
 .page-wrap {
   min-height: 100vh;
-  background: #F5F4EE;
+  background: #f9f8f5;
 }
 
 /* ── 페이지 헤더 ── */
@@ -207,7 +208,7 @@ async function onSubmit() {
 }
 
 /* ── 메인 콘텐츠 ── */
-.main-content { padding-top: 28px; padding-bottom: 48px; }
+.main-content { padding-top: 28px; padding-bottom: 48px; padding-left: 2rem; padding-right: 2rem; }
 
 /* ── 작성 박스 ── */
 .write-box {

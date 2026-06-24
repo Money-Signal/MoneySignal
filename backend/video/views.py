@@ -140,7 +140,7 @@ def get_related_videos(request, video_id):
             part='snippet',
             q=query,
             type='video',
-            maxResults=10,
+            maxResults=25,
             relevanceLanguage='ko'
         ).execute()
 

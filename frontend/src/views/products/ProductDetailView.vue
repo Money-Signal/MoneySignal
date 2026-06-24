@@ -265,7 +265,7 @@ function goToMap(bankName) {
 /* ── 페이지 배경 ── */
 .page-wrap {
   min-height: 100vh;
-  background-color: #EBEADD;
+  background-color: #f9f8f5;
 }
 
 /* ── 히어로 오른쪽 영역 ── */
@@ -505,7 +505,7 @@ function goToMap(bankName) {
   font-size: 0.78rem;
   padding: 3px 10px;
   border-radius: 20px;
-  background: #EBEADD;
+  background: #f9f8f5;
   color: #5a5a4a;
   border: 1px solid #d4d3c4;
 }

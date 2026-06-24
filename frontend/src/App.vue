@@ -21,7 +21,7 @@ import AlertModal from './components/common/AlertModal.vue';
 
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: #F8F7F2; font-family: -apple-system, sans-serif; }
+body { background: #f9f8f5; font-family: -apple-system, sans-serif; }
 
 .app-wrapper {
   display: flex;

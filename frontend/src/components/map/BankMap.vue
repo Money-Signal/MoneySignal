@@ -248,7 +248,7 @@ defineExpose({
   bottom: 57px; 
   left: 50%;
   transform: translateX(-50%);
-  background-color: #EBEADD;     
+  background-color: #f9f8f5;
   border: 2px solid #A0BAA3;   
   border-radius: 16px;         
   padding: 8px 14px;

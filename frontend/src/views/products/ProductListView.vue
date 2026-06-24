@@ -2,11 +2,7 @@
   <div class="page-wrap">
     <div class="container py-4">
 
-      <!-- 페이지 타이틀 -->
-      <div class="page-title mb-4">
-        <h2>금융상품 비교</h2>
-        <p>예금·적금 상품을 한눈에 비교하고 나에게 맞는 상품을 찾아보세요.</p>
-      </div>
+      <PageHeader title="금융상품 비교" description="예금·적금 상품을 한눈에 비교하고 나에게 맞는 상품을 찾아보세요." class="mb-4" />
 
       <!-- 추천 섹션 -->
       <div class="recommend-section mb-4">
@@ -169,6 +165,7 @@ import { useAuthStore } from '@/stores/auth'
 import CompareBar from '@/components/products/CompareBar.vue'
 import CompareModal from '@/components/products/CompareModal.vue'
 import DropdownSelect from '@/components/common/DropdownSelect.vue'
+import PageHeader from '@/components/common/PageHeader.vue'
 
 const router = useRouter()
 const store = useProductStore()
@@ -238,7 +235,11 @@ function onCompareToggle(product) {
 /* ── 페이지 배경 ── */
 .page-wrap {
   min-height: 100vh;
-  background-color: #EBEADD;
+  background-color: #f9f8f5;
+}
+.page-wrap .container {
+  padding-left: 2rem;
+  padding-right: 2rem;
 }
 
 /* ── 타이틀 ── */
