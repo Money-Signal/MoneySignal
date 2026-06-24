@@ -26,7 +26,10 @@ const router = createRouter({
     { path: '/video/:videoId', name: 'VideoDetail', component: VideoDetailView},
     { path: '/products', name: 'productList', component: () => import('@/views/products/ProductListView.vue') },
     { path: '/products/:id', name: 'productDetail', component: () => import('@/views/products/ProductDetailView.vue') },
-    { path: '/currency', name: 'currency', component: CurrencyView}
+    { path: '/currency', name: 'currency', component: CurrencyView},
+    { path: '/community',        name: 'communityList',   component: () => import('@/views/community/CommunityListView.vue')   },
+    { path: '/community/write',  name: 'communityWrite',  component: () => import('@/views/community/CommunityWriteView.vue')  },
+    { path: '/community/:id',    name: 'communityDetail', component: () => import('@/views/community/CommunityDetailView.vue') },
   ],
 })
 
