@@ -64,7 +64,10 @@
     <div class="results-section">
       <div v-if="activeTab === 'list'" class="tab-content-wrapper">
         <div v-if="localBanks.length > 0" class="bank-items-list">
-          <p class="result-count">검색 결과 총 <strong>{{ localBanks.length }}</strong>건</p>
+          <p class="result-count">
+            검색 결과 총 <strong>{{ localBanks.length }}</strong>건
+            <span v-if="userLocation" class="sort-badge"><i class="bi bi-geo-alt-fill"></i> 가까운 순</span>
+          </p>
           <div v-for="(bank, index) in localBanks" :key="index" class="bank-item" @click="clickBankItem(bank)" style="cursor: pointer;">
             <div class="bank-info">
               <span class="bank-badge">{{ index + 1 }}</span>
@@ -77,6 +80,10 @@
                 </div>
                 <p class="bank-address"><i class="bi bi-geo-alt-fill me-1"></i> {{ bank.road_address_name || bank.address_name }}</p>
                 <p v-if="bank.phone" class="bank-phone"><i class="bi bi-telephone-fill me-1"></i> {{ bank.phone }}</p>
+                <!-- ✅ 길찾기 버튼 추가 -->
+                <button class="directions-btn" @click.stop="goToDirections(bank)">
+                  <i class="bi bi-signpost-2-fill"></i> 길찾기
+                </button>
               </div>
             </div>
           </div>
@@ -102,6 +109,10 @@
                 </div>
                 <p class="bank-address"><i class="bi bi-geo-alt-fill me-1"></i> {{ bank.road_address_name || bank.address_name }}</p>
                 <p v-if="bank.phone" class="bank-phone"><i class="bi bi-telephone-fill me-1"></i> {{ bank.phone }}</p>
+                <!-- ✅ 즐겨찾기 탭에도 길찾기 버튼 추가 -->
+                <button class="directions-btn" @click.stop="goToDirections(bank)">
+                  <i class="bi bi-signpost-2-fill"></i> 길찾기
+                </button>
               </div>
             </div>
           </div>
@@ -117,15 +128,20 @@
 
 <script setup>
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
+import { useRouter } from 'vue-router'  // ✅ 추가
 import axios from 'axios'
 import { regionData } from '@/utils/regionData'
 import { useAlert } from '@/composables/useAlert'
 
 const { alert } = useAlert()
+const router = useRouter()  // ✅ 추가
+
+// 현재 위치 (거리순 정렬용)
+const userLocation = ref(null)  // { lat, lng }
 
 const props = defineProps({
   banks: { type: Array, default: () => [] },
-  initialQuery: { type: String, default: '' }  // 추가
+  initialQuery: { type: String, default: '' }
 })
 
 const emit = defineEmits(['searchResult', 'selectBank'])
@@ -151,6 +167,19 @@ const handleOutsideClick = (e) => {
 
 const clickBankItem = (bank) => { emit('selectBank', bank) }
 
+// ✅ 길찾기 페이지로 이동
+const goToDirections = (bank) => {
+  router.push({
+    name: 'directions',
+    query: {
+      lat: bank.y,
+      lng: bank.x,
+      name: bank.place_name,
+      address: bank.road_address_name || bank.address_name
+    }
+  })
+}
+
 const fetchFavorites = async () => {
   try {
     const token = localStorage.getItem('access_token')
@@ -160,19 +189,55 @@ const fetchFavorites = async () => {
   } catch (error) { console.error('즐겨찾기 목록 로드 실패:', error) }
 }
 
+// Haversine 공식으로 두 좌표 간 거리(km) 계산
+const getDistance = (lat1, lng1, lat2, lng2) => {
+  const R = 6371
+  const dLat = (lat2 - lat1) * Math.PI / 180
+  const dLng = (lng2 - lng1) * Math.PI / 180
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLng / 2) ** 2
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+}
+
+const sortByDistance = (banks) => {
+  if (!userLocation.value) return banks
+  const { lat, lng } = userLocation.value
+  return [...banks].sort((a, b) =>
+    getDistance(lat, lng, parseFloat(a.y), parseFloat(a.x)) -
+    getDistance(lat, lng, parseFloat(b.y), parseFloat(b.x))
+  )
+}
+
 const searchBanks = () => {
   if (!window.kakao || !window.kakao.maps) return
   const ps = new window.kakao.maps.services.Places()
   const query = [selectedSido.value, selectedGugun.value, bankName.value || '은행'].filter(Boolean).join(' ')
   ps.keywordSearch(query, (data, status) => {
-    if (status === window.kakao.maps.services.Status.OK) { localBanks.value = data; emit('searchResult', data) }
-    else { localBanks.value = []; emit('searchResult', []) }
+    if (status === window.kakao.maps.services.Status.OK) {
+      const sorted = sortByDistance(data)
+      localBanks.value = sorted
+      emit('searchResult', sorted)
+    } else {
+      localBanks.value = []
+      emit('searchResult', [])
+    }
   }, { category_group_code: 'BK9' })
 }
 
 onMounted(() => {
   fetchFavorites()
   document.addEventListener('click', handleOutsideClick)
+  // 현재 위치 조용히 가져오기 (성공 시 이후 검색에 반영)
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        userLocation.value = { lat: pos.coords.latitude, lng: pos.coords.longitude }
+      },
+      () => { /* 거부 시 거리 정렬 없이 그냥 표시 */ }
+    )
+  }
 })
 
 watch(() => props.initialQuery, (query) => {
@@ -194,19 +259,12 @@ onBeforeUnmount(() => {
 const isFavorite = (bank) => { return favoriteBanks.value.some(b => b.id === String(bank.id)) }
 
 const toggleFavorite = async (bank) => {
-  console.log("함수 진입 확인");
-  
   const token = localStorage.getItem('access_token');
-  console.log("저장된 토큰 값:", token); 
-  
   if (!token) {
-    console.error("토큰 없음! 로그인 필요");
     await alert('로그인이 필요한 서비스입니다.', '로그인 필요')
     return;
   }
-
   try {
-    console.log("서버로 요청 보내는 중...");
     await axios.post('http://127.0.0.1:8000/api/v1/map/favorites/', {
       id: String(bank.id),
       place_name: bank.place_name,
@@ -216,10 +274,8 @@ const toggleFavorite = async (bank) => {
     }, {
       headers: { Authorization: `Bearer ${token}` }
     });
-    console.log("요청 성공!");
     await fetchFavorites();
   } catch (error) {
-    console.error("에러 상세 내용:", error);
     await alert('요청 처리 중 오류가 발생했습니다.', '오류')
   }
 }
@@ -274,6 +330,7 @@ input { width: 100%; padding: 8px 12px; font-size: 13px; border: 1.5px solid #A0
 
 .result-count { font-size: 12px; color: #666; margin-bottom: 10px; }
 .result-count strong { color: #86A78A; }
+.sort-badge { font-size: 10px; color: #86A78A; font-weight: 600; margin-left: 6px; }
 
 .bank-item { background-color: #ffffff; border: 1px solid #e6e5da; border-radius: 8px; padding: 12px; margin-bottom: 8px; transition: border-color 0.15s ease; }
 .bank-item:hover { border-color: #86A78A; }
@@ -291,6 +348,29 @@ input { width: 100%; padding: 8px 12px; font-size: 13px; border: 1.5px solid #A0
 .bank-address { font-size: 12px; color: #666; }
 .bank-address i { color: #A0BAA3; }
 .bank-phone { font-size: 11px; color: #86A78A; }
+
+/* ✅ 길찾기 버튼 스타일 */
+.directions-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #86A78A;
+  background: #edf5ee;
+  border: 1px solid #A0BAA3;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  align-self: flex-start;
+}
+.directions-btn:hover {
+  background: #86A78A;
+  color: #fff;
+  border-color: #86A78A;
+}
 
 .no-result { text-align: center; padding: 40px 10px; border: 1px dashed #d1d0c5; border-radius: 8px; }
 .no-result p { font-size: 13px; font-weight: 600; color: #333d29; margin: 0 0 4px 0; display: flex; align-items: center; justify-content: center; }
