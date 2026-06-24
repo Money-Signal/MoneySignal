@@ -4,6 +4,11 @@ import apiClient from '@/api/axios'
 export const getPosts = (category = '') =>
   apiClient.get('/community/posts/', { params: category ? { category } : {} })
 
+// 키워드로 게시글 검색 — 상품 상세에서 관련 글 찾을 때 사용
+// search: 제목/본문 포함 키워드, limit: 최대 결과 수
+export const searchPosts = (search, limit = 5) =>
+  apiClient.get('/community/posts/', { params: { search, category: 'DEPOSIT', limit } })
+
 // 게시글 상세 조회
 export const getPost = (postId) => apiClient.get(`/community/posts/${postId}/`)
 

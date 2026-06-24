@@ -9,13 +9,27 @@
         <div class="d-flex align-items-center gap-2 mb-3">
           <h6 class="fw-bold mb-0 rec-title">맞춤 추천</h6>
           <span v-if="store.recommendationType === 'personalized'" class="ai-badge">
-            <i class="bi bi-stars me-1" />AI 추천
+            <i class="bi bi-robot me-1" />AI 추천
           </span>
         </div>
 
-        <!-- 추천 로딩 -->
-        <div v-if="store.isRecommendLoading" class="text-center py-3">
-          <div class="spinner-border spinner-border-sm" style="color:#86A78A" role="status" />
+        <!-- 추천 로딩: 스켈레톤 -->
+        <div v-if="store.isRecommendLoading">
+          <div class="insight-banner mb-3 skel-banner">
+            <i class="bi bi-robot me-2" />AI가 맞춤 상품을 분석하고 있어요
+            <span class="dot-flicker">...</span>
+          </div>
+          <div class="recommend-scroll">
+            <div v-for="i in 5" :key="i" class="rec-card skel-card">
+              <div class="skel-line skel-chip mb-2" />
+              <div class="skel-line skel-name mt-1" />
+              <div class="skel-line skel-name-short mt-1" />
+              <div class="skel-line skel-member mt-2" />
+              <div class="skel-line skel-reason mt-2" />
+              <div class="skel-line skel-reason-short mt-1" />
+              <div class="skel-line skel-rate mt-auto" />
+            </div>
+          </div>
         </div>
 
         <!-- 비로그인 유도 -->
@@ -33,27 +47,42 @@
         </div>
 
         <!-- 추천 카드 가로 스크롤 -->
-        <div v-else-if="store.recommendations.length" class="recommend-scroll">
-          <div
-            v-for="product in store.recommendations"
-            :key="product.id"
-            class="rec-card"
-            @click="goDetail(product.id)"
-          >
-            <div class="d-flex justify-content-between align-items-start mb-2">
-              <span class="bank-chip">{{ product.kor_co_nm }}</span>
-              <button
-                :class="['heart-btn', product.liked ? 'liked' : '']"
-                @click.stop="onLike(product.id)"
-              >
-                <i :class="product.liked ? 'bi bi-heart-fill' : 'bi bi-heart'" />
-              </button>
-            </div>
-            <p class="rec-name">{{ product.fin_prdt_nm }}</p>
-            <p class="rec-member">{{ product.join_member || '-' }}</p>
-            <div class="rec-rate mt-auto">
-              <span class="rate-value">{{ product.max_intr_rate2 != null ? product.max_intr_rate2 + '%' : '-' }}</span>
-              <span class="rate-label">최고금리</span>
+        <div v-else-if="store.recommendations.length">
+          <!-- AI 전체 인사이트 배너 -->
+          <div v-if="store.overallInsight" class="insight-banner mb-3">
+            <i class="bi bi-stars me-2" />{{ store.overallInsight }}
+          </div>
+
+          <div class="recommend-scroll">
+            <div
+              v-for="product in store.recommendations"
+              :key="product.id"
+              class="rec-card"
+              @click="goDetail(product.id)"
+            >
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <span class="bank-chip">{{ product.kor_co_nm }}</span>
+                <button
+                  :class="['heart-btn', product.liked ? 'liked' : '']"
+                  @click.stop="onLike(product.id)"
+                >
+                  <i :class="product.liked ? 'bi bi-heart-fill' : 'bi bi-heart'" />
+                </button>
+              </div>
+              <p class="rec-name">{{ product.fin_prdt_nm }}</p>
+              <p class="rec-member">{{ product.join_member || '-' }}</p>
+              <div class="rec-rate mt-auto">
+                <span class="rate-value">{{ product.max_intr_rate2 != null ? product.max_intr_rate2 + '%' : '-' }}</span>
+                <span class="rate-label">최고금리</span>
+              </div>
+
+              <!-- 호버 시 추천 이유 오버레이 -->
+              <div v-if="product.ai_reason" class="rec-reason-overlay">
+                <div>
+                  <p class="reason-label"><i class="bi bi-robot me-1" />추천 이유</p>
+                  <p class="reason-text">{{ product.ai_reason }}</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -84,7 +113,6 @@
           <div class="sort-wrap">
             <DropdownSelect v-model="sortBy" :options="sortOptions" />
           </div>
-
         </div>
       </div>
 
@@ -105,10 +133,10 @@
         <p v-else>검색 조건에 맞는 상품이 없어요.</p>
       </div>
 
-      <!-- 상품 목록 -->
+      <!-- 상품 목록: 현재 페이지에 해당하는 상품만 렌더링 -->
       <div v-else class="row g-3">
         <div
-          v-for="product in filteredSortedProducts"
+          v-for="product in pagedProducts"
           :key="product.id"
           class="col-md-6 col-lg-4"
         >
@@ -150,6 +178,30 @@
         </div>
       </div>
 
+      <!-- 페이지네이션 -->
+      <div v-if="totalPages > 1" class="pagination-wrap">
+        <!-- 이전 버튼 -->
+        <button class="page-btn" :disabled="currentPage === 1" @click="goPage(currentPage - 1)">
+          <i class="bi bi-chevron-left" />
+        </button>
+
+        <!-- 페이지 번호 버튼들 -->
+        <button
+          v-for="p in pageNumbers"
+          :key="p"
+          :class="['page-btn', { active: p === currentPage, ellipsis: p === '...' }]"
+          :disabled="p === '...'"
+          @click="p !== '...' && goPage(p)"
+        >
+          {{ p }}
+        </button>
+
+        <!-- 다음 버튼 -->
+        <button class="page-btn" :disabled="currentPage === totalPages" @click="goPage(currentPage + 1)">
+          <i class="bi bi-chevron-right" />
+        </button>
+      </div>
+
     </div>
   </div>
 
@@ -158,7 +210,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, RouterLink } from 'vue-router'
 import { useProductStore } from '@/stores/product'
 import { useAuthStore } from '@/stores/auth'
@@ -189,12 +241,16 @@ onMounted(() => {
 function changeTab(type) {
   activeTab.value = type
   searchQuery.value = ''
+  currentPage.value = 1 // 탭 전환 시 1페이지로 리셋
   store.fetchProducts({ type })
 }
 
+// ── 필터·정렬 ─────────────────────────────────────────────
+// 검색어·정렬 기준을 클라이언트에서 처리. store.products는 전체 목록을 보유.
 const filteredSortedProducts = computed(() => {
   let list = [...store.products]
 
+  // 은행명 또는 상품명으로 부분 일치 검색
   if (searchQuery.value.trim()) {
     const q = searchQuery.value.trim().toLowerCase()
     list = list.filter(p =>
@@ -202,6 +258,7 @@ const filteredSortedProducts = computed(() => {
     )
   }
 
+  // 선택된 정렬 기준 적용 (기본값 'popular'은 서버에서 이미 like_cnt 내림차순 반환)
   if (sortBy.value === 'rate_desc')
     list.sort((a, b) => (b.max_intr_rate2 ?? -Infinity) - (a.max_intr_rate2 ?? -Infinity))
   else if (sortBy.value === 'base_rate_desc')
@@ -210,11 +267,60 @@ const filteredSortedProducts = computed(() => {
   return list
 })
 
+// ── 페이지네이션 ──────────────────────────────────────────
+const PAGE_SIZE = 12 // 한 페이지에 보여줄 상품 수
+const currentPage = ref(1)
+
+// 전체 페이지 수
+const totalPages = computed(() =>
+  Math.ceil(filteredSortedProducts.value.length / PAGE_SIZE)
+)
+
+// 현재 페이지에 해당하는 상품 슬라이스
+const pagedProducts = computed(() => {
+  const start = (currentPage.value - 1) * PAGE_SIZE
+  return filteredSortedProducts.value.slice(start, start + PAGE_SIZE)
+})
+
+// 검색어·정렬이 바뀌면 1페이지로 리셋
+watch([searchQuery, sortBy], () => { currentPage.value = 1 })
+
+// 페이지 이동 + 목록 상단으로 스크롤
+function goPage(page) {
+  currentPage.value = page
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+// 표시할 페이지 번호 목록 (최대 7개, 중간 생략 시 '...' 삽입)
+// 예: 1 2 3 ... 8 9 10  /  1 ... 4 5 6 ... 10
+const pageNumbers = computed(() => {
+  const total = totalPages.value
+  const cur = currentPage.value
+  if (total <= 7) {
+    // 페이지가 7개 이하면 전부 표시
+    return Array.from({ length: total }, (_, i) => i + 1)
+  }
+  const pages = []
+  if (cur <= 4) {
+    // 앞쪽에 있을 때: 1 2 3 4 5 ... last
+    pages.push(1, 2, 3, 4, 5, '...', total)
+  } else if (cur >= total - 3) {
+    // 뒤쪽에 있을 때: 1 ... last-4 last-3 last-2 last-1 last
+    pages.push(1, '...', total - 4, total - 3, total - 2, total - 1, total)
+  } else {
+    // 중간에 있을 때: 1 ... cur-1 cur cur+1 ... last
+    pages.push(1, '...', cur - 1, cur, cur + 1, '...', total)
+  }
+  return pages
+})
+
+// ── 라우팅·인터랙션 ───────────────────────────────────────
 function goDetail(id) {
   router.push({ name: 'productDetail', params: { id } })
 }
 
 async function onLike(productId) {
+  // 비로그인 시 로그인 페이지로 이동
   if (!authStore.isLoggedIn) {
     router.push({ name: 'login' })
     return
@@ -255,12 +361,14 @@ function onCompareToggle(product) {
 }
 .rec-title { color: #2d2d25; font-size: 0.95rem; }
 .ai-badge {
-  font-size: 0.7rem;
+  font-size: 0.78rem;
   font-weight: 700;
   color: #fff;
   background: #86A78A;
-  padding: 3px 10px;
+  padding: 4px 12px;
   border-radius: 20px;
+  box-shadow: 0 2px 6px rgba(134,167,138,0.35);
+  letter-spacing: 0.3px;
 }
 
 /* 유도 박스 */
@@ -284,9 +392,56 @@ function onCompareToggle(product) {
 }
 .nudge-link:hover { text-decoration: underline; }
 
+/* ── 스켈레톤 ── */
+@keyframes shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position: 600px 0; }
+}
+@keyframes dot-blink {
+  0%, 100% { opacity: 0.2; }
+  50%       { opacity: 1; }
+}
+
+.skel-banner {
+  opacity: 0.75;
+}
+.dot-flicker {
+  display: inline-block;
+  animation: dot-blink 1.2s ease-in-out infinite;
+  letter-spacing: 2px;
+}
+.skel-card {
+  pointer-events: none;
+}
+.skel-line {
+  background: linear-gradient(90deg, #e8e8e0 25%, #f4f4ec 50%, #e8e8e0 75%);
+  background-size: 1200px 100%;
+  animation: shimmer 1.5s infinite linear;
+  border-radius: 6px;
+}
+.skel-chip        { width: 64px;  height: 20px; border-radius: 20px; }
+.skel-name        { width: 90%;   height: 13px; }
+.skel-name-short  { width: 65%;   height: 13px; }
+.skel-member      { width: 50%;   height: 11px; }
+.skel-reason      { width: 95%;   height: 11px; }
+.skel-reason-short{ width: 75%;   height: 11px; }
+.skel-rate        { width: 55px;  height: 22px; border-radius: 6px; margin-top: 14px; }
+
+/* AI 인사이트 배너 */
+.insight-banner {
+  font-size: 0.83rem;
+  color: #4a7a51;
+  background: #f0f5f1;
+  border-left: 3px solid #86A78A;
+  border-radius: 6px;
+  padding: 9px 14px;
+  line-height: 1.55;
+}
+
 /* 추천 가로 스크롤 */
 .recommend-scroll {
   display: flex;
+  justify-content: center;
   gap: 12px;
   overflow-x: auto;
   padding: 4px 2px 8px;
@@ -301,14 +456,16 @@ function onCompareToggle(product) {
 
 /* 추천 카드 */
 .rec-card {
-  flex: 0 0 190px;
+  flex: 0 0 230px;
   background: #fafaf6;
   border: 1.5px solid #e4e3d4;
   border-radius: 12px;
-  padding: 14px;
+  padding: 18px 18px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
+  position: relative;
+  overflow: hidden;
   transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
 }
 .rec-card:hover {
@@ -330,6 +487,33 @@ function onCompareToggle(product) {
 .rec-member {
   font-size: 0.75rem;
   color: #a0a090;
+  margin: 0;
+}
+.rec-reason-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(34, 44, 36, 0.87);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.22s ease;
+  pointer-events: none;
+}
+.rec-card:hover .rec-reason-overlay {
+  opacity: 1;
+}
+.reason-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #a8d4ac;
+  margin: 0 0 6px;
+}
+.reason-text {
+  font-size: 0.78rem;
+  color: #f0f5f0;
+  line-height: 1.55;
   margin: 0;
 }
 .rec-rate {
@@ -548,6 +732,52 @@ function onCompareToggle(product) {
   color: #c8c7b8;
   cursor: not-allowed;
   background: #f7f7f2;
+}
+
+/* ── 페이지네이션 ── */
+.pagination-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  margin-top: 36px;
+}
+.page-btn {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1.5px solid #e4e3d4;
+  background: #fff;
+  color: #5a5a4a;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.page-btn:hover:not(:disabled):not(.active):not(.ellipsis) {
+  border-color: #A0BAA3;
+  color: #4a7a51;
+}
+.page-btn.active {
+  background: #86A78A;
+  border-color: #86A78A;
+  color: #fff;
+  font-weight: 700;
+  cursor: default;
+}
+.page-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.page-btn.ellipsis {
+  border-color: transparent;
+  background: none;
+  cursor: default;
+  color: #b0b0a0;
 }
 
 /* 비교바 있을 때 하단 여백 */

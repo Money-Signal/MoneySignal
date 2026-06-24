@@ -1,6 +1,7 @@
 """금융상품 관련 View"""
 
 import os
+import json as json_module
 from openai import OpenAI
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -159,13 +160,22 @@ def recommend_products(request):
         products = sorted(queryset, key=lambda p: id_order.get(p.id, 999))[:5]
 
         serializer = ProductListSerializer(products, many=True, context={'request': request})
+
+        # --- STEP 5: AI 추천 이유 생성 ---
+        insights = _generate_ai_insights(user, products, profile_text)
+        reasons = insights.get('reasons', {})
+        result_data = [dict(item) for item in serializer.data]
+        for item in result_data:
+            item['ai_reason'] = reasons.get(str(item['id']), '')
+
         return Response({
             'type': 'personalized',
-            'results': serializer.data,
+            'overall_insight': insights.get('overall_insight', ''),
+            'results': result_data,
         })
 
     except Exception:  # pylint: disable=broad-except
-        return Response({'type': 'personalized', 'results': []})
+        return Response({'type': 'personalized', 'overall_insight': '', 'results': []})
 
 
 def _build_user_profile_text(user):
@@ -223,6 +233,53 @@ def _build_user_profile_text(user):
 
     return '\n'.join(lines) if lines else '금융상품 추천을 원합니다.'
 
+
+def _generate_ai_insights(user, products, profile_text: str) -> dict:
+    """
+    유저 프로필 + 추천 상품 목록을 LLM에 전달해
+    overall_insight(전체 이유)와 상품별 ai_reason을 JSON으로 반환.
+    실패 시 빈 dict 반환 (추천 결과 자체에는 영향 없음).
+    """
+    try:
+        product_lines = []
+        for i, p in enumerate(products, 1):
+            options = p.options.all()
+            max_rate = max((o.intr_rate2 or o.intr_rate or 0) for o in options) if options.exists() else 0
+            product_lines.append(
+                f"{i}. [ID:{p.id}] {p.fin_prdt_nm} ({p.kor_co_nm}) | 최고금리 {max_rate}% | 가입대상: {p.join_member or '제한없음'}"
+            )
+
+        prompt = f"""당신은 친절한 금융 전문가입니다. 아래 사용자 프로필과 AI가 선별한 추천 상품을 보고, 왜 이 상품들이 이 사용자에게 적합한지 한국어로 설명해주세요.
+
+사용자 프로필:
+{profile_text}
+
+추천 상품:
+{chr(10).join(product_lines)}
+
+아래 JSON 형식으로만 응답하세요 (다른 텍스트 없이):
+{{
+  "overall_insight": "이 사용자에게 이 상품들을 추천하는 전체적인 이유 1~2문장. 사용자의 투자성향, 목표, 직업 등을 구체적으로 언급.",
+  "reasons": {{
+    "<상품ID>": "이 상품을 추천하는 이유 1~2문장. 사용자 프로필과 연결지어 구체적으로.",
+    ...
+  }}
+}}"""
+
+        response = gms_client.chat.completions.create(
+            model='gpt-4.1-mini',
+            messages=[{'role': 'user', 'content': prompt}],
+            temperature=0.7,
+            max_tokens=800,
+        )
+        content = response.choices[0].message.content.strip()
+        if '```' in content:
+            content = content.split('```')[1]
+            if content.startswith('json'):
+                content = content[4:]
+        return json_module.loads(content.strip())
+    except Exception:  # pylint: disable=broad-except
+        return {'overall_insight': '', 'reasons': {}}
 
 
 @api_view(['GET'])

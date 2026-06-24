@@ -114,18 +114,17 @@ const resetPeriod = () => {
 
 /* 🎯 [금 시세 활성화]: 고급스러운 톤다운 소프트 골드 테마 */
 .toggle-btn.active-gold {
-  background: #D4AF37; /* 클래식 골드 컬러 */
+  background: rgba(212, 175, 55, 0.72);
   color: #ffffff;
-  border-color: #D4AF37;
-  box-shadow: 0 4px 10px rgba(212, 175, 55, 0.25);
+  border-color: rgba(212, 175, 55, 0.6);
+  box-shadow: 0 4px 10px rgba(212, 175, 55, 0.2);
 }
 
-/* 🎯 [은 시세 활성화]: 반장님 그래프 선 색상(#86A78A)과 완벽 동기화 */
 .toggle-btn.active-silver {
-  background: #8A9A86; /* 그래프 선 색상 */
+  background: rgba(138, 154, 134, 0.72);
   color: #ffffff;
-  border-color: #8A9A86;
-  box-shadow: 0 4px 10px rgba(134, 167, 138, 0.25);
+  border-color: rgba(138, 154, 134, 0.6);
+  box-shadow: 0 4px 10px rgba(134, 167, 138, 0.2);
 }
 
 /* 날짜 입력 및 버튼 컨트롤 영역 */
@@ -194,12 +193,12 @@ input[type="date"]:focus {
 
 /* 조회 버튼 */
 .submit-btn {
-  background: #2D3E2E;
+  background: rgba(45, 62, 46, 0.75);
   color: #ffffff;
 }
 .submit-btn:hover {
-  background: #1E2B1F;
-  box-shadow: 0 4px 12px rgba(45, 62, 46, 0.3);
+  background: rgba(45, 62, 46, 0.9);
+  box-shadow: 0 4px 12px rgba(45, 62, 46, 0.25);
   transform: translateY(-1px);
 }
 
