@@ -213,7 +213,6 @@ const filteredSortedProducts = computed(() => {
   return list
 })
 
-
 function goDetail(id) {
   router.push({ name: 'productDetail', params: { id } })
 }
@@ -298,7 +297,7 @@ function onCompareToggle(product) {
   display: flex;
   gap: 12px;
   overflow-x: auto;
-  padding: 4px 2px 8px;  /* 위 padding으로 hover lift 잘림 방지 */
+  padding: 4px 2px 8px;
   scrollbar-width: thin;
   scrollbar-color: #c8d9c9 transparent;
 }
@@ -563,8 +562,6 @@ function onCompareToggle(product) {
 .page-wrap {
   padding-bottom: 80px;
 }
-
-
 
 /* ── 빈 상태 ── */
 .empty-state {
