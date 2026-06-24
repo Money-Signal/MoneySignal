@@ -4,6 +4,7 @@
     <SideNav />
     <main class="app-main">
       <RouterView />
+      <AppFooter />
     </main>
   </div>
 </template>
@@ -11,6 +12,7 @@
 <script setup>
 import AppHeader from '@/components/common/AppHeader.vue'
 import SideNav from '@/components/common/SideNav.vue'
+import AppFooter from '@/components/common/AppFooter.vue'
 </script>
 
 <style>
