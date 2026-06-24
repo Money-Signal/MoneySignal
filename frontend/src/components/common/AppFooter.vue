@@ -9,10 +9,12 @@
         <div class="footer-col">
           <p class="footer-col-title">서비스</p>
           <ul>
-            <li><RouterLink to="/currency">환율</RouterLink></li>
-            <li><RouterLink to="/map">은행 찾기</RouterLink></li>
-            <li><RouterLink to="/products">금융 상품</RouterLink></li>
-            <li><RouterLink to="/video">금융 영상</RouterLink></li>
+            <li><RouterLink to="/products">예·적금 상품</RouterLink></li>
+            <li><RouterLink to="/currency">환율 조회</RouterLink></li>
+            <li><RouterLink to="/video">영상 검색</RouterLink></li>
+            <li><RouterLink to="/map">주변 은행 찾기</RouterLink></li>
+            <li><RouterLink to="/exchange">금·은 시세</RouterLink></li>
+            <li><RouterLink to="/community">커뮤니티</RouterLink></li>
           </ul>
         </div>
 

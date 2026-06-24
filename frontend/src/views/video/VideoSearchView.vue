@@ -144,12 +144,11 @@ onMounted(() => {
 .video-search-container {
   background-color: #f9f8f5;
   min-height: 100vh;
-  padding: 2.5rem 0;
 }
 .inner-container {
   max-width: 1320px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 2.5rem 2rem;
 }
 
 h2 {
@@ -159,7 +158,7 @@ h2 {
 }
 
 .search-box {
-  margin-bottom: 25px;
+  margin: 0 auto 25px;
   width: 100%;
   max-width: 600px;
   display: flex;
@@ -195,6 +194,7 @@ button:hover {
   font-weight: 500;
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 
 .sort-toggle-group {
@@ -203,7 +203,8 @@ button:hover {
   padding: 4px;
   border-radius: 10px;
   border: 1px solid #A0BAA3;
-  margin-bottom: 30px;
+  margin: 0 auto 30px;
+  width: fit-content;
 }
 .sort-btn {
   padding: 6px 16px;
@@ -229,6 +230,7 @@ button:hover {
 .video-grid-wrapper {
   width: 100%;
   max-width: 1200px;
+  margin: 0 auto;
 }
 /* 자식 컴포넌트인 VideoList 안의 그리드 속성을 오버라이딩하여 최대 3열로 강제 제어합니다 */
 .video-grid-wrapper :deep(.video-list) {
@@ -259,6 +261,7 @@ button:hover {
   list-style: none;
   padding: 0;
   gap: 6px;
+  justify-content: center;
 }
 .page-link {
   color: #556256;

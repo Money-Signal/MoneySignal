@@ -1,24 +1,21 @@
 <template>
-  <div class="map-page-outer">
-    <div class="map-header-area">
-      <div class="map-header-inner">
-        <PageHeader title="주변 은행 검색" description="내 주변 은행을 찾고 영업시간과 위치를 확인하세요." />
+  <div class="page-outer">
+    <div class="page-container">
+      <PageHeader title="주변 은행 검색" description="내 주변 은행을 찾고 영업시간과 위치를 확인하세요." />
+      <div class="map-page-wrapper">
+        <div class="side-panel">
+          <BankList
+            :banks="searchedBanks"
+            :initial-query="initialQuery"
+            @search-result="onSearchResult"
+            @select-bank="onSelectBank"
+          />
+        </div>
+        <div class="map-panel">
+          <BankMap ref="bankMapRef" :banks="searchedBanks" />
+        </div>
       </div>
     </div>
-    <div class="map-page-wrapper">
-    <div class="side-panel">
-      <BankList
-        :banks="searchedBanks"
-        :initial-query="initialQuery"
-        @search-result="onSearchResult"
-        @select-bank="onSelectBank"
-      />
-    </div>
-    
-    <div class="map-panel">
-      <BankMap ref="bankMapRef" :banks="searchedBanks" />
-    </div>
-  </div>
   </div>
 </template>
 
@@ -54,41 +51,26 @@ const onSelectBank = (bank) => {
 </script>
 
 <style scoped>
-.map-page-outer {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-}
-
-.map-header-area {
-  padding: 1.5rem 0 0;
-  background: #f9f8f5;
-  flex-shrink: 0;
-}
-.map-header-inner {
-  max-width: 1320px;
-  margin: 0 auto;
-  padding: 0 2rem;
-}
-
 .map-page-wrapper {
   display: flex;
   width: 100%;
-  flex: 1;
-  height: 0;
+  height: calc(100vh - 260px);
+  min-height: 500px;
   overflow: hidden;
-  background-color: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e1e6e2;
 }
 
 .side-panel {
-  width: 40%;
+  width: 38%;
   height: 100%;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .map-panel {
-  width: 60%;
+  width: 62%;
   height: 100%;
 }
 

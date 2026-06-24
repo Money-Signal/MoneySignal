@@ -1,6 +1,5 @@
 @import './base.css';
 
-/* ?꾩껜 諛곌꼍???듭씪 */
 html, body {
   min-height: 100vh;
   background-color: #f9f8f5;
@@ -13,5 +12,17 @@ html, body {
 a {
   text-decoration: none;
   transition: color 0.2s;
+}
+
+/* 공통 페이지 레이아웃 */
+.page-outer {
+  min-height: 100vh;
+  background: #f9f8f5;
+}
+
+.page-container {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 2.5rem 2rem;
 }
 

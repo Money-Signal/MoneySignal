@@ -1,11 +1,7 @@
 <template>
   <div class="bank-list-container">
     <div class="search-section">
-      <h2 class="search-title">
-        <i class="bi bi-bank me-1"></i> 주변 은행 찾기
-      </h2>
       <p class="search-subtitle">원하시는 지역과 은행명을 입력해 주세요.</p>
-      
       <div class="search-form">
         <!-- 광역시도 커스텀 드롭다운 -->
         <div class="form-group custom-select-wrapper" ref="sidoRef">
@@ -42,7 +38,7 @@
         <div class="form-group input-wrapper">
           <input 
             v-model="bankName" 
-            placeholder="은행명 (예: 국민은행)" 
+            placeholder="은행명 / 위치"
             @keyup.enter="searchBanks" 
           />
         </div>
@@ -125,7 +121,7 @@ import axios from 'axios'
 import { regionData } from '@/utils/regionData'
 import { useAlert } from '@/composables/useAlert'
 
-const {alert, confirm} = useAlert()
+const { alert } = useAlert()
 
 const props = defineProps({
   banks: { type: Array, default: () => [] },

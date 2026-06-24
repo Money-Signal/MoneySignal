@@ -1,7 +1,7 @@
 <template>
-  <div class="page-wrap">
+  <div class="page-outer">
 
-    <div class="container main-content">
+    <div class="page-container">
 
       <PageHeader title="커뮤니티" description="금융 정보와 생각을 자유롭게 나눠보세요.">
         <RouterLink v-if="authStore.isLoggedIn" to="/community/write" class="write-btn">
@@ -205,10 +205,6 @@ function formatDate(dateStr) {
 </script>
 
 <style scoped>
-.page-wrap {
-  min-height: 100vh;
-  background: #f9f8f5;
-}
 
 /* ── 페이지 헤더 ── */
 .page-header {
@@ -238,7 +234,6 @@ function formatDate(dateStr) {
 }
 
 /* ── 메인 컨텐츠 ── */
-.main-content { padding-top: 28px; padding-bottom: 48px; padding-left: 2rem; padding-right: 2rem; }
 
 /* ── 섹션 제목 ── */
 .section-title {
