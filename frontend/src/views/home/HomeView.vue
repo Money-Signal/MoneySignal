@@ -308,26 +308,29 @@ onBeforeUnmount(() => {
 }
 
 .hero-section {
-  background: #fff;
+  background: #f5f4ed;
   border-bottom: 0.5px solid #eee;
   position: relative;
   overflow: hidden;
+  padding: 24px;
 }
 .hero-section::before {
   content: '';
   position: absolute;
-  top: -100px; right: -100px;
-  width: 500px; height: 500px;
-  background: radial-gradient(circle, rgba(160,186,163,0.15) 0%, transparent 70%);
+  bottom: -60px; left: -60px;
+  width: 380px; height: 280px;
+  background: radial-gradient(circle, rgba(180,200,165,0.65) 0%, transparent 75%);
+  filter: blur(20px);
   border-radius: 50%;
   pointer-events: none;
 }
 .hero-section::after {
   content: '';
   position: absolute;
-  bottom: -75px; left: 30%;
-  width: 375px; height: 375px;
-  background: radial-gradient(circle, rgba(242,193,93,0.1) 0%, transparent 70%);
+  bottom: -80px; right: -60px;
+  width: 420px; height: 300px;
+  background: radial-gradient(circle, rgba(238,212,140,0.55) 0%, transparent 75%);
+  filter: blur(20px);
   border-radius: 50%;
   pointer-events: none;
 }
@@ -336,24 +339,31 @@ onBeforeUnmount(() => {
   max-width: 1120px;
   margin: 0 auto;
   width: 100%;
-  padding: 65px 30px 55px;
+  padding: 64px 36px;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 50px;
   align-items: center;
   position: relative;
   z-index: 1;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
 }
 .hero-left { position: relative; z-index: 1; }
 .hero-tag {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: #f9f8f5;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 20px;
   padding: 6px 15px;
   font-size: 13px;
-  color: #6A7F5A;
+  color: #4f5f43;
   font-weight: 600;
   margin-bottom: 24px;
 }
@@ -387,9 +397,9 @@ onBeforeUnmount(() => {
 .btn-secondary {
   padding: 12px 26px;
   border-radius: 8px;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.45);
   color: #3B2F26;
-  border: 1.5px solid #e0ddd5;
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
   font-size: 14px;
   text-decoration: none;
   font-weight: 600;
@@ -402,12 +412,15 @@ onBeforeUnmount(() => {
   position: relative;
   z-index: 1;
   height: 340px;
+  transform: translateX(-30px);
 }
 .float-card {
   position: absolute;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-radius: 16px;
-  border: 0.5px solid #e8e8e8;
+  border: 1px solid rgba(255, 255, 255, 0.6);
   padding: 16px 18px;
   box-shadow: 0 4px 24px rgba(0,0,0,0.07);
 }
@@ -421,7 +434,7 @@ onBeforeUnmount(() => {
 .fc-chg.up { color: #4a8a4e; }
 .fc-chg.dn { color: #a05050; }
 .mini-chart { height: 48px; display: flex; align-items: flex-end; gap: 4px; }
-.bar { background: #C5D9C7; border-radius: 2px; flex: 1; }
+.bar { background: rgba(106,127,90,0.35); border-radius: 2px; flex: 1; }
 .bar.hi { background: #6A7F5A; }
 
 .badge-card {
@@ -441,7 +454,8 @@ onBeforeUnmount(() => {
 
 /* mini-rates: 2x2 그리드로 4개 표시 */
 .mini-rates {
-  bottom: 0; left: 0;
+  bottom: -30px;
+  left: -20px;
   width: 260px;
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -550,7 +564,10 @@ onBeforeUnmount(() => {
 
 .cta-section { padding: 0 0 44px; background: #fff; }
 .cta {
-  background: linear-gradient(135deg, #6A7F5A 0%, #86A78A 100%);
+  background: linear-gradient(135deg, rgba(106, 127, 90, 0.55) 0%, rgba(134, 167, 138, 0.55) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 18px;
   padding: 34px 44px;
   display: flex;

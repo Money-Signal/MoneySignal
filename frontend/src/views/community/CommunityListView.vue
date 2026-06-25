@@ -9,6 +9,9 @@
         </RouterLink>
       </PageHeader>
 
+      <LoadingSpinner v-if="store.isLoading" />
+      <template v-else>
+
       <!-- 인기글 섹션 -->
       <div v-if="popularPosts.length" class="section mb-5">
         <h3 class="section-title"><i class="bi bi-fire me-2" style="color:#F2A93B"/>인기글</h3>
@@ -63,13 +66,8 @@
         </div>
       </div>
 
-      <!-- 로딩 -->
-      <div v-if="store.isLoading" class="loading-wrap">
-        <div class="spinner-border" style="color:#86A78A" role="status" />
-      </div>
-
       <!-- 에러 -->
-      <div v-else-if="store.error" class="alert alert-danger">{{ store.error }}</div>
+      <div v-if="store.error" class="alert alert-danger">{{ store.error }}</div>
 
       <!-- 빈 상태 -->
       <div v-else-if="filteredPosts.length === 0" class="empty-state">
@@ -113,6 +111,7 @@
         </div>
       </div>
 
+      </template>
     </div>
   </div>
 </template>
@@ -123,6 +122,7 @@ import { useRouter, RouterLink } from 'vue-router'
 import { useCommunityStore } from '@/stores/community'
 import { useAuthStore } from '@/stores/auth'
 import PageHeader from '@/components/common/PageHeader.vue'
+import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 
 const router    = useRouter()
 const store     = useCommunityStore()

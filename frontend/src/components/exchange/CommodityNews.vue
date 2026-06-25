@@ -4,10 +4,7 @@
       <i class="bi bi-newspaper me-2"></i> 실시간 주요 뉴스
     </h3>
     
-    <div v-if="loading" class="news-status text-center">
-      <div class="spinner-border text-success" role="status"></div>
-      <p class="mt-2">최신 원자재 뉴스를 불러오는 중입니다...</p>
-    </div>
+    <LoadingSpinner v-if="loading" />
 
     <div v-else-if="newsList && newsList.length > 0" class="news-list">
       <div v-for="(item, index) in newsList" :key="index" class="news-item">
@@ -36,7 +33,8 @@
 </template>
 
 <script setup>
-// 부모(AssetView)로부터 받는 데이터 정의
+import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
+
 defineProps({
   newsList: { type: Array, default: () => [] },
   loading: { type: Boolean, default: false }

@@ -16,7 +16,7 @@
             v-if="!isLoading && chartData && chartData.labels && chartData.labels.length > 0" 
             :chart-data="chartData" 
           />
-          <div v-else-if="isLoading" class="status-state">⏳ 시세 데이터를 불러오는 중입니다...</div>
+          <LoadingSpinner v-else-if="isLoading" />
           <div v-else class="status-state empty-state">❌ 해당 기간 내에 데이터가 존재하지 않습니다.</div>
         </div>
       </div>
@@ -36,6 +36,7 @@ import PageHeader from '@/components/common/PageHeader.vue'
 import AssetFilter from '@/components/exchange/AssetFilter.vue'
 import AssetChart from '@/components/exchange/AssetChart.vue'
 import CommodityNews from '@/components/exchange/CommodityNews.vue'
+import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 
 const excelMinDate = ref('')
 const excelMaxDate = ref('')

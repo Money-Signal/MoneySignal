@@ -3,9 +3,7 @@
     <div class="container py-4">
 
       <!-- 로딩 -->
-      <div v-if="store.isLoading" class="text-center py-5">
-        <div class="spinner-border" style="color: #86A78A;" role="status" />
-      </div>
+      <LoadingSpinner v-if="store.isLoading" />
 
       <!-- 에러 -->
       <div v-else-if="store.error" class="alert alert-danger">
@@ -181,9 +179,7 @@
           </div>
 
           <!-- 로딩 -->
-          <div v-if="relatedLoading" class="text-center py-4">
-            <div class="spinner-border spinner-border-sm" style="color:#86A78A" role="status" />
-          </div>
+          <LoadingSpinner v-if="relatedLoading" />
 
           <!-- 결과 없음 -->
           <div v-else-if="relatedPosts.length === 0" class="related-empty">
@@ -247,6 +243,7 @@ import { useAuthStore } from '@/stores/auth'
 import { searchPosts } from '@/api/community'
 import YieldCalculator from '@/components/products/YieldCalculator.vue'
 import RateChart from '@/components/products/RateChart.vue'
+import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 
 const route = useRoute()
 const router = useRouter()

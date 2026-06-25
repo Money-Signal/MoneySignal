@@ -104,7 +104,7 @@ const props = defineProps({
   selectedCode: { type: String, default: '' }
 })
 
-const emit = defineEmits(['update:selectedCode'])
+const emit = defineEmits(['update:selectedCode', 'loaded'])
 
 const rates = ref([])
 const error = ref('')
@@ -177,6 +177,8 @@ onMounted(async () => {
     rates.value = res.data.filter(item => item.deal_bas_r && item.deal_bas_r !== '-')
   } catch (e) {
     error.value = '환율 데이터를 불러올 수 없습니다.'
+  } finally {
+    emit('loaded')
   }
 })
 

@@ -22,10 +22,7 @@
         </button>
       </div>
 
-      <div v-if="loading" class="chart-loading">
-        <div class="spinner-border spinner-border-sm text-secondary me-2"></div>
-        불러오는 중...
-      </div>
+      <LoadingSpinner v-if="loading" />
 
       <div v-if="error" class="alert-error mb-2">
         <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
@@ -45,6 +42,7 @@ import {
   CategoryScale, LineController, Tooltip, Legend, Filler, Title
 } from 'chart.js'
 import { fetchChartData } from '@/api/currency'
+import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 
 Chart.register(LineElement, PointElement, LinearScale, CategoryScale, LineController, Tooltip, Legend, Filler, Title)
 

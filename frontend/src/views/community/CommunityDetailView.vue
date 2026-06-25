@@ -3,9 +3,7 @@
     <div class="container py-4" style="max-width: 780px;">
 
       <!-- 로딩 -->
-      <div v-if="store.isLoading" class="loading-wrap">
-        <div class="spinner-border" style="color:#86A78A" role="status" />
-      </div>
+      <LoadingSpinner v-if="store.isLoading" />
 
       <!-- 에러 -->
       <div v-else-if="store.error" class="alert alert-danger">{{ store.error }}</div>
@@ -140,6 +138,7 @@ import { useRouter, useRoute, RouterLink } from 'vue-router'
 import { useCommunityStore } from '@/stores/community'
 import { useAuthStore } from '@/stores/auth'
 import { useAlert } from '@/composables/useAlert'
+import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 
 const {confirm} = useAlert()
 
