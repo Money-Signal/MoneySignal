@@ -133,7 +133,7 @@ def recommend_products(request):
         collection = get_collection()
         query_kwargs = {
             'query_embeddings': [user_vector],
-            'n_results': min(20, collection.count()),  # 후속 DB 필터를 위해 여유있게 조회
+            'n_results': min(50, collection.count()),  # 후속 DB 필터를 위해 여유있게 조회
         }
         if where_filter:
             query_kwargs['where'] = where_filter
@@ -192,11 +192,11 @@ def _build_user_profile_text(user):
         'AGGRESSIVE':   '공격형 - 높은 수익 추구',
     }
     OCCUPATION_MAP = {
-        'EMPLOYEE':    '직장인 (급여소득자)',
-        'SELF_EMPLOY': '자영업자 (개인사업자)',
-        'STUDENT':     '학생',
-        'HOUSEWIFE':   '주부',
-        'FREELANCER':  '프리랜서',
+        'EMPLOYEE':    '직장인, 급여소득자, 급여이체, 급여통장, 직장인 전용',
+        'SELF_EMPLOY': '자영업자, 개인사업자, 사업소득자',
+        'STUDENT':     '학생, 청년, 대학생, 만 18세 이상, 청소년',
+        'HOUSEWIFE':   '주부, 비직장인, 가정주부',
+        'FREELANCER':  '프리랜서, 자유직업자, 사업소득자',
         'ETC':         '기타',
     }
 
@@ -229,7 +229,7 @@ def _build_user_profile_text(user):
         lines.append(f'월 저축 가능 금액: {user.monthly_saving}만원')
 
     if user.investment_period:
-        lines.append(f'최대 투자 기간: {user.investment_period}개월')
+        lines.append(f'{user.investment_period}개월 이하 만기 상품 선호, {user.investment_period}개월 단기 저축')
 
     return '\n'.join(lines) if lines else '금융상품 추천을 원합니다.'
 

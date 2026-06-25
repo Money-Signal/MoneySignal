@@ -73,7 +73,7 @@ const profileImageUrl = computed(() => {
       <nav class="header-nav">
         <template v-if="authStore.isLoggedIn">
           <RouterLink to="/mypage" class="user-profile">
-            <img :src="profileImageUrl" alt="프로필" class="profile-avatar" />
+            <img :src="profileImageUrl" alt="프로필" class="profile-avatar" @error="$event.target.src = defaultProfileImg" />
             <span class="nickname">{{ authStore.user?.nickname }}</span>
           </RouterLink>
           <button class="btn-logout" @click="handleLogout">로그아웃</button>
