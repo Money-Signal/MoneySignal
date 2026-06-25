@@ -1,7 +1,6 @@
 gunicorn==21.2.0
 whitenoise==6.7.0
 dj-database-url==2.3.0
-PyMySQL==1.1.1
 aiohappyeyeballs==2.6.2
 aiohttp==3.14.1
 aiosignal==1.4.0
