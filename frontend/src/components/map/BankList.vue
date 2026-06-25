@@ -184,7 +184,7 @@ const fetchFavorites = async () => {
   try {
     const token = localStorage.getItem('access_token')
     if (!token) return
-    const response = await axios.get('http://127.0.0.1:8000/api/v1/map/favorites/', { headers: { Authorization: `Bearer ${token}` } })
+    const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/map/favorites/`, { headers: { Authorization: `Bearer ${token}` } })
     favoriteBanks.value = response.data.map(fav => ({ id: fav.kakao_id, place_name: fav.place_name, road_address_name: fav.road_address_name, address_name: fav.address_name, phone: fav.phone }))
   } catch (error) { console.error('즐겨찾기 목록 로드 실패:', error) }
 }
@@ -265,7 +265,7 @@ const toggleFavorite = async (bank) => {
     return;
   }
   try {
-    await axios.post('http://127.0.0.1:8000/api/v1/map/favorites/', {
+    await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/map/favorites/`, {
       id: String(bank.id),
       place_name: bank.place_name,
       road_address_name: bank.road_address_name,

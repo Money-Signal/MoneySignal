@@ -50,7 +50,7 @@ const currentFilters = ref({ assetType: 'gold', startDate: '', endDate: '' })
 const fetchNewsData = async () => {
   isNewsLoading.value = true
   try {
-    const response = await axios.get('http://localhost:8000/api/exchange/news/', { params: { asset_type: currentFilters.value.assetType } })
+    const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/exchange/news/`, { params: { asset_type: currentFilters.value.assetType } })
     newsList.value = response.data.news || []
   } catch (error) { newsList.value = [] } finally { isNewsLoading.value = false }
 }
@@ -58,7 +58,7 @@ const fetchNewsData = async () => {
 const fetchChartData = async () => {
   isLoading.value = true 
   try {
-    const response = await axios.get('http://localhost:8000/api/exchange/prices/', {
+    const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/exchange/prices/`, {
       params: { asset_type: currentFilters.value.assetType, start_date: currentFilters.value.startDate, end_date: currentFilters.value.endDate }
     })
     chartData.value = { asset_type: response.data?.asset_type || currentFilters.value.assetType, labels: response.data?.labels || [], prices: response.data?.prices || [] }

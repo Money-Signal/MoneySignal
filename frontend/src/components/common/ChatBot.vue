@@ -130,7 +130,7 @@ const sendMessage = async () => {
   await scrollToBottom()
 
   try {
-    const res = await axios.post('http://localhost:8000/api/chatbot/', { message: text })
+    const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/chatbot/`, { message: text })
     messages.value.push({ role: 'assistant', content: res.data.answer })
   } catch (e) {
     messages.value.push({

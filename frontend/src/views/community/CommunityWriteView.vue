@@ -133,7 +133,7 @@ onMounted(async () => {
     form.value.title    = store.post.title
     form.value.content  = store.post.content
     if (store.post.image) {
-      const BACKEND_URL = 'http://127.0.0.1:8000'
+      const BACKEND_URL = import.meta.env.VITE_API_URL
       const img = store.post.image
       imagePreview.value = img.startsWith('http') ? img : `${BACKEND_URL}${img}`
     }

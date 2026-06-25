@@ -366,7 +366,7 @@ const investmentOptions = [
   { value: 'AGGRESSIVE',   label: '공격형', emoji: '🚀', desc: '수익 극대화'   },
 ]
 
-const BACKEND_URL = 'http://127.0.0.1:8000'
+const BACKEND_URL = import.meta.env.VITE_API_URL
 
 // 프로필 사진 URL — 로컬 미리보기 → 백엔드 미디어 경로 → 기본 이미지 순으로 적용
 const profileImageUrl = computed(() => {
