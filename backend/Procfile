@@ -1,1 +1,1 @@
-web: python manage.py migrate && python manage.py collectstatic --noinput && gunicorn moneysignal.wsgi:application --bind 0.0.0.0:$PORT --workers 2
+web: python manage.py migrate && python manage.py collectstatic --noinput && python manage.py fetch_products && python manage.py build_faq_embeddings && gunicorn moneysignal.wsgi:application --bind 0.0.0.0:$PORT --workers 2
