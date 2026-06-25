@@ -8,7 +8,7 @@ from rest_framework.permissions import AllowAny
 from products.services import recommend_products, search_faq
 
 GMS_API_URL = "https://gms.ssafy.io/gmsapi/api.openai.com/v1/chat/completions"  # GMS 실제 엔드포인트로 교체
-MODEL = "gpt-4.1-mini"
+MODEL = "gpt-5"
 
 SYSTEM_PROMPT = """
 너는 한국의 돈 흐름을 알려주는 MoneySignal의 금융 도우미 '한돈이'야.

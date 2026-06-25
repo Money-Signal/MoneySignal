@@ -267,7 +267,7 @@ def _generate_ai_insights(user, products, profile_text: str) -> dict:
 }}"""
 
         response = gms_client.chat.completions.create(
-            model='gpt-4.1-mini',
+            model='gpt-5',
             messages=[{'role': 'user', 'content': prompt}],
             temperature=0.7,
             max_tokens=800,
