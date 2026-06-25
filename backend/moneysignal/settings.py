@@ -70,10 +70,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'moneysignal.wsgi.application'
 
 # ─── 데이터베이스 ─────────────────────────────────────────────────────────────
-# 배포 환경: MYSQL_URL 또는 DATABASE_URL 사용 / 로컬: 개별 변수 사용
-import pymysql
-pymysql.install_as_MySQLdb()
-
+# 배포 환경: MYSQL_URL 사용 / 로컬: 개별 변수 사용
 _db_url = os.environ.get('MYSQL_URL') or os.environ.get('DATABASE_URL')
 if _db_url:
     DATABASES = {
