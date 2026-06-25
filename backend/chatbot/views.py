@@ -128,7 +128,7 @@ def chatbot_response(request):
         payload = {
             "model": MODEL,
             "messages": [
-                {"role": "system", "content": full_system},
+                {"role": "developer", "content": full_system},
                 {"role": "user", "content": user_message},
             ],
             "max_tokens": 600,
