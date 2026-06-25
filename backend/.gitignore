@@ -1,0 +1,69 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# Django
+db.sqlite3
+db.sqlite3-journal
+
+# ChromaDB
+chroma_db/
+
+# Migrations (선택)
+# */migrations/*
+# !*/migrations/__init__.py
+
+# Environment Variables
+.env
+.env.*
+
+# Static Files
+staticfiles/
+static/
+
+# Media Files
+media/
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Pytest
+.pytest_cache/
+
+# Coverage
+.coverage
+htmlcov/
+
+# Type Checker
+.mypy_cache/
+
+# Ruff
+.ruff_cache/
+
+# Django Stuff
+local_settings.py
+
+# Build
+build/
+dist/
+
+# Temporary Files
+*.tmp
+*.bak
+
+# Node
+node_modules/
