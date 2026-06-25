@@ -104,7 +104,7 @@ const fetchVideos = async () => {
   isLoading.value = true
   currentSlide.value = 0
   try {
-    const response = await axios.get('http://localhost:8000/api/video/search/', {
+    const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/video/search/`, {
       params: {
         q: searchQuery.value || '재테크',
         sort_by: currentSort.value,

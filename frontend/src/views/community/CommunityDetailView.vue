@@ -154,7 +154,7 @@ const CATEGORY_MAP = {
   STOCK: '주식·ETF', REALESTATE: '부동산', QNA: '질문',
 }
 const categoryLabel = (value) => CATEGORY_MAP[value] ?? value
-const BACKEND_URL   = 'http://127.0.0.1:8000'
+const BACKEND_URL   = import.meta.env.VITE_API_URL
 const defaultAvatar = 'https://ui-avatars.com/api/?background=86A78A&color=fff&size=64'
 
 function getAvatarUrl(img) {

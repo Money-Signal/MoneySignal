@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const apiClient = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api',
+  baseURL: `${import.meta.env.VITE_API_URL}/api`,
   headers: { 'Content-Type': 'application/json' },
 })
 
@@ -37,7 +37,7 @@ apiClient.interceptors.response.use(
       }
 
       try {
-        const { data } = await axios.post('http://127.0.0.1:8000/api/accounts/token/refresh/', {
+        const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/api/accounts/token/refresh/`, {
           refresh: refreshToken,
         })
 

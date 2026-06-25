@@ -83,9 +83,9 @@ const isExpanded = ref(false);
 
 const fetchVideoData = async (videoId) => {
   try {
-    const res = await axios.get(`http://localhost:8000/api/video/detail/${videoId}/`);
+    const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/video/detail/${videoId}/`);
     video.value = res.data.video;
-    const resRelated = await axios.get(`http://localhost:8000/api/video/related/${videoId}/`);
+    const resRelated = await axios.get(`${import.meta.env.VITE_API_URL}/api/video/related/${videoId}/`);
     relatedVideos.value = resRelated.data.related;
     isExpanded.value = false;
   } catch (error) {
