@@ -1,6 +1,7 @@
 from pathlib import Path
 from datetime import timedelta
 import os
+import dj_database_url
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -68,20 +69,28 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'moneysignal.wsgi.application'
 
-# ─── 데이터베이스 (Railway MySQL 환경변수 자동 인식) ──────────────────────────
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get('MYSQLDATABASE', 'moneysignal'),
-        'USER': os.environ.get('MYSQLUSER', 'root'),
-        'PASSWORD': os.environ.get('MYSQLPASSWORD', os.environ.get('DB_PASSWORD', '')),
-        'HOST': os.environ.get('MYSQLHOST', 'localhost'),
-        'PORT': os.environ.get('MYSQLPORT', '3306'),
-        'OPTIONS': {
-            'charset': 'utf8mb4',
-        },
+# ─── 데이터베이스 ─────────────────────────────────────────────────────────────
+# 배포 환경: MYSQL_URL 또는 DATABASE_URL 사용 / 로컬: 개별 변수 사용
+import pymysql
+pymysql.install_as_MySQLdb()
+
+_db_url = os.environ.get('MYSQL_URL') or os.environ.get('DATABASE_URL')
+if _db_url:
+    DATABASES = {
+        'default': dj_database_url.parse(_db_url, conn_max_age=600)
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': os.environ.get('MYSQLDATABASE', 'moneysignal'),
+            'USER': os.environ.get('MYSQLUSER', 'root'),
+            'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+            'HOST': os.environ.get('MYSQLHOST', '127.0.0.1'),
+            'PORT': os.environ.get('MYSQLPORT', '3306'),
+            'OPTIONS': {'charset': 'utf8mb4'},
+        }
+    }
 
 # ─── 비밀번호 검증 ────────────────────────────────────────────────────────────
 AUTH_PASSWORD_VALIDATORS = [
