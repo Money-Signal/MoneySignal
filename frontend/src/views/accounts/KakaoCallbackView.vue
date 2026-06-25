@@ -8,23 +8,24 @@
 import { onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useAlert } from '@/composables/useAlert'
 
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
+const { successConfetti } = useAlert()
 
-onMounted(() => {
-  // URL 쿼리 파라미터에서 JWT 토큰 및 신규 유저 여부 추출
+onMounted(async () => {
   const access = route.query.access
   const refresh = route.query.refresh
   const isNew = route.query.is_new === 'true'
 
   if (access && refresh) {
     authStore.loginWithKakao(access, refresh)
-    // 처음 로그인한 유저는 프로필 설정 페이지로, 기존 유저는 홈으로 이동
+    await authStore.fetchProfile()
+    await successConfetti(`${authStore.user?.nickname}님 환영합니다! 🎉`, '로그인 성공')
     router.push(isNew ? '/profile/setup' : '/')
   } else {
-    // 토큰이 없으면 로그인 페이지로 이동
     router.push('/login')
   }
 })

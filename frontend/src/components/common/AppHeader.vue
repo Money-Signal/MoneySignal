@@ -89,10 +89,8 @@ const profileImageUrl = computed(() => {
 
 <style scoped>
 .app-header {
-  /* 배경색을 요청하신 #C7D4CA로 변경 */
-  background: #C7D4CA; 
-  /* 경계선 색상도 배경과 어울리는 더 부드러운 톤으로 조정 */
-  border-bottom: 0.5px solid #b3c2b8;
+  background: #5C7050;
+  border-bottom: 1px solid #E0D2B0;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -135,8 +133,8 @@ const profileImageUrl = computed(() => {
   font-weight: 700;
   letter-spacing: -0.5px;
 }
-.money { color: #3B2F26; }
-.signal { color: #6A7F5A; }
+.money { color: #fff; }
+.signal { color: #d9e6cf; }
 
 /* 메뉴 */
 .main-nav {
@@ -153,23 +151,22 @@ const profileImageUrl = computed(() => {
   padding: 6px 12px;
   border-radius: 20px;
   font-size: 13px;
-  color: #555;
+  color: rgba(255, 255, 255, 0.85);
   text-decoration: none;
   transition: background 0.15s, color 0.15s;
   white-space: nowrap;
 }
-.nav-item i { font-size: 14px; color: #A0BAA3; }
-.nav-item:hover { 
-  /* 호버 시 색상을 배경색보다 조금 더 진한 톤으로 */
-  background: #b3c2b8; 
-  color: #2a352a; 
+.nav-item i { font-size: 14px; color: rgba(255, 255, 255, 0.7); }
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
 }
 .nav-item.active {
-  background: #b3c2b8;
-  color: #3f4d3f;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
   font-weight: 600;
 }
-.nav-item.active i { color: #3f4d3f; }
+.nav-item.active i { color: #fff; }
 
 .header-nav {
   display: flex;
@@ -187,48 +184,51 @@ const profileImageUrl = computed(() => {
   transition: background 0.15s;
 }
 .user-profile:hover {
-  background: #b3c2b8;
+  background: rgba(255, 255, 255, 0.12);
 }
 .profile-avatar {
   width: 28px;
   height: 28px;
   border-radius: 50%;
   object-fit: cover;
-  border: 1.5px solid #a0baa3;
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
   flex-shrink: 0;
 }
 .nickname {
   font-size: 13px;
-  color: #3B2F26;
+  color: #fff;
   font-weight: 600;
 }
 .btn-mypage {
   padding: 6px 14px;
   border-radius: 20px;
-  border: 1.5px solid #6A7F5A;
+  border: 1.5px solid rgba(255, 255, 255, 0.7);
   background: transparent;
-  color: #6A7F5A;
+  color: #fff;
   font-size: 13px;
   text-decoration: none;
   cursor: pointer;
 }
 .btn-logout {
   font-size: 13px;
-  color: #999;
+  color: rgba(255, 255, 255, 0.7);
   background: none;
   border: none;
   cursor: pointer;
 }
-.btn-logout:hover { color: #6A7F5A; }
+.btn-logout:hover { color: #fff; }
 .btn-signup {
   padding: 6px 16px;
   border-radius: 20px;
   border: none;
-  background: #6A7F5A;
-  color: #fff;
+  background: #fff;
+  color: #5C7050;
   font-size: 13px;
   text-decoration: none;
   font-weight: 600;
+}
+.btn-signup:hover {
+  background: #f1f1f1;
 }
 .logo-img {
   height: 70px;

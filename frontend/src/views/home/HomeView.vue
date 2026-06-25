@@ -18,7 +18,7 @@
           </p>
           <div class="hero-btns">
             <RouterLink to="/signup" class="btn-primary">시작하기</RouterLink>
-            <RouterLink to="/currency" class="btn-secondary">더 알아보기</RouterLink>
+            <button class="btn-secondary" @click="scrollToBottom">더 알아보기</button>
           </div>
           <div class="hero-stats">
             <div class="stat">
@@ -81,10 +81,22 @@
         </div>
         <div class="feat-grid">
           <div class="feat-card">
+            <div class="feat-icon"><i class="bi bi-piggy-bank"></i></div>
+            <p class="feat-name">금융 상품 추천</p>
+            <p class="feat-desc">나에게 맞는 예·적금 상품을 비교하고 추천받기</p>
+            <RouterLink to="/products" class="feat-link">자세히 보기 →</RouterLink>
+          </div>
+          <div class="feat-card">
             <div class="feat-icon"><i class="bi bi-currency-exchange"></i></div>
             <p class="feat-name">실시간 환율</p>
             <p class="feat-desc">27개국 환율을 실시간으로 확인하고 차트로 추이 분석</p>
             <RouterLink to="/currency" class="feat-link">자세히 보기 →</RouterLink>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon"><i class="bi bi-play-circle"></i></div>
+            <p class="feat-name">금융 영상</p>
+            <p class="feat-desc">금융 전문가 유튜브 콘텐츠로 더 깊은 인사이트</p>
+            <RouterLink to="/video" class="feat-link">자세히 보기 →</RouterLink>
           </div>
           <div class="feat-card">
             <div class="feat-icon"><i class="bi bi-map"></i></div>
@@ -93,16 +105,10 @@
             <RouterLink to="/map" class="feat-link">자세히 보기 →</RouterLink>
           </div>
           <div class="feat-card">
-            <div class="feat-icon"><i class="bi bi-star"></i></div>
-            <p class="feat-name">금융 상품 추천</p>
-            <p class="feat-desc">나에게 맞는 예·적금 상품을 비교하고 추천받기</p>
-            <RouterLink to="/products" class="feat-link">자세히 보기 →</RouterLink>
-          </div>
-          <div class="feat-card">
-            <div class="feat-icon"><i class="bi bi-play-circle"></i></div>
-            <p class="feat-name">금융 영상</p>
-            <p class="feat-desc">금융 전문가 유튜브 콘텐츠로 더 깊은 인사이트</p>
-            <RouterLink to="/video" class="feat-link">자세히 보기 →</RouterLink>
+            <div class="feat-icon"><i class="bi bi-people"></i></div>
+            <p class="feat-name">커뮤니티</p>
+            <p class="feat-desc">금융 정보를 이웃과 나누고 질문하며 함께 성장</p>
+            <RouterLink to="/community" class="feat-link">자세히 보기 →</RouterLink>
           </div>
         </div>
       </div>
@@ -289,6 +295,10 @@ onBeforeUnmount(() => {
   clearInterval(depositTimer)
   clearInterval(savingTimer)
 })
+
+const scrollToBottom = () => {
+  window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
+}
 </script>
 
 <style scoped>
@@ -402,6 +412,7 @@ onBeforeUnmount(() => {
   font-size: 14px;
   text-decoration: none;
   font-weight: 600;
+  cursor: pointer;
 }
 .hero-stats { display: flex; gap: 34px; }
 .stat-val { font-size: 22px; font-weight: 800; color: #1a1a1a; }
@@ -482,7 +493,7 @@ onBeforeUnmount(() => {
   margin-bottom: 10px;
 }
 .feat-title { font-size: 22px; font-weight: 800; color: #1a1a1a; letter-spacing: -0.3px; }
-.feat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.feat-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
 .feat-card {
   background: #fff;
   padding: 22px;
