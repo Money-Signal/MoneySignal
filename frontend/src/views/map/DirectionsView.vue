@@ -17,19 +17,17 @@
                 @click="selectMode('car')"
                 :disabled="routeLoading"
               >
-                <span v-if="routeLoading && travelMode === 'car'" class="spinner btn-spinner"></span>
+                <img v-if="routeLoading && travelMode === 'car'" :src="spinnerSvg" class="spinner-img btn-spinner" />
                 <i v-else class="bi bi-car-front-fill"></i>
                 자동차
               </button>
               <button
                 class="mode-btn"
-                :class="{ active: travelMode === 'walk', loading: routeLoading && travelMode === 'walk' }"
+                :class="{ active: travelMode === 'walk' }"
                 @click="selectMode('walk')"
-                :disabled="routeLoading"
               >
-                <span v-if="routeLoading && travelMode === 'walk'" class="spinner btn-spinner"></span>
-                <i v-else class="bi bi-person-walking"></i>
-                도보
+                <i class="bi bi-person-walking"></i>
+                도보 <span class="kakaomap-badge">카카오맵</span>
               </button>
             </div>
             <!-- 출발지 미설정 안내 -->
@@ -64,7 +62,7 @@
 
             <div v-if="originMode === 'gps'" class="location-status">
               <div v-if="originLoading" class="status-row loading">
-                <span class="spinner"></span> 현재 위치 확인 중...
+                <img :src="spinnerSvg" class="spinner-img" /> 현재 위치 확인 중...
               </div>
               <div v-else-if="originCoords" class="status-row success">
                 <i class="bi bi-geo-alt-fill"></i> 현재 위치 사용 중
@@ -183,6 +181,7 @@ import { useRoute } from 'vue-router'
 import PageHeader from '@/components/common/PageHeader.vue'
 import { useAlert } from '@/composables/useAlert'
 import bankMarkerImg from '@/assets/bank-marker.png'
+import spinnerSvg from '@/assets/spinner.svg'
 import originMarkerImg from '@/assets/origin-marker.png'
 
 const route = useRoute()
@@ -413,25 +412,19 @@ const getRoute = async () => {
   const dest = `${destCoords.value.lng},${destCoords.value.lat}`
 
   try {
-    let url, headers
-
-    if (travelMode.value === 'car') {
-      url = `https://apis-navi.kakaomobility.com/v1/directions?origin=${origin}&destination=${dest}&summary=false`
-      headers = { 'Authorization': `KakaoAK ${REST_KEY}`, 'Content-Type': 'application/json' }
-    } else {
-      // 도보: 카카오 로컬 도보 경로
-      url = `https://apis-navi.kakaomobility.com/v1/wadding/directions?origin=${origin}&destination=${dest}`
-      headers = { 'Authorization': `KakaoAK ${REST_KEY}`, 'Content-Type': 'application/json' }
+    if (travelMode.value === 'walk') {
+      // 도보: 카카오맵 웹으로 연결
+      openKakaoMapWalk()
+      routeLoading.value = false
+      return
     }
+
+    const url = `https://apis-navi.kakaomobility.com/v1/directions?origin=${origin}&destination=${dest}&summary=false`
+    const headers = { 'Authorization': `KakaoAK ${REST_KEY}`, 'Content-Type': 'application/json' }
 
     const res = await fetch(url, { headers })
     const data = await res.json()
-
-    if (travelMode.value === 'car') {
-      await drawCarRoute(data)
-    } else {
-      await drawWalkRoute(data)
-    }
+    await drawCarRoute(data)
   } catch (e) {
     console.error('경로 탐색 오류:', e)
     await alert('경로를 불러오는 데 실패했어요. 잠시 후 다시 시도해 주세요.', '경로 오류')
@@ -471,37 +464,17 @@ const drawCarRoute = async (data) => {
   fitBounds(linePath)
 }
 
-const drawWalkRoute = async (data) => {
-  if (!data.routes || data.routes[0]?.result_code !== 0) {
-    await alert('도보 경로를 찾을 수 없어요.\n자동차 경로로 전환합니다.', '경로 없음')
-    travelMode.value = 'car'
-    getRoute()
-    return
-  }
-  const route = data.routes[0]
-  routeSummary.value = {
-    distance: route.summary.distance,
-    duration: route.summary.duration
-  }
-
-  const linePath = []
-  route.sections.forEach(section => {
-    section.roads.forEach(road => {
-      for (let i = 0; i < road.vertexes.length; i += 2) {
-        linePath.push(new window.kakao.maps.LatLng(road.vertexes[i + 1], road.vertexes[i]))
-      }
-    })
-  })
-
-  polyline.value = new window.kakao.maps.Polyline({
-    path: linePath,
-    strokeWeight: 4,
-    strokeColor: '#4A90D9',
-    strokeOpacity: 0.85,
-    strokeStyle: 'shortdot'
-  })
-  polyline.value.setMap(map.value)
-  fitBounds(linePath)
+// 도보: 카카오맵 웹으로 연결
+const openKakaoMapWalk = () => {
+  const oLat = originCoords.value.lat
+  const oLng = originCoords.value.lng
+  const dLat = destCoords.value.lat
+  const dLng = destCoords.value.lng
+  // 카카오맵 웹 길찾기 URL: /link/from/출발지명,위도,경도/to/목적지명,위도,경도
+  const url = `https://map.kakao.com/link/from/${encodeURIComponent('출발지')},${oLat},${oLng}/to/${encodeURIComponent(destName.value)},${dLat},${dLng}`
+  window.open(url, '_blank')
+  // 카카오맵 이동 후 자동차 모드로 복귀
+  travelMode.value = 'car'
 }
 
 const fitBounds = (linePath) => {
@@ -603,20 +576,12 @@ onMounted(async () => {
 .status-row.success { background: #edf5ee; color: #2D6A4F; }
 .status-row.warn    { background: #fff8e6; color: #8a6200; }
 
-.spinner {
-  width: 14px; height: 14px;
-  border: 2px solid rgba(134, 167, 138, 0.3);
-  border-top-color: #86A78A;
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-  display: inline-block;
+.spinner-img {
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
+  display: inline-block;
 }
-.spinner.white {
-  border-color: rgba(255,255,255,0.3);
-  border-top-color: #fff;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
 
 .text-btn {
   background: none; border: none; cursor: pointer;
@@ -692,14 +657,7 @@ onMounted(async () => {
   box-shadow: 0 2px 8px rgba(134,167,138,0.25);
 }
 .mode-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-.btn-spinner {
-  width: 13px; height: 13px;
-  border: 2px solid rgba(45,106,79,0.25);
-  border-top-color: #2D6A4F;
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-  display: inline-block;
-}
+.btn-spinner { width: 18px; height: 18px; }
 .mode-hint {
   margin: 8px 0 0; font-size: 11px; color: #aaa;
   display: flex; align-items: center; gap: 4px;
@@ -774,4 +732,18 @@ onMounted(async () => {
   border-color: #86A78A !important;
 }
 .dest-confirmed > i { color: #86A78A !important; }
+</style>
+
+<style>
+.kakaomap-badge {
+  font-size: 9px;
+  font-weight: 700;
+  background: #FEE500;
+  color: #3C1E1E;
+  border-radius: 4px;
+  padding: 1px 5px;
+  margin-left: 3px;
+  vertical-align: middle;
+  white-space: nowrap;
+}
 </style>

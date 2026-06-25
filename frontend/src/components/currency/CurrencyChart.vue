@@ -1,21 +1,22 @@
 <template>
   <div class="chart-card">
-    <!-- 통화 미선택 시: 흰 카드 안에 안내문 -->
+    <!-- 통화 미선택 시 -->
     <div v-if="!selectedCode" class="empty-state">
       <i class="bi bi-bar-chart-line me-2"></i>통화를 선택하면 차트가 표시됩니다
     </div>
 
     <!-- 통화 선택 후 -->
-    <div v-else>
+    <div v-else class="chart-inner">
       <p class="card-label mb-3">
         <i class="bi bi-graph-up me-1"></i>환율 추이
       </p>
 
+      <!-- 빠른 필터 버튼 -->
       <div class="filter-row mb-3">
         <button
           v-for="f in filters"
           :key="f.days"
-          :class="['filter-btn', { active: selectedDays === f.days }]"
+          :class="['filter-btn', { active: selectedDays === f.days && !isCustomMode }]"
           @click="changeFilter(f.days)"
         >
           {{ f.label }}
@@ -23,6 +24,47 @@
       </div>
 
       <LoadingSpinner v-if="loading" />
+      <!-- 날짜 직접 설정 (항상 표시) -->
+      <div class="custom-date-row mb-3">
+        <div class="date-input-wrap">
+          <label>시작일</label>
+          <VueDatePicker
+            v-model="customStart"
+            :enable-time-picker="false"
+            :max-date="customEnd || today"
+            locale="ko"
+            format="yyyy-MM-dd"
+            placeholder="시작일 선택"
+            auto-apply
+            :clearable="false"
+            class="custom-dp"
+          />
+        </div>
+        <span class="date-separator">~</span>
+        <div class="date-input-wrap">
+          <label>종료일</label>
+          <VueDatePicker
+            v-model="customEnd"
+            :enable-time-picker="false"
+            :min-date="customStart"
+            :max-date="today"
+            locale="ko"
+            format="yyyy-MM-dd"
+            placeholder="종료일 선택"
+            auto-apply
+            :clearable="false"
+            class="custom-dp"
+          />
+        </div>
+        <button class="date-search-btn" @click="loadCustomChart" :disabled="!customStart || !customEnd">
+          <i class="bi bi-search me-1"></i>조회
+        </button>
+      </div>
+
+      <div v-if="loading" class="chart-loading">
+        <div class="spinner-border spinner-border-sm text-secondary me-2"></div>
+        신호를 찾는 중...
+      </div>
 
       <div v-if="error" class="alert-error mb-2">
         <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
@@ -36,13 +78,16 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch, nextTick, computed } from 'vue'
 import {
   Chart, LineElement, PointElement, LinearScale,
   CategoryScale, LineController, Tooltip, Legend, Filler, Title
 } from 'chart.js'
 import { fetchChartData } from '@/api/currency'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
+// 수정
+import VueDatePicker from '@vuepic/vue-datepicker'
+import '@vuepic/vue-datepicker/dist/main.css'
 
 Chart.register(LineElement, PointElement, LinearScale, CategoryScale, LineController, Tooltip, Legend, Filler, Title)
 
@@ -53,8 +98,13 @@ const props = defineProps({
 const chartCanvas = ref(null)
 const loading = ref(false)
 const error = ref('')
-const selectedDays = ref(null)  // ← 기본값 null (아무것도 선택 안 된 상태)
+const selectedDays = ref(null)
+const isCustomMode = ref(false)
+const customStart = ref(null)
+const customEnd = ref(null)
 let chartInstance = null
+
+const today = computed(() => new Date())
 
 const filters = [
   { label: '7일', days: 7 },
@@ -160,6 +210,7 @@ const renderChart = (labels, data) => {
 
 const loadChart = async (code, days) => {
   if (!code || !days) return
+  isCustomMode.value = false
   loading.value = true
   error.value = ''
   try {
@@ -167,28 +218,74 @@ const loadChart = async (code, days) => {
     const chartData = res.data.chart_data
     const labels = chartData.map(d => d.date)
     const data = chartData.map(d => d.rate)
-
-    loading.value = false  // ← canvas가 DOM에 나타나도록 먼저 false로
-    await nextTick()       // ← DOM 업데이트 기다리기
+    loading.value = false
+    await nextTick()
     renderChart(labels, data)
   } catch (e) {
     error.value = '차트 데이터를 불러올 수 없습니다.'
-    loading.value = false  // ← 에러 시에도 false로
+    loading.value = false
+  }
+}
+
+const loadCustomChart = async () => {
+  if (!customStart.value || !customEnd.value || !props.selectedCode) return
+
+  const start = new Date(customStart.value)
+  const end = new Date(customEnd.value)
+  const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1
+
+  if (days <= 0) {
+    error.value = '종료일이 시작일보다 빠릅니다.'
+    return
+  }
+
+  isCustomMode.value = true
+  selectedDays.value = null
+  loading.value = true
+  error.value = ''
+  try {
+    const res = await fetchChartData(props.selectedCode, days)
+    const chartData = res.data.chart_data
+    const labels = chartData.map(d => d.date)
+    const data = chartData.map(d => d.rate)
+    loading.value = false
+    await nextTick()
+    renderChart(labels, data)
+  } catch (e) {
+    error.value = '차트 데이터를 불러올 수 없습니다.'
+    loading.value = false
   }
 }
 
 const changeFilter = (days) => {
+  isCustomMode.value = false
   selectedDays.value = days
+  
+  // 날짜 피커 자동 업데이트
+  const end = new Date()
+  const start = new Date()
+  start.setDate(start.getDate() - days)
+  customEnd.value = end
+  customStart.value = start
+
   loadChart(props.selectedCode, days)
 }
 
-// 통화 선택 시 필터도 1달로 자동 선택 후 차트 로드
 watch(() => props.selectedCode, (code) => {
   if (code) {
-    selectedDays.value = 30  // ← 통화 선택하면 1달 기본 선택
+    isCustomMode.value = false
+    selectedDays.value = 30
+    // 날짜 피커 기본값: 1달 전 ~ 오늘
+    const end = new Date()
+    const start = new Date()
+    start.setMonth(start.getMonth() - 1)
+    customEnd.value = end
+    customStart.value = start
     loadChart(code, 30)
   } else {
-    selectedDays.value = null  // ← 통화 해제 시 필터도 초기화
+    selectedDays.value = null
+    customStart.value = null
+    customEnd.value = null
   }
 })
 </script>
@@ -203,6 +300,7 @@ watch(() => props.selectedCode, (code) => {
   display: flex;
   flex-direction: column;
 }
+.chart-inner { display: flex; flex-direction: column; }
 .card-label {
   font-size: 15px;
   color: #3a3a2e;
@@ -214,12 +312,6 @@ watch(() => props.selectedCode, (code) => {
   font-size: 15px;
   text-align: center;
   padding: 4rem 0;
-}
-.filter-wrap {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 1.25rem;
-  flex-wrap: wrap;
 }
 .filter-row {
   display: flex;
@@ -236,14 +328,78 @@ watch(() => props.selectedCode, (code) => {
   cursor: pointer;
   transition: all 0.15s;
 }
-.filter-btn.active {
-  background: #86A78A;
+.filter-btn.active { background: #86A78A; color: #fff; border-color: #86A78A; }
+.filter-btn:hover:not(.active) { background: #f3f5f0; }
+
+/* 날짜 설정 영역 */
+.custom-date-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+  background: #f9f8f5;
+  border-radius: 12px;
+  padding: 14px 16px;
+  border: 0.5px solid #e8e7de;
+}
+.date-input-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 140px;
+}
+.date-input-wrap label {
+  font-size: 11px;
+  color: #a0a090;
+  font-weight: 600;
+}
+.date-separator {
+  color: #A0BAA3;
+  font-weight: 500;
+  padding-bottom: 8px;
+}
+.date-search-btn {
+  padding: 9px 18px;
+  border-radius: 8px;
+  border: none;
+  background: #6a9e6e;
   color: #fff;
-  border-color: #86A78A;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+  height: 38px;
 }
-.filter-btn:hover:not(.active) {
-  background: #f3f5f0;
+.date-search-btn:hover:not(:disabled) { background: #5a8a5e; }
+.date-search-btn:disabled { background: #c8d9c9; cursor: not-allowed; }
+
+/* VueDatePicker 커스텀 */
+.custom-dp {
+  --dp-font-family: -apple-system, sans-serif;
+  --dp-border-radius: 8px;
+  --dp-input-padding: 8px 12px;
+  --dp-font-size: 13px;
+  --dp-input-border-color: #A0BAA3;
+  --dp-input-focus-border-color: #6a9e6e;
+  --dp-primary-color: #6a9e6e;
+  --dp-primary-text-color: #fff;
+  --dp-secondary-color: #f3f5f0;
+  --dp-hover-color: #eaf2ea;
+  --dp-hover-text-color: #2d2d25;
+  --dp-highlight-color: rgba(106, 158, 110, 0.1);
+  --dp-border-color: #A0BAA3;
+  --dp-menu-border-color: #e8e7de;
+  --dp-icon-color: #86A78A;
+  --dp-danger-color: #c0756a;
+  --dp-disabled-color: #f0efea;
+  --dp-scroll-bar-color: #c8d9c9;
+  --dp-background-color: #fff;
+  --dp-text-color: #2d2d25;
+  --dp-header-color: #f9f8f5;
 }
+
 .chart-loading {
   display: flex;
   align-items: center;
@@ -259,10 +415,6 @@ watch(() => props.selectedCode, (code) => {
   padding: 0.75rem 1rem;
   font-size: 14px;
 }
-.canvas-wrap {
-  width: 100%;
-}
-canvas {
-  width: 100% !important;
-}
+.canvas-wrap { width: 100%; }
+canvas { width: 100% !important; }
 </style>
