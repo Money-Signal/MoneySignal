@@ -244,44 +244,43 @@ const mapProduct = (product, index) => ({
 })
 
 onMounted(async () => {
+  // 환율 + 상품 데이터 동시 로드
   try {
-    const res = await fetchLatestRates()
+    const [rateRes, depositRes, savingRes] = await Promise.all([
+      fetchLatestRates(),
+      getProducts({ type: 'D' }),
+      getProducts({ type: 'S' }),
+    ])
+
     const order = ['USD', 'JPY', 'EUR', 'CNY', 'GBP']
-    const filtered = res.data.filter(item => HOME_CURRENCIES.includes(item.cur_unit))
+    const filtered = rateRes.data.filter(item => HOME_CURRENCIES.includes(item.cur_unit))
     mainRates.value = order
       .map(code => filtered.find(item => item.cur_unit === code))
       .filter(Boolean)
-      .slice(0, 5)  // USD 1개 + 나머지 4개
+      .slice(0, 5)
 
-    rateTimer = setInterval(() => {
-      rateIdx.value = (rateIdx.value + 1) % 3
-    }, 3000)
+    depositProducts.value = depositRes.data.slice(0, 3).map(mapProduct)
+    savingProducts.value = savingRes.data.slice(0, 3).map(mapProduct)
   } catch (e) {
-    console.error('환율 로드 실패:', e)
+    console.error('데이터 로드 실패:', e)
   } finally {
     rateLoading.value = false
   }
 
-  try {
-    const [depositRes, savingRes] = await Promise.all([
-      getProducts({ type: 'D' }),
-      getProducts({ type: 'S' }),
-    ])
-    depositProducts.value = depositRes.data.slice(0, 3).map(mapProduct)
-    savingProducts.value = savingRes.data.slice(0, 3).map(mapProduct)
-  } catch (e) {
-    console.error('상품 데이터 로드 실패:', e)
-  }
-
+  // 세 타이머를 같은 시점에 동시 시작 → 항상 같은 박자로 넘어감
+  const INTERVAL = 3000
+  rateTimer = setInterval(() => {
+    rateIdx.value = (rateIdx.value + 1) % 3
+  }, INTERVAL)
   if (depositProducts.value.length) {
     depositTimer = setInterval(() => {
       depositIdx.value = (depositIdx.value + 1) % depositProducts.value.length
-    }, 3000)
+    }, INTERVAL)
   }
   if (savingProducts.value.length) {
     savingTimer = setInterval(() => {
       savingIdx.value = (savingIdx.value + 1) % savingProducts.value.length
-    }, 3000)
+    }, INTERVAL)
   }
 })
 
@@ -439,7 +438,6 @@ onBeforeUnmount(() => {
 .bc-title { font-size: 13px; font-weight: 700; color: #1a1a1a; margin-bottom: 3px; }
 .bc-sub { font-size: 12px; color: #999; }
 
-/* mini-rates: 2x2 그리드로 4개 표시 */
 .mini-rates {
   bottom: 0; left: 0;
   width: 260px;
