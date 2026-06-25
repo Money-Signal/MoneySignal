@@ -23,7 +23,6 @@
         </button>
       </div>
 
-      <LoadingSpinner v-if="loading" />
       <!-- 날짜 직접 설정 (항상 표시) -->
       <div class="custom-date-row mb-3">
         <div class="date-input-wrap">
@@ -84,8 +83,6 @@ import {
   CategoryScale, LineController, Tooltip, Legend, Filler, Title
 } from 'chart.js'
 import { fetchChartData } from '@/api/currency'
-import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
-// 수정
 import VueDatePicker from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
 

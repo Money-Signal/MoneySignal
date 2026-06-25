@@ -2,7 +2,7 @@
   <Teleport to="body">
     <!-- 전체 화면 캔버스 confetti (모달 밖) -->
     <canvas
-      v-if="modalType === 'successConfetti'"
+      v-if="isVisible && modalType === 'successConfetti'"
       ref="confettiCanvas"
       class="confetti-canvas"
     />

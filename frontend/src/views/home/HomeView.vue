@@ -38,17 +38,14 @@
 
         <div class="hero-right">
           <div class="float-card main-card">
-            <div v-if="rateLoading" class="loading-text">불러오는 중...</div>
-            <template v-else>
-              <p class="fc-label">{{ mainRates[0]?.cur_unit }} · {{ mainRates[0]?.cur_nm }} · 오늘 기준</p>
-              <p class="fc-val">{{ Number(mainRates[0]?.deal_bas_r).toLocaleString() }} ₩</p>
-              <p class="fc-chg" :class="(mainRates[0]?.change || 0) > 0 ? 'up' : 'dn'">
-                {{ (mainRates[0]?.change || 0) > 0 ? '▲' : '▼' }} 전일 대비 {{ Math.abs(mainRates[0]?.change || 0).toFixed(2) }}
-              </p>
-              <div class="mini-chart">
-                <div v-for="(h, i) in chartBars" :key="i" class="bar" :class="{ hi: i === chartBars.length - 1 }" :style="{ height: h + '%' }"></div>
-              </div>
-            </template>
+            <p class="fc-label">{{ mainRates[0]?.cur_unit }} · {{ mainRates[0]?.cur_nm }} · 오늘 기준</p>
+            <p class="fc-val">{{ Number(mainRates[0]?.deal_bas_r).toLocaleString() }} ₩</p>
+            <p class="fc-chg" :class="(mainRates[0]?.change || 0) > 0 ? 'up' : 'dn'">
+              {{ (mainRates[0]?.change || 0) > 0 ? '▲' : '▼' }} 전일 대비 {{ Math.abs(mainRates[0]?.change || 0).toFixed(2) }}
+            </p>
+            <div class="mini-chart">
+              <div v-for="(h, i) in chartBars" :key="i" class="bar" :class="{ hi: i === chartBars.length - 1 }" :style="{ height: h + '%' }"></div>
+            </div>
           </div>
 
           <div class="float-card badge-card" v-if="depositProducts.length">
@@ -58,15 +55,13 @@
           </div>
 
           <div class="float-card mini-rates">
-            <template v-if="!rateLoading">
-              <div v-for="item in mainRates.slice(1)" :key="item.cur_unit" class="mr-item">
-                <p class="mr-label">{{ item.cur_unit }}</p>
-                <p class="mr-val">{{ Number(item.deal_bas_r).toLocaleString() }} ₩</p>
-                <p class="mr-chg" :class="(item.change || 0) > 0 ? 'up' : 'dn'">
-                  {{ (item.change || 0) > 0 ? '▲' : '▼' }} {{ (item.change || 0) > 0 ? '+' : '' }}{{ (item.change || 0).toFixed(2) }}
-                </p>
-              </div>
-            </template>
+            <div v-for="item in mainRates.slice(1)" :key="item.cur_unit" class="mr-item">
+              <p class="mr-label">{{ item.cur_unit }}</p>
+              <p class="mr-val">{{ Number(item.deal_bas_r).toLocaleString() }} ₩</p>
+              <p class="mr-chg" :class="(item.change || 0) > 0 ? 'up' : 'dn'">
+                {{ (item.change || 0) > 0 ? '▲' : '▼' }} {{ (item.change || 0) > 0 ? '+' : '' }}{{ (item.change || 0).toFixed(2) }}
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -125,8 +120,7 @@
               <RouterLink to="/currency" class="col-more">더보기 →</RouterLink>
             </div>
             <div class="carousel-wrap">
-              <div v-if="rateLoading" class="loading-text">불러오는 중...</div>
-              <transition v-else name="fade" mode="out-in">
+              <transition name="fade" mode="out-in">
                 <div :key="rateIdx" class="info-card" @click="$router.push('/currency')">
                   <div class="rank" :class="rateIdx === 0 ? 'gold' : 'green'">{{ rateIdx + 1 }}</div>
                   <div class="cinfo">
@@ -221,12 +215,7 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
-import { fetchLatestRates } from '@/api/currency'
-import { getProducts } from '@/api/product'
 
-const rateLoading = ref(true)
-const mainRates = ref([])
-const HOME_CURRENCIES = ['USD', 'JPY', 'EUR', 'CNY', 'GBP']
 const chartBars = [55, 68, 48, 72, 60, 82, 65, 88, 100]
 
 const rateIdx = ref(0)
@@ -236,42 +225,26 @@ let rateTimer = null
 let depositTimer = null
 let savingTimer = null
 
-const depositProducts = ref([])
-const savingProducts = ref([])
+const mainRates = ref([
+  { cur_unit: 'USD', cur_nm: '미국 달러', deal_bas_r: '1385.50', change: 2.30 },
+  { cur_unit: 'JPY', cur_nm: '일본 엔', deal_bas_r: '9.08', change: -0.12 },
+  { cur_unit: 'EUR', cur_nm: '유럽 유로', deal_bas_r: '1552.40', change: 4.80 },
+  { cur_unit: 'CNY', cur_nm: '중국 위안', deal_bas_r: '191.20', change: -0.55 },
+  { cur_unit: 'GBP', cur_nm: '영국 파운드', deal_bas_r: '1770.80', change: 1.65 },
+])
 
-const PRODUCT_BADGES = ['최고금리', '인기', '추천']
-const mapProduct = (product, index) => ({
-  id: product.id,
-  bank: product.kor_co_nm,
-  name: product.fin_prdt_nm,
-  rate: product.max_intr_rate2 != null ? product.max_intr_rate2 : '-',
-  period: product.join_way?.split(',')[0]?.trim() || '온라인',
-  badge: PRODUCT_BADGES[index] || '인기',
-})
+const depositProducts = ref([
+  { id: 1, bank: 'KB국민은행', name: 'KB Star 정기예금', rate: '3.80', period: '12개월', badge: '최고금리' },
+  { id: 2, bank: '신한은행', name: '신한 My 정기예금', rate: '3.70', period: '12개월', badge: '인기' },
+  { id: 3, bank: '하나은행', name: '하나 정기예금 Plus', rate: '3.65', period: '6개월', badge: '추천' },
+])
+const savingProducts = ref([
+  { id: 1, bank: '우리은행', name: '우리 Super 적금', rate: '4.50', period: '12개월', badge: '최고금리' },
+  { id: 2, bank: '카카오뱅크', name: '카카오 세이브적금', rate: '4.20', period: '12개월', badge: '인기' },
+  { id: 3, bank: 'IBK기업은행', name: 'IBK 중기사랑적금', rate: '4.10', period: '6개월', badge: '추천' },
+])
 
-onMounted(async () => {
-  // 환율 + 상품 데이터 동시 로드
-  try {
-    const [rateRes, depositRes, savingRes] = await Promise.all([
-      fetchLatestRates(),
-      getProducts({ type: 'D' }),
-      getProducts({ type: 'S' }),
-    ])
-
-    const order = ['USD', 'JPY', 'EUR', 'CNY', 'GBP']
-    const filtered = rateRes.data.filter(item => HOME_CURRENCIES.includes(item.cur_unit))
-    mainRates.value = order
-      .map(code => filtered.find(item => item.cur_unit === code))
-      .filter(Boolean)
-      .slice(0, 5)
-
-    depositProducts.value = depositRes.data.slice(0, 3).map(mapProduct)
-    savingProducts.value = savingRes.data.slice(0, 3).map(mapProduct)
-  } catch (e) {
-    console.error('데이터 로드 실패:', e)
-  } finally {
-    rateLoading.value = false
-  }
+onMounted(() => {
 
   // 세 타이머를 같은 시점에 동시 시작 → 항상 같은 박자로 넘어감
   const INTERVAL = 3000
