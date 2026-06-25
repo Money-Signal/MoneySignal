@@ -4,6 +4,9 @@
 
       <PageHeader title="금융상품 비교" description="예금·적금 상품을 한눈에 비교하고 나에게 맞는 상품을 찾아보세요." class="mb-4" />
 
+      <LoadingSpinner v-if="store.isLoading" />
+      <template v-else>
+
       <!-- 추천 섹션 -->
       <div class="recommend-section mb-4">
         <div class="d-flex align-items-center gap-2 mb-3">
@@ -116,13 +119,8 @@
         </div>
       </div>
 
-      <!-- 로딩 -->
-      <div v-if="store.isLoading" class="text-center py-5">
-        <div class="spinner-border" style="color:#86A78A" role="status" />
-      </div>
-
       <!-- 에러 -->
-      <div v-else-if="store.error" class="alert alert-danger">
+      <div v-if="store.error" class="alert alert-danger">
         {{ store.error }}
       </div>
 
@@ -202,6 +200,7 @@
         </button>
       </div>
 
+      </template>
     </div>
   </div>
 
@@ -218,6 +217,7 @@ import CompareBar from '@/components/products/CompareBar.vue'
 import CompareModal from '@/components/products/CompareModal.vue'
 import DropdownSelect from '@/components/common/DropdownSelect.vue'
 import PageHeader from '@/components/common/PageHeader.vue'
+import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 
 const router = useRouter()
 const store = useProductStore()

@@ -211,9 +211,7 @@
       <div v-if="!isEditing" class="mypage-card mb-3">
         <p class="section-title"><i class="bi bi-heart-fill me-2" style="color:#c0756a" />관심 상품</p>
 
-        <div v-if="productStore.isLoading" class="text-center py-3">
-          <div class="spinner-border spinner-border-sm" style="color:#86A78A" role="status" />
-        </div>
+        <LoadingSpinner v-if="productStore.isLoading" />
 
         <div v-else-if="productStore.likedProducts.length === 0" class="liked-empty">
           <i class="bi bi-heart" />
@@ -311,6 +309,7 @@ import defaultProfileImg from '@/assets/default-profile.svg'
 import DropdownSelect from '@/components/common/DropdownSelect.vue'
 import PageHeader from '@/components/common/PageHeader.vue'
 import { useAlert } from '@/composables/useAlert'
+import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 
 const {alert, confirm} = useAlert()
 

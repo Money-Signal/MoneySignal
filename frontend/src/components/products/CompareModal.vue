@@ -13,10 +13,7 @@
       </div>
 
       <!-- 로딩 -->
-      <div v-if="isLoading" class="text-center py-5">
-        <div class="spinner-border" style="color:#86A78A" role="status" />
-        <p class="mt-3 text-muted small">상품 정보를 불러오는 중...</p>
-      </div>
+      <LoadingSpinner v-if="isLoading" />
 
       <!-- 비교 콘텐츠 -->
       <div v-else class="modal-content-scroll">
@@ -172,6 +169,7 @@ import {
 } from 'chart.js'
 import { getProductDetail } from '@/api/product'
 import { useProductStore } from '@/stores/product'
+import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 
 Chart.register(BarElement, BarController, LineElement, LineController, PointElement, LinearScale, CategoryScale, Tooltip, Legend, Filler)
 

@@ -88,7 +88,7 @@ const errors = reactive({ email: '', password: '' })
 function loginWithKakao() {
   const clientId = import.meta.env.VITE_KAKAO_REST_API_KEY
   const redirectUri = import.meta.env.VITE_KAKAO_REDIRECT_URI
-  window.location.href = `https://kauth.kakao.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code`
+  window.location.href = `https://kauth.kakao.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&prompt=login`
 }
 
 async function handleLogin() {
