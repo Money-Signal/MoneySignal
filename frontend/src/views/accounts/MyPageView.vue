@@ -11,7 +11,7 @@
       <!-- 프로필 카드 -->
       <div class="mypage-card profile-card mb-3">
         <div class="profile-image-wrapper">
-          <img :src="profileImageUrl" class="profile-image" alt="프로필 사진" />
+          <img :src="profileImageUrl" class="profile-image" alt="프로필 사진" @error="$event.target.src = defaultProfileImg" />
           <label v-if="isEditing" class="profile-image-edit">
             <input type="file" accept="image/*" @change="onImageChange" hidden />
             <i class="bi bi-camera-fill"></i>

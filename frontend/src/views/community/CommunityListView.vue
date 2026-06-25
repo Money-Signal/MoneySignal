@@ -97,7 +97,7 @@
               <p class="pc-preview">{{ post.content?.trim() }}</p>
               <div class="pc-bottom-row">
                 <div class="pc-author-row">
-                  <img :src="getAvatarUrl(post.author_image)" class="avatar" alt="프로필" />
+                  <img :src="getAvatarUrl(post.author_image)" class="avatar" alt="프로필" @error="$event.target.src = defaultAvatar" />
                   <span class="pc-author">{{ post.author_nickname }}</span>
                 </div>
                 <div class="pc-stats">

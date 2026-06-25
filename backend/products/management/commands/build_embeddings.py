@@ -97,13 +97,11 @@ class Command(BaseCommand):
         ) or '-'
 
         lines = [
-            f'상품명: {product.fin_prdt_nm}',
-            f'은행: {product.kor_co_nm}',
             f'유형: {product_type_nm}',
             f'가입방법: {product.join_way or "-"}',
-            f'가입대상: {product.join_member or "-"}',   # "개인", "직장인", "청년" 등 → 유저 age_group, occupation 매칭 포인트
+            f'적합 고객: {product.join_member or "제한없음"}',
             f'금리정보: {rate_info}',
-            f'우대조건: {product.spcl_cnd[:200] if product.spcl_cnd else "-"}',  # "급여이체", "카드실적" 등 → occupation 매칭 포인트
+            f'우대조건: {product.spcl_cnd or "-"}',
         ]
         return '\n'.join(lines)
 

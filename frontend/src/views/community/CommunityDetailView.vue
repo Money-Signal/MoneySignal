@@ -27,7 +27,7 @@
           <!-- 작성자 정보 + 수정/삭제 -->
           <div class="post-meta-row">
             <div class="author-info">
-              <img :src="getAvatarUrl(store.post.author_image)" class="avatar" alt="프로필" />
+              <img :src="getAvatarUrl(store.post.author_image)" class="avatar" alt="프로필" @error="$event.target.src = defaultAvatar" />
               <div class="author-text">
                 <span class="author-name">{{ store.post.author_nickname }}</span>
                 <div class="post-info-row">
@@ -88,7 +88,7 @@
             :key="comment.id"
             class="comment-item"
           >
-            <img :src="getAvatarUrl(comment.author_image)" class="avatar-sm" alt="프로필" />
+            <img :src="getAvatarUrl(comment.author_image)" class="avatar-sm" alt="프로필" @error="$event.target.src = defaultAvatar" />
             <div class="comment-body">
               <div class="comment-meta">
                 <span class="comment-author">{{ comment.author_nickname }}</span>
@@ -105,7 +105,7 @@
 
           <!-- 댓글 입력 -->
           <div v-if="authStore.isLoggedIn" class="comment-form">
-            <img :src="getAvatarUrl(authStore.user?.profile_image)" class="avatar-sm" alt="내 프로필" />
+            <img :src="getAvatarUrl(authStore.user?.profile_image)" class="avatar-sm" alt="내 프로필" @error="$event.target.src = defaultAvatar" />
             <div class="comment-input-wrap">
               <textarea
                 v-model="commentContent"
