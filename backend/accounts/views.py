@@ -98,10 +98,19 @@ def kakao_callback(request):
             'code': code,
         },
     )
-    kakao_access_token = token_res.json().get('access_token')
+    token_data = token_res.json()
+    kakao_access_token = token_data.get('access_token')
 
     if not kakao_access_token:
-        return HttpResponseRedirect(f'{settings.FRONTEND_URL}/login?error=token_failed')
+        kakao_err = token_data.get('error', 'unknown')
+        kakao_desc = token_data.get('error_description', '')
+        import logging; logging.getLogger(__name__).error(
+            'Kakao token failed: %s / %s | redirect_uri=%s | client_id_prefix=%s',
+            kakao_err, kakao_desc, settings.KAKAO_REDIRECT_URI, settings.KAKAO_REST_API_KEY[:8],
+        )
+        return HttpResponseRedirect(
+            f'{settings.FRONTEND_URL}/login?error=token_failed&kakao_error={kakao_err}'
+        )
 
     # 2. 카카오 액세스 토큰 → 유저 정보 조회
     user_info_res = requests.get(
