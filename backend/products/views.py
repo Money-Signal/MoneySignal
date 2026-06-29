@@ -20,8 +20,7 @@ from products.serializers import (
 
 # GMS 임베딩 클라이언트 (build_embeddings와 동일한 모델 사용)
 gms_client = OpenAI(
-    api_key=os.environ.get('GMS_KEY'),
-    base_url='https://gms.ssafy.io/gmsapi/api.openai.com/v1',
+    api_key=os.environ.get('OPENAI_API_KEY'),
 )
 EMBEDDING_MODEL = 'text-embedding-3-small'
 
@@ -267,7 +266,7 @@ def _generate_ai_insights(user, products, profile_text: str) -> dict:
 }}"""
 
         response = gms_client.chat.completions.create(
-            model='gpt-4.1-mini',
+            model='gpt-4o-mini',
             messages=[{'role': 'user', 'content': prompt}],
             temperature=0.7,
             max_tokens=800,

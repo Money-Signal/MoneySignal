@@ -1,14 +1,17 @@
 import os
 import json
-import requests
+from openai import OpenAI
 from django.http import JsonResponse
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 
 from products.services import recommend_products, search_faq
 
-GMS_API_URL = "https://gms.ssafy.io/gmsapi/api.openai.com/v1/chat/completions"  # GMS 실제 엔드포인트로 교체
-MODEL = "gpt-4.1-mini"
+MODEL = "gpt-4o-mini"
+
+openai_client = OpenAI(
+    api_key=os.environ.get('OPENAI_API_KEY'),
+)
 
 SYSTEM_PROMPT = """
 너는 한국의 돈 흐름을 알려주는 MoneySignal의 금융 도우미 '한돈이'야.
@@ -119,32 +122,19 @@ def chatbot_response(request):
         if context:
             full_system += f"\n\n{context}"
 
-        # GMS API 호출
-        gms_key = os.environ.get('GMS_KEY')
-        headers = {
-            "Authorization": f"Bearer {gms_key}",
-            "Content-Type": "application/json",
-        }
-        payload = {
-            "model": MODEL,
-            "messages": [
+        # OpenAI API 호출
+        response = openai_client.chat.completions.create(
+            model=MODEL,
+            messages=[
                 {"role": "system", "content": full_system},
                 {"role": "user", "content": user_message},
             ],
-            "max_tokens": 600,
-            "temperature": 0.7,
-        }
-
-        res = requests.post(GMS_API_URL, headers=headers, json=payload, timeout=15)
-        res.raise_for_status()
-        data = res.json()
-
-        answer = data['choices'][0]['message']['content'].strip()
+            max_tokens=600,
+            temperature=0.7,
+        )
+        answer = response.choices[0].message.content.strip()
         return JsonResponse({'answer': answer}, status=200)
 
-    except requests.exceptions.RequestException as e:
-        print(f"GMS API 호출 오류: {e}")
-        return JsonResponse({'error': 'AI 서비스 연결에 실패했어요. 잠시 후 다시 시도해주세요.'}, status=502)
     except Exception as e:
         print(f"챗봇 오류: {e}")
         return JsonResponse({'error': str(e)}, status=500)
