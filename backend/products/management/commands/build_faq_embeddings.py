@@ -9,9 +9,8 @@ from openai import OpenAI
 from django.core.management.base import BaseCommand
 from products.chroma_client import get_faq_collection
 
-gms_client = OpenAI(
-    api_key=os.environ.get('GMS_KEY'),
-    base_url='https://gms.ssafy.io/gmsapi/api.openai.com/v1',
+openai_client = OpenAI(
+    api_key=os.environ.get('OPENAI_API_KEY'),
 )
 EMBEDDING_MODEL = 'text-embedding-3-small'
 
@@ -119,8 +118,8 @@ class Command(BaseCommand):
     help = '서비스 Q&A FAQ를 임베딩해 ChromaDB에 저장합니다.'
 
     def handle(self, *args, **options):
-        if not os.environ.get('GMS_KEY'):
-            self.stderr.write(self.style.ERROR('GMS_KEY 환경변수가 설정되지 않았습니다.'))
+        if not os.environ.get('OPENAI_API_KEY'):
+            self.stderr.write(self.style.ERROR('OPENAI_API_KEY 환경변수가 설정되지 않았습니다.'))
             return
 
         collection = get_faq_collection()
@@ -138,7 +137,7 @@ class Command(BaseCommand):
         for faq in FAQ_DATA:
             text = f"질문: {faq['question']}\n답변: {faq['answer']}"
             try:
-                response = gms_client.embeddings.create(model=EMBEDDING_MODEL, input=text)
+                response = openai_client.embeddings.create(model=EMBEDDING_MODEL, input=text)
                 vector = response.data[0].embedding
                 collection.add(
                     ids=[faq['id']],
